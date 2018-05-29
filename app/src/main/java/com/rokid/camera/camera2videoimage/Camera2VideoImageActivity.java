@@ -23,6 +23,7 @@ import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -93,6 +94,8 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     }
     private Size mPreviewSize;
     private CaptureRequest.Builder mCaptureRequestBuilder;
+    private ImageButton mRecordImageButton;
+    private boolean mIsRecording = false;
 
     private static class CompareSizeByArea implements Comparator<Size> {
 
@@ -109,6 +112,19 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_camera2_video_image);
 
         mTextureView = (TextureView) findViewById(R.id.textureView);
+        mRecordImageButton = findViewById(R.id.ibVideoOnline);
+        mRecordImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mIsRecording) {
+                    mIsRecording = false;
+                    mRecordImageButton.setImageResource(R.mipmap.btn_video_online);
+                } else {
+                    mIsRecording = true;
+                    mRecordImageButton.setImageResource(R.mipmap.btn_video_online_round);
+                }
+            }
+        });
     }
 
     @Override
