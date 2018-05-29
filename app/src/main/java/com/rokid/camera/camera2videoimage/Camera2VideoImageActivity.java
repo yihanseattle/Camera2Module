@@ -11,6 +11,7 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -104,6 +105,9 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
         ORIENTATIONS.append(Surface.ROTATION_270, 270);
     }
     private Size mPreviewSize;
+    private Size mVideoSize;
+    private MediaRecorder mMediaRecorder;
+    private int mTotalRotation;
     private CaptureRequest.Builder mCaptureRequestBuilder;
     private ImageButton mRecordImageButton;
     private boolean mIsRecording = false;
@@ -124,6 +128,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 
         createVideoFolder();
 
+        mMediaRecorder = new MediaRecorder();
         mTextureView = (TextureView) findViewById(R.id.textureView);
         mRecordImageButton = findViewById(R.id.ibVideoOnline);
         mRecordImageButton.setOnClickListener(new View.OnClickListener() {
@@ -187,8 +192,8 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
                 }
                 StreamConfigurationMap map = cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
                 int deviceOrientation = getWindowManager().getDefaultDisplay().getRotation();
-                int totalRotation = sensorToDeviceRotation(cameraCharacteristics, deviceOrientation);
-                boolean swapRotation = totalRotation == 90 || totalRotation == 270;
+                mTotalRotation = sensorToDeviceRotation(cameraCharacteristics, deviceOrientation);
+                boolean swapRotation = mTotalRotation == 90 || mTotalRotation == 270;
                 int rotatedWidth = width;
                 int rotatedHeight = height;
                 if (swapRotation) {
@@ -197,6 +202,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
                     rotatedHeight = width;
                 }
                 mPreviewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedWidth, rotatedHeight);
+                mVideoSize = chooseOptimalSize(map.getOutputSizes(MediaRecorder.class), rotatedWidth, rotatedHeight);
                 mCameraId = cameraId;
                 return;
             }
@@ -324,7 +330,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
         if (bigEnough.size() > 0) {
             return Collections.min(bigEnough, new CompareSizeByArea());
         } else {
-            return choices[0];
+            return choices[2];
         }
     }
 
@@ -358,7 +364,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
                 if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     Toast.makeText(this, "app needs to be able to save videos", Toast.LENGTH_SHORT).show();
                 }
-                requestPermissions(new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE }, REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION_RESULT);
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION_RESULT);
             }
         } else {
             mIsRecording = true;
@@ -369,5 +375,17 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void setupMediaRecorder() throws IOException {
+        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        mMediaRecorder.setOutputFile(mVideoFileName);
+        mMediaRecorder.setVideoEncodingBitRate(1000000);
+        mMediaRecorder.setVideoFrameRate(30);
+        mMediaRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
+        mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+        mMediaRecorder.setOrientationHint(mTotalRotation);
+        mMediaRecorder.prepare();
     }
 }
