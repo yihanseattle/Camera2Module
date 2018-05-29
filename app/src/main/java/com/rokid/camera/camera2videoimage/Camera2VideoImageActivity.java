@@ -1,22 +1,27 @@
 package com.rokid.camera.camera2videoimage;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,11 +30,14 @@ import java.util.List;
 
 public class Camera2VideoImageActivity extends AppCompatActivity {
 
+    private static final int REQUEST_CAMERA_PERMISSION_RESULT = 0;
+
     private TextureView mTextureView;
     private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
             setupCamera(width, height);
+            connectCamera();
         }
 
         @Override
@@ -53,6 +61,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
         @Override
         public void onOpened(@NonNull CameraDevice cameraDevice) {
             mCameraDevice = cameraDevice;
+            Toast.makeText(getApplicationContext(), "Camera connection made!", Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -105,6 +114,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 
         if (mTextureView.isAvailable()) {
             setupCamera(mTextureView.getWidth(), mTextureView.getHeight());
+            connectCamera();
         } else {
             mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
         }
@@ -158,6 +168,40 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
             }
         } catch (CameraAccessException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void connectCamera() {
+        CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+        try {
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                // device is Marshmallow or later
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
+                        PackageManager.PERMISSION_GRANTED) {
+                    // connect the camera
+                    cameraManager.openCamera(mCameraId, mCameraDevicesStateCallback, mBackgroundHandler);
+                } else {
+                    if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
+                        Toast.makeText(this, "Video app required access to camera", Toast.LENGTH_SHORT).show();
+                    }
+                    requestPermissions(new String[] { Manifest.permission.CAMERA }, REQUEST_CAMERA_PERMISSION_RESULT);
+                }
+            } else {
+                cameraManager.openCamera(mCameraId, mCameraDevicesStateCallback, mBackgroundHandler);
+            }
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CAMERA_PERMISSION_RESULT) {
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(getApplicationContext(), "Application will not run without camera services", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
