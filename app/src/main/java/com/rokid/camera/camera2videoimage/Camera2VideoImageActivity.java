@@ -1,13 +1,16 @@
 package com.rokid.camera.camera2videoimage;
 
+import android.content.Context;
 import android.graphics.SurfaceTexture;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.TextureView;
 import android.view.View;
-import android.widget.Toast;
 
 public class Camera2VideoImageActivity extends AppCompatActivity {
 
@@ -15,7 +18,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
-            Toast.makeText(getApplicationContext(), "TextureView is available", Toast.LENGTH_SHORT).show();
+            setupCamera(width, height);
         }
 
         @Override
@@ -54,6 +57,8 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
         }
     };
 
+    private String mCameraId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,7 +72,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
         super.onResume();
 
         if (mTextureView.isAvailable()) {
-
+            setupCamera(mTextureView.getWidth(), mTextureView.getHeight());
         } else {
             mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
         }
@@ -90,6 +95,25 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
                             | View.SYSTEM_UI_FLAG_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+        }
+    }
+
+    private void setupCamera(int width, int height) {
+        CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+
+
+        try {
+            for (String cameraId : cameraManager.getCameraIdList()) {
+                // get camera characteristics
+                CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId);
+                if (cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT) {
+                    continue;
+                }
+                mCameraId = cameraId;
+                return;
+            }
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
         }
     }
 
