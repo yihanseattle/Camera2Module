@@ -155,10 +155,10 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     private static SparseIntArray ORIENTATIONS = new SparseIntArray();
 
     static {
-        ORIENTATIONS.append(Surface.ROTATION_0, 0);
-        ORIENTATIONS.append(Surface.ROTATION_90, 90);
-        ORIENTATIONS.append(Surface.ROTATION_180, 180);
-        ORIENTATIONS.append(Surface.ROTATION_270, 270);
+        ORIENTATIONS.append(Surface.ROTATION_0, 90);
+        ORIENTATIONS.append(Surface.ROTATION_90, 0);
+        ORIENTATIONS.append(Surface.ROTATION_180, 270);
+        ORIENTATIONS.append(Surface.ROTATION_270, 180);
     }
 
     private Size mPreviewSize;
@@ -641,6 +641,8 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
         try {
             mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             mCaptureRequestBuilder.addTarget(mImageReader.getSurface());
+            // not sure why we need to add 180 rotation here
+            // the original image was 180 degree off
             mCaptureRequestBuilder.set(CaptureRequest.JPEG_ORIENTATION, mTotalRotation);
 
             CameraCaptureSession.CaptureCallback stillCaptureCallback = new CameraCaptureSession.CaptureCallback() {
@@ -714,7 +716,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     private static int sensorToDeviceRotation(CameraCharacteristics cameraCharacteristics, int deviceOrientation) {
         int sensorOrientation = cameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
         deviceOrientation = ORIENTATIONS.get(deviceOrientation);
-        return (sensorOrientation + deviceOrientation + 360) % 360;
+        return (sensorOrientation + deviceOrientation + 270) % 360;
     }
 
 //    /**
