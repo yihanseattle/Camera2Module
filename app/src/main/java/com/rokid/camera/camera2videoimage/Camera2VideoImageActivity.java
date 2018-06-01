@@ -81,7 +81,6 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
         public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
             setupCamera(width, height);
             connectCamera();
-            initApp();
             configureTransform(width, height);
         }
 
@@ -329,6 +328,8 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
                 }
         );
 
+        initApp();
+
     }
 
     @Override
@@ -340,7 +341,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
         if (mTextureView.isAvailable()) {
             setupCamera(mTextureView.getWidth(), mTextureView.getHeight());
             connectCamera();
-            initApp();
+
         } else {
             mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
         }
@@ -561,7 +562,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
                     if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
                         Toast.makeText(this, "Video app required access to camera", Toast.LENGTH_SHORT).show();
                     }
-                    requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO}, REQUEST_CAMERA_PERMISSION_RESULT);
+                    requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE }, REQUEST_CAMERA_PERMISSION_RESULT);
                 }
             } else {
                 cameraManager.openCamera(mCameraId, mCameraDevicesStateCallback, mBackgroundHandler);
@@ -676,7 +677,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
         } else if (requestCode == REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION_RESULT) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 mIsRecording = true;
-                mRecordImageButton.setImageResource(R.mipmap.ic_launcher);
+//                mRecordImageButton.setImageResource(R.mipmap.ic_launcher);
                 try {
                     createVidelFileName();
                 } catch (IOException e) {
