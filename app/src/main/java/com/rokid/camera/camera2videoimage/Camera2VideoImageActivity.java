@@ -3,10 +3,12 @@ package com.rokid.camera.camera2videoimage;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
+import android.graphics.Typeface;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -28,14 +30,28 @@ import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
+import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
 import android.widget.Chronometer;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.rokid.camera.camera2videoimage.enums.CameraMode;
+import com.rokid.camera.camera2videoimage.recyclerviews.RecyclerViewAdapter;
+import com.rokid.camera.camera2videoimage.utils.Utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -65,6 +81,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
         public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
             setupCamera(width, height);
             connectCamera();
+            initApp();
             configureTransform(width, height);
         }
 
@@ -222,6 +239,18 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     private ImageButton mStillImageButton;
     private boolean mIsRecording = false;
 
+    // camera 1
+    private CameraMode cameraMode;
+    private ImageView ivCameraButton;
+    private LinearLayout linearLayoutVideoProgress;
+    private ImageView ivRecordingRedDot;
+    private RecyclerView recyclerView;
+
+//    public static final int MEDIA_TYPE_IMAGE = 1;
+//    public static final int MEDIA_TYPE_VIDEO = 2;
+
+    private ArrayList<String> mCameraModes = new ArrayList<>();
+
     private static class CompareSizeByArea implements Comparator<Size> {
 
         @Override
@@ -240,7 +269,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
         createImageFolder();
 
         mMediaRecorder = new MediaRecorder();
-        mChronometer = findViewById(R.id.chronometer2);
+        mChronometer = findViewById(R.id.chronometer);
         mChronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             @Override
             public void onChronometerTick(Chronometer chronometer) {
@@ -255,30 +284,50 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
             }
         });
         mTextureView = findViewById(R.id.textureView);
-        mRecordImageButton = findViewById(R.id.ibVideoOnline);
-        mRecordImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mIsRecording) {
-                    mChronometer.stop();
-                    mChronometer.setVisibility(View.INVISIBLE);
-                    mIsRecording = false;
-                    mRecordImageButton.setImageResource(R.mipmap.btn_video_online);
-                    mMediaRecorder.stop();
-                    mMediaRecorder.reset();
-                    startPreview();
-                } else {
-                    checkWriteStoragePermission();
+//        mRecordImageButton = findViewById(R.id.ibVideoOnline);
+//        mRecordImageButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (mIsRecording) {
+//                    mChronometer.stop();
+//                    mChronometer.setVisibility(View.INVISIBLE);
+//                    mIsRecording = false;
+//                    mRecordImageButton.setImageResource(R.mipmap.btn_video_online);
+//                    mMediaRecorder.stop();
+//                    mMediaRecorder.reset();
+//                    startPreview();
+//                } else {
+//                    checkWriteStoragePermission();
+//                }
+//            }
+//        });
+//        mStillImageButton = findViewById(R.id.ibCamera);
+//        mStillImageButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                lockFocus();
+//            }
+//        });
+
+        linearLayoutVideoProgress = findViewById(R.id.linearlayoutVideoProgress);
+        ivRecordingRedDot = findViewById(R.id.ivVideoRecordingRedDot);
+        Animation mAnimation = new AlphaAnimation(1, 0);
+        mAnimation.setDuration(700);
+        mAnimation.setInterpolator(new LinearInterpolator());
+        mAnimation.setRepeatCount(Animation.INFINITE);
+        mAnimation.setRepeatMode(Animation.REVERSE);
+        ivRecordingRedDot.startAnimation(mAnimation);
+
+        // Add a listener to the Capture button
+        ivCameraButton = findViewById(R.id.ivCameraButton);
+        ivCameraButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        performCameraButtonAction();
+                    }
                 }
-            }
-        });
-        mStillImageButton = findViewById(R.id.ibCamera);
-        mStillImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                lockFocus();
-            }
-        });
+        );
 
     }
 
@@ -291,6 +340,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
         if (mTextureView.isAvailable()) {
             setupCamera(mTextureView.getWidth(), mTextureView.getHeight());
             connectCamera();
+            initApp();
         } else {
             mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
         }
@@ -775,7 +825,6 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 mIsRecording = true;
-                mRecordImageButton.setImageResource(R.mipmap.ic_launcher);
                 try {
                     createVidelFileName();
                 } catch (IOException e) {
@@ -795,7 +844,6 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
             }
         } else {
             mIsRecording = true;
-            mRecordImageButton.setImageResource(R.mipmap.ic_launcher);
             try {
                 createVidelFileName();
             } catch (IOException e) {
@@ -863,5 +911,233 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
             matrix.postRotate(180, centerX, centerY);
         }
         mTextureView.setTransform(matrix);
+    }
+
+    // ----------------------
+    // ----------------------
+    // ----------------------
+    // ----------------------
+    // ----------------------
+    // camera 1
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_ENTER:
+                // ENTER
+                Log.i("testtest", "KeyUp ->> " + keyCode + " -- ENTER \n");
+                performCameraButtonAction();
+                break;
+
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                // RIGHT
+                Log.i("testtest", "KeyUp ->> " + keyCode + " -- RIGHT \n");
+                performSwipeToPhoto();
+                break;
+
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                // LEFT
+                Log.i("testtest", "KeyUp ->> " + keyCode + " -- LEFT \n");
+                performSwipeToVideo();
+                break;
+
+            default:
+                Log.i("testtest", "KeyUp ->> " + keyCode + " -- Not Defined!! \n");
+                break;
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
+    private void initRecyclerView() {
+        Log.d(TAG, "initRecyclerView: init recyclerview");
+        mCameraModes.add("                  ");
+        mCameraModes.add(getResources().getString(R.string.CAMERAMODE_PHOTO));
+        mCameraModes.add(getResources().getString(R.string.CAMERAMODE_VIDEO));
+        mCameraModes.add("                  ");
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(layoutManager);
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(this, mCameraModes);
+        recyclerView.setAdapter(adapter);
+
+    }
+
+    private void updateButtonText(final CameraMode cameraMode) {
+        if (cameraMode == CameraMode.PHOTO_STOPPED) {
+            ivCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.shutterinactive));
+        } else if (cameraMode == CameraMode.PHOTO_TAKING) {
+            ivCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.shutteractive));
+            new Handler(getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    ivCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.shutterinactive));
+                }
+            }, 500);
+            this.cameraMode = CameraMode.PHOTO_STOPPED;
+        } else if (cameraMode == CameraMode.VIDEO_STOPPED) {
+            ivCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.videoinactive));
+        } else if (cameraMode == CameraMode.VIDEO_RECORDING) {
+            ivCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.videoactive));
+        }
+    }
+
+    private void initCameraModeForVideo() {
+        View view = null;
+        TextView textView = null;
+        view = recyclerView.findViewHolderForAdapterPosition(1).itemView;
+        textView = view.findViewById(R.id.tvCameraMode);
+        textView.setTextSize(Constants.CAMERA_MODE_TEXT_SIZE_SELECTED);
+        textView.setTextColor(Color.parseColor(Constants.CAMERA_MODE_TEXT_COLOR_SELECTED));
+        textView.setPadding(
+                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_LEFT),
+                0,
+                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
+                0);
+        textView.setTypeface(null, Typeface.BOLD);
+        view = recyclerView.findViewHolderForAdapterPosition(2).itemView;
+        textView = view.findViewById(R.id.tvCameraMode);
+        textView.setTextSize(Constants.CAMERA_MODE_TEXT_SIZE_DESELECTED);
+        textView.setTextColor(Color.parseColor(Constants.CAMERA_MODE_TEXT_COLOR_DESELECTED));
+        textView.setPadding(
+                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_LEFT),
+                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_TOP),
+                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
+                0);
+        textView.setTypeface(null, Typeface.NORMAL);
+    }
+
+    private void initCameraModeForPhoto() {
+        View view = null;
+        TextView textView = null;
+        view = recyclerView.findViewHolderForAdapterPosition(1).itemView;
+        textView = view.findViewById(R.id.tvCameraMode);
+        textView.setTextSize(Constants.CAMERA_MODE_TEXT_SIZE_DESELECTED);
+        textView.setTextColor(Color.parseColor(Constants.CAMERA_MODE_TEXT_COLOR_DESELECTED));
+        textView.setPadding(
+                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_LEFT),
+                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_TOP),
+                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
+                0);
+        textView.setTypeface(null, Typeface.NORMAL);
+        view = recyclerView.findViewHolderForAdapterPosition(2).itemView;
+        textView = view.findViewById(R.id.tvCameraMode);
+        textView.setTextSize(Constants.CAMERA_MODE_TEXT_SIZE_SELECTED);
+        textView.setTextColor(Color.parseColor(Constants.CAMERA_MODE_TEXT_COLOR_SELECTED));
+        textView.setPadding(
+                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_LEFT),
+                0,
+                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
+                0);
+        textView.setTypeface(null, Typeface.BOLD);
+    }
+
+    private void disableProgressTextView() {
+        recyclerView.setVisibility(View.VISIBLE);
+        linearLayoutVideoProgress.setVisibility(View.GONE);
+    }
+
+    private void enableProgressTextView() {
+        recyclerView.setVisibility(View.GONE);
+        linearLayoutVideoProgress.setVisibility(View.VISIBLE);
+
+    }
+
+    private void initCameraButton() {
+        cameraMode = CameraMode.PHOTO_STOPPED;
+        updateButtonText(cameraMode);
+    }
+
+    private void initPreview() {
+        // Create our Preview view and set it as the content of our activity.
+        cameraMode = CameraMode.PHOTO_STOPPED;
+        mTextureView.setOnTouchListener(new OnSwipeTouchListener(this) {
+            View view = null;
+            TextView textView = null;
+
+            public void onSwipeTop() {
+//                Toast.makeText(getApplicationContext(), "top", Toast.LENGTH_SHORT).show();
+            }
+
+            public void onSwipeRight() {
+//                Toast.makeText(getApplicationContext(), "right", Toast.LENGTH_SHORT).show();
+
+                performSwipeToPhoto();
+            }
+
+            public void onSwipeLeft() {
+//                Toast.makeText(getApplicationContext(), "left", Toast.LENGTH_SHORT).show();
+
+                performSwipeToVideo();
+
+            }
+
+            public void onSwipeBottom() {
+//                Toast.makeText(getApplicationContext(), "bottom", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+    }
+
+    private void performSwipeToVideo() {
+        cameraMode = CameraMode.VIDEO_STOPPED;
+        updateButtonText(cameraMode);
+        recyclerView.scrollToPosition(3);
+        initCameraModeForPhoto();
+    }
+
+    private void performSwipeToPhoto() {
+        cameraMode = CameraMode.PHOTO_STOPPED;
+        updateButtonText(cameraMode);
+        recyclerView.scrollToPosition(0);
+        initCameraModeForVideo();
+        initPreview();
+    }
+
+    private void performCameraButtonAction() {
+        if (cameraMode == CameraMode.PHOTO_STOPPED) {
+            cameraMode = CameraMode.PHOTO_TAKING;
+            // get an image from the camera
+            handleStillPictureButton();
+            updateButtonText(cameraMode);
+        } else {
+            handleVideoButton();
+        }
+    }
+
+    private void handleVideoButton() {
+        if (mIsRecording) {
+            mChronometer.stop();
+            mMediaRecorder.stop();
+            mMediaRecorder.reset();
+            // app state and UI
+            mIsRecording = false;
+            cameraMode = CameraMode.VIDEO_STOPPED;
+            updateButtonText(cameraMode);
+            disableProgressTextView();
+            // restart preview
+            startPreview();
+        } else {
+            mIsRecording = true;
+            cameraMode = CameraMode.VIDEO_RECORDING;
+            updateButtonText(cameraMode);
+            enableProgressTextView();
+            checkWriteStoragePermission();
+        }
+    }
+
+    private void handleStillPictureButton() {
+        lockFocus();
+    }
+
+    private void initApp() {
+        initRecyclerView();
+        initCameraButton();
+//        initTimerTask();
+        // Create an instance of Camera
+//        mCamera = getCameraInstance();
+//        mCamera.setDisplayOrientation(180);
+//        startContinuousAutoFocus();
+        initPreview();
     }
 }

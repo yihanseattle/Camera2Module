@@ -4,47 +4,71 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#000000"
     tools:context="com.rokid.camera.camera2videoimage.Camera2VideoImageActivity">
 
     <com.rokid.camera.camera2videoimage.AutoFitTextureView
         android:id="@+id/textureView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
+        android:visibility="visible"
         />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_alignBottom="@id/textureView"
+        android:gravity="bottom"
+        android:alpha="1.0"
+        >
+        <LinearLayout
+            android:id="@+id/linearlayoutVideoProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            android:orientation="horizontal"
+            android:layout_marginBottom="3dp"
+            >
 
-    <ImageButton
-        android:id="@+id/ibVideoOnline"
-        android:layout_width="52dp"
-        android:layout_height="53dp"
-        android:src="@mipmap/btn_video_online"
-        android:contentDescription="@string/video_button"
-        android:layout_marginBottom="36dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="49dp"
-        />
-
-    <ImageButton
-        android:id="@+id/ibCamera"
-        android:layout_width="61dp"
-        android:layout_height="51dp"
-        android:src="@mipmap/ic_launcher"
-        android:contentDescription="@string/camera_button"
-        android:layout_alignTop="@id/ibVideoOnline"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="57dp"
-        />
-
-    <Chronometer
-        android:id="@+id/chronometer2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="invisible"
-        android:textColor="#ff0000"
-        android:textSize="24sp"
-        android:layout_above="@+id/ibVideoOnline"
-        android:layout_alignStart="@+id/ibVideoOnline" />
+            <ImageView
+                android:id="@+id/ivVideoRecordingRedDot"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:src="@drawable/oval"
+                android:layout_gravity="center"
+                android:layout_margin="3dp"
+                android:paddingRight="5dp"
+                />
+            <Chronometer
+                android:id="@+id/chronometer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:textSize="25sp"
+                />
+            <View
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_marginLeft="5dp"
+                />
+        </LinearLayout>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            >
+        </android.support.v7.widget.RecyclerView>
+        <ImageView
+            android:id="@+id/ivCameraButton"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/shutterinactive"
+            android:layout_gravity="center"
+            />
+    </LinearLayout>
 </RelativeLayout>
