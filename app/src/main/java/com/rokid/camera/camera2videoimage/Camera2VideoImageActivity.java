@@ -14,6 +14,7 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
@@ -171,6 +172,8 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
         }
     };
     private MediaRecorder mMediaRecorder;
+    private boolean mAutoFocusSupported;
+
     private class ImageSaver implements Runnable {
 
         private final Image mImage;
@@ -203,6 +206,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
             }
         }
     }
+
     private Chronometer mChronometer;
     private int mTotalRotation;
     private CameraCaptureSession mPreviewCaptureSession;
@@ -273,13 +277,13 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
             @Override
             public void onChronometerTick(Chronometer chronometer) {
                 long time = SystemClock.elapsedRealtime() - mChronometer.getBase();
-                int h   = (int)(time /3600000);
-                int m = (int)(time - h*3600000)/60000;
-                int s= (int)(time - h*3600000- m*60000)/1000 ;
-                String hh = h < 10 ? "0"+h: h+"";
-                String mm = m < 10 ? "0"+m: m+"";
-                String ss = s < 10 ? "0"+s: s+"";
-                mChronometer.setText(hh+":"+mm+":"+ss);
+                int h = (int) (time / 3600000);
+                int m = (int) (time - h * 3600000) / 60000;
+                int s = (int) (time - h * 3600000 - m * 60000) / 1000;
+                String hh = h < 10 ? "0" + h : h + "";
+                String mm = m < 10 ? "0" + m : m + "";
+                String ss = s < 10 ? "0" + s : s + "";
+                mChronometer.setText(hh + ":" + mm + ":" + ss);
             }
         });
         mTextureView = findViewById(R.id.textureView);
@@ -394,6 +398,18 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
                 mImageSize = chooseOptimalSize(map.getOutputSizes(ImageFormat.JPEG), rotatedWidth, rotatedHeight);
                 mImageReader = ImageReader.newInstance(mImageSize.getWidth(), mImageSize.getHeight(), ImageFormat.JPEG, 1);
                 mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, mBackgroundHandler);
+
+                // Check if auto focus is supported
+                int[] afAvailableModes = cameraCharacteristics.get(
+                        CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES);
+                if (afAvailableModes.length == 0 ||
+                        (afAvailableModes.length == 1
+                                && afAvailableModes[0] == CameraMetadata.CONTROL_AF_MODE_OFF)) {
+                    mAutoFocusSupported = false;
+                } else {
+                    mAutoFocusSupported = true;
+                }
+
                 mCameraId = cameraId;
                 return;
             }
@@ -562,7 +578,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
                     if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
                         Toast.makeText(this, "Video app required access to camera", Toast.LENGTH_SHORT).show();
                     }
-                    requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE }, REQUEST_CAMERA_PERMISSION_RESULT);
+                    requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CAMERA_PERMISSION_RESULT);
                 }
             } else {
                 cameraManager.openCamera(mCameraId, mCameraDevicesStateCallback, mBackgroundHandler);
@@ -778,17 +794,22 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 
     private static Size chooseOptimalSize(Size[] choices, int width, int height) {
         List<Size> bigEnough = new ArrayList<>();
+        List<Size> notBigEnough = new ArrayList<>();
         for (Size option : choices) {
             if (option.getHeight() == option.getWidth() * height / width &&
                     option.getWidth() >= width && option.getHeight() >= height) {
                 bigEnough.add(option);
+            } else {
+                notBigEnough.add(option);
             }
         }
 
         if (bigEnough.size() > 0) {
             return Collections.min(bigEnough, new CompareSizeByArea());
+        } else if (notBigEnough.size() > 0) {
+            return Collections.max(notBigEnough, new CompareSizeByArea());
         } else {
-            return choices[2];
+            return choices[31];
         }
     }
 
@@ -929,6 +950,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
             case KeyEvent.KEYCODE_ENTER:
                 // ENTER
                 Log.i("testtest", "KeyUp ->> " + keyCode + " -- ENTER \n");
+
                 performCameraButtonAction();
                 break;
 
@@ -1130,7 +1152,11 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     }
 
     private void handleStillPictureButton() {
-        lockFocus();
+        if (mAutoFocusSupported) {
+            lockFocus();
+        } else {
+            startStillCaptureRequest();
+        }
     }
 
     private void initApp() {
