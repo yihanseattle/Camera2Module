@@ -61,6 +61,8 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_gravity="center"
+            android:clickable="false"
+            android:focusableInTouchMode="false"
             >
         </android.support.v7.widget.RecyclerView>
         <ImageView

@@ -168,7 +168,10 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     private final ImageReader.OnImageAvailableListener mOnImageAvailableListener = new ImageReader.OnImageAvailableListener() {
         @Override
         public void onImageAvailable(ImageReader imageReader) {
-            mBackgroundHandler.post(new ImageSaver(imageReader.acquireLatestImage()));
+            Image image = imageReader.acquireLatestImage();
+            if (image != null) {
+                mBackgroundHandler.post(new ImageSaver(image));
+            }
         }
     };
     private MediaRecorder mMediaRecorder;
@@ -184,14 +187,17 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-            ByteBuffer byteBuffer = mImage.getPlanes()[0].getBuffer();
-            byte[] bytes = new byte[byteBuffer.remaining()];
-            byteBuffer.get(bytes);
 
             FileOutputStream fileOutputStream = null;
             try {
-                fileOutputStream = new FileOutputStream(mImageFileName);
-                fileOutputStream.write(bytes);
+                if (mImageFileName != null) {
+                    ByteBuffer byteBuffer = mImage.getPlanes()[0].getBuffer();
+                    byte[] bytes = new byte[byteBuffer.remaining()];
+                    byteBuffer.get(bytes);
+
+                    fileOutputStream = new FileOutputStream(mImageFileName);
+                    fileOutputStream.write(bytes);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -396,7 +402,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
                 mPreviewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedWidth, rotatedHeight);
                 mVideoSize = chooseOptimalSize(map.getOutputSizes(MediaRecorder.class), rotatedWidth, rotatedHeight);
                 mImageSize = chooseOptimalSize(map.getOutputSizes(ImageFormat.JPEG), rotatedWidth, rotatedHeight);
-                mImageReader = ImageReader.newInstance(mImageSize.getWidth(), mImageSize.getHeight(), ImageFormat.JPEG, 1);
+                mImageReader = ImageReader.newInstance(mImageSize.getWidth(), mImageSize.getHeight(), ImageFormat.JPEG, 40);
                 mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, mBackgroundHandler);
 
                 // Check if auto focus is supported
@@ -592,11 +598,14 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
         try {
             setupMediaRecorder();
             SurfaceTexture surfaceTexture = mTextureView.getSurfaceTexture();
+            assert surfaceTexture != null;
             surfaceTexture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
             Surface previewSurface = new Surface(surfaceTexture);
             Surface recordSurface = mMediaRecorder.getSurface();
             mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
             mCaptureRequestBuilder.addTarget(previewSurface);
+//            mCaptureRequestBuilder.addTarget(mImageReader.getSurface());
+
             mCaptureRequestBuilder.addTarget(recordSurface);
 
             mCameraDevice.createCaptureSession(Arrays.asList(previewSurface, recordSurface), new CameraCaptureSession.StateCallback() {
@@ -623,12 +632,14 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 
     private void startPreview() {
         SurfaceTexture surfaceTexture = mTextureView.getSurfaceTexture();
+        assert surfaceTexture != null;
         surfaceTexture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
         Surface previewSurface = new Surface(surfaceTexture);
 
         try {
             mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-            mCaptureRequestBuilder.addTarget(previewSurface);
+//            mCaptureRequestBuilder.addTarget(previewSurface);
+            mCaptureRequestBuilder.addTarget(mImageReader.getSurface());
 
             mCameraDevice.createCaptureSession(Arrays.asList(previewSurface, mImageReader.getSurface()), new CameraCaptureSession.StateCallback() {
                 @Override
@@ -830,7 +841,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     }
 
     private void createImageFolder() {
-        File imageFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File imageFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
         mImageFolder = new File(imageFile, "camera2VideoImage");
         if (!mImageFolder.exists()) {
             mImageFolder.mkdirs();
