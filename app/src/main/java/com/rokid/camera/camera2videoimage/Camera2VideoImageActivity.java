@@ -66,6 +66,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Camera2VideoImageActivity extends AppCompatActivity {
@@ -850,9 +851,17 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
         List<Size> bigEnough = new ArrayList<>();
         // Collect the supported resolutions that are smaller than the preview Surface
         List<Size> notBigEnough = new ArrayList<>();
+
+        List<Double> ratio = new LinkedList<>();
+
         int w = aspectRatio.getWidth();
         int h = aspectRatio.getHeight();
         for (Size option : choices) {
+            if (option.getWidth() > option.getHeight()) {
+                ratio.add((double)option.getWidth() / option.getHeight());
+            } else {
+                ratio.add((double)option.getHeight() / option.getWidth());
+            }
             if (option.getWidth() <= maxWidth && option.getHeight() <= maxHeight &&
                     option.getHeight() == option.getWidth() * h / w) {
                 if (option.getWidth() >= textureViewWidth &&
@@ -872,7 +881,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
             return Collections.max(notBigEnough, new CompareSizeByArea());
         } else {
             Log.e(TAG, "Couldn't find any suitable preview size");
-            return choices[9];
+            return choices[5];
         }
     }
 
@@ -1170,14 +1179,14 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     private void performSwipeToVideo() {
         cameraMode = CameraMode.VIDEO_STOPPED;
         updateButtonText(cameraMode);
-        recyclerView.scrollToPosition(3);
+        recyclerView.smoothScrollToPosition(3);
         initCameraModeForPhoto();
     }
 
     private void performSwipeToPhoto() {
         cameraMode = CameraMode.PHOTO_STOPPED;
         updateButtonText(cameraMode);
-        recyclerView.scrollToPosition(0);
+        recyclerView.smoothScrollToPosition(0);
         initCameraModeForVideo();
         initPreview();
     }
