@@ -881,13 +881,20 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
             return Collections.max(notBigEnough, new CompareSizeByArea());
         } else {
             Log.e(TAG, "Couldn't find any suitable preview size");
-            return choices[5];
+//            return choices[5];
+            return choices[0];
         }
     }
 
     private void createVideoFolder() {
-        File movieFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-        mVideoFolder = new File(movieFile, "camera2VideoImage");
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DCIM), "RokidCameraVideos");
+        mVideoFolder = mediaStorageDir;
+
+//        File movieFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+//        mVideoFolder = new File(movieFile, "camera2VideoImage");
+
+
         if (!mVideoFolder.exists()) {
             mVideoFolder.mkdirs();
         }
@@ -902,8 +909,13 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     }
 
     private void createImageFolder() {
-        File imageFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        mImageFolder = new File(imageFile, "camera2VideoImage");
+//        File imageFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+//        mImageFolder = new File(imageFile, "camera2VideoImage");
+
+
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DCIM), "RokidCameraImages");
+        mImageFolder = mediaStorageDir;
         if (!mImageFolder.exists()) {
             mImageFolder.mkdirs();
         }
@@ -1224,11 +1236,11 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     }
 
     private void handleStillPictureButton() {
-        if (mAutoFocusSupported) {
-            lockFocus();
-        } else {
-            startStillCaptureRequest();
-        }
+        startStillCaptureRequest();
+//        if (mAutoFocusSupported) {
+//            lockFocus();
+//        } else {
+//        }
     }
 
     private void initApp() {
