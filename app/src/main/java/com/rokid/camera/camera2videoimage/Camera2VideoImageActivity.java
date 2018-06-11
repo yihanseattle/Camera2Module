@@ -891,7 +891,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
             return Collections.max(notBigEnough, new CompareSizeByArea());
         } else {
             Log.e(TAG, "Couldn't find any suitable preview size");
-            if (Constants.isInRokidGlass) {
+            if (DeviceConfig.isInRokidGlass) {
                 return choices[5];
             } else {
                 return choices[choices.length - 1];

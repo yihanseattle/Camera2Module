@@ -35,6 +35,4 @@ public class Constants {
     public static Size PREVIEW_SIZE = new Size(1920, 1080);
 
 
-    // is in Pixel 2 phone or in Rokid Glass
-    public static final boolean isInRokidGlass = false;
 }
