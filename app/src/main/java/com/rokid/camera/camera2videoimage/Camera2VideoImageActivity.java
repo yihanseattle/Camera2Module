@@ -30,6 +30,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -176,6 +177,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     };
     private MediaRecorder mMediaRecorder;
     private boolean mAutoFocusSupported;
+    private boolean permissionsAreGranted;
 
     private class ImageSaver implements Runnable {
 
@@ -334,29 +336,31 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
 
-        initApp();
-
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (arePermissionsGranted()) {
+            initApp();
+        } else {
+            requestAllPermissions();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        startBackgroundThread();
-
-        if (mTextureView.isAvailable()) {
-            setupCamera(mTextureView.getWidth(), mTextureView.getHeight());
-            connectCamera();
-
-        } else {
-            mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
-        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
         closeCamera();
     }
 
@@ -719,26 +723,32 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CAMERA_PERMISSION_RESULT) {
-            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(getApplicationContext(), "Application will not run without camera services", Toast.LENGTH_SHORT).show();
-            }
-            if (grantResults[1] != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(getApplicationContext(), "Application will not run without audio", Toast.LENGTH_SHORT).show();
-            }
-        } else if (requestCode == REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION_RESULT) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                mIsRecording = true;
-//                mRecordImageButton.setImageResource(R.mipmap.ic_launcher);
-                try {
-                    createVidelFileName();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                Toast.makeText(getApplicationContext(), "Permission successfully granted! :)", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(getApplicationContext(), "App needs to save video to run", Toast.LENGTH_SHORT).show();
-            }
+//        if (requestCode == REQUEST_CAMERA_PERMISSION_RESULT) {
+//            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+//                Toast.makeText(getApplicationContext(), "Application will not run without camera services", Toast.LENGTH_SHORT).show();
+//            }
+//            if (grantResults[1] != PackageManager.PERMISSION_GRANTED) {
+//                Toast.makeText(getApplicationContext(), "Application will not run without audio", Toast.LENGTH_SHORT).show();
+//            }
+//        } else if (requestCode == REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION_RESULT) {
+//            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                mIsRecording = true;
+////                mRecordImageButton.setImageResource(R.mipmap.ic_launcher);
+//                try {
+//                    createVidelFileName();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//                Toast.makeText(getApplicationContext(), "Permission successfully granted! :)", Toast.LENGTH_SHORT).show();
+//            } else {
+//                Toast.makeText(getApplicationContext(), "App needs to save video to run", Toast.LENGTH_SHORT).show();
+//            }
+//        }
+
+        if (arePermissionsGranted()) {
+            initApp();
+        } else {
+            Toast.makeText(this, "Please grant all permission so the app will work properly.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -881,14 +891,17 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
             return Collections.max(notBigEnough, new CompareSizeByArea());
         } else {
             Log.e(TAG, "Couldn't find any suitable preview size");
-//            return choices[5];
-            return choices[0];
+            if (Constants.isInRokidGlass) {
+                return choices[5];
+            } else {
+                return choices[choices.length - 1];
+            }
         }
     }
 
     private void createVideoFolder() {
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DCIM), "RokidCameraVideos");
+                Environment.DIRECTORY_DCIM), "RokidCamera");
         mVideoFolder = mediaStorageDir;
 
 //        File movieFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
@@ -914,7 +927,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 
 
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DCIM), "RokidCameraImages");
+                Environment.DIRECTORY_DCIM), "RokidCamera");
         mImageFolder = mediaStorageDir;
         if (!mImageFolder.exists()) {
             mImageFolder.mkdirs();
@@ -1236,11 +1249,11 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     }
 
     private void handleStillPictureButton() {
-        startStillCaptureRequest();
-//        if (mAutoFocusSupported) {
-//            lockFocus();
-//        } else {
-//        }
+        if (mAutoFocusSupported) {
+            lockFocus();
+        } else {
+            startStillCaptureRequest();
+        }
     }
 
     private void initApp() {
@@ -1252,5 +1265,41 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 //        mCamera.setDisplayOrientation(180);
 //        startContinuousAutoFocus();
         initPreview();
+        initCamera();
+    }
+
+    private void initCamera() {
+        startBackgroundThread();
+
+        if (mTextureView.isAvailable()) {
+            setupCamera(mTextureView.getWidth(), mTextureView.getHeight());
+            connectCamera();
+
+        } else {
+            mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
+        }
+    }
+
+    private boolean arePermissionsGranted() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            permissionsAreGranted = true;
+        } else {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void requestAllPermissions() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[] {
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE }, 8);
+        }
     }
 }
