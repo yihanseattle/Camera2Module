@@ -436,7 +436,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
                 mPreviewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
                 mVideoSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
                 mImageSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
-                mImageReader = ImageReader.newInstance(mImageSize.getWidth(), mImageSize.getHeight(), ImageFormat.JPEG, 1);
+                mImageReader = ImageReader.newInstance(mImageSize.getWidth(), mImageSize.getHeight(), ImageFormat.JPEG, 10);
                 mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, mBackgroundHandler);
 
                 // Check if auto focus is supported
@@ -618,7 +618,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
                     if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
                         Toast.makeText(this, "Video app required access to camera", Toast.LENGTH_SHORT).show();
                     }
-                    requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CAMERA_PERMISSION_RESULT);
+                    requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CAMERA_PERMISSION_RESULT);
                 }
             } else {
                 cameraManager.openCamera(mCameraId, mCameraDevicesStateCallback, mBackgroundHandler);
@@ -901,7 +901,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 
     private void createVideoFolder() {
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DCIM), "RokidCamera");
+                Environment.DIRECTORY_DCIM), "RokidCameraVideo");
         mVideoFolder = mediaStorageDir;
 
 //        File movieFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
@@ -927,7 +927,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 
 
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DCIM), "RokidCamera");
+                Environment.DIRECTORY_DCIM), "RokidCameraCamera");
         mImageFolder = mediaStorageDir;
         if (!mImageFolder.exists()) {
             mImageFolder.mkdirs();
@@ -1043,6 +1043,42 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (DeviceConfig.isInRokidGlass) {
+            handleGlassAction(keyCode);
+        } else {
+            handleControllerAction(keyCode);
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
+    private void handleControllerAction(int keyCode) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BUTTON_A:
+                // ENTER
+                Log.i("testtest", "KeyUp ->> " + keyCode + " -- ENTER \n");
+
+                performCameraButtonAction();
+                break;
+
+            case 20:
+                // RIGHT
+                Log.i("testtest", "KeyUp ->> " + keyCode + " -- RIGHT \n");
+                performSwipeToPhoto();
+                break;
+
+            case 19:
+                // LEFT
+                Log.i("testtest", "KeyUp ->> " + keyCode + " -- LEFT \n");
+                performSwipeToVideo();
+                break;
+
+            default:
+                Log.i("testtest", "KeyUp ->> " + keyCode + " -- Not Defined!! \n");
+                break;
+        }
+    }
+
+    private void handleGlassAction(int keyCode) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENTER:
                 // ENTER
@@ -1053,29 +1089,49 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 // RIGHT
-                Log.i("testtest", "KeyUp ->> " + keyCode + " -- RIGHT \n");
-                performSwipeToPhoto();
+                if (DeviceConfig.useKeyboardInGlassForDebuggingWithoutTouchpad) {
+                    Log.i("testtest", "KeyUp ->> " + keyCode + " -- RIGHT \n");
+                    performSwipeToPhoto();
+                }
                 break;
 
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 // LEFT
-                Log.i("testtest", "KeyUp ->> " + keyCode + " -- LEFT \n");
-                performSwipeToVideo();
+                if (DeviceConfig.useKeyboardInGlassForDebuggingWithoutTouchpad) {
+                    // debugging using keyboard via Vysor
+                    Log.i("testtest", "KeyUp ->> " + keyCode + " -- LEFT \n");
+                    performSwipeToVideo();
+                }
+                break;
+
+            case KeyEvent.KEYCODE_DPAD_UP:
+                // RIGHT
+                if (!DeviceConfig.useKeyboardInGlassForDebuggingWithoutTouchpad) {
+                    Log.i("testtest", "KeyUp ->> " + keyCode + " -- RIGHT \n");
+                    performSwipeToPhoto();
+                }
+                break;
+
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                // LEFT
+                if (!DeviceConfig.useKeyboardInGlassForDebuggingWithoutTouchpad) {
+                    Log.i("testtest", "KeyUp ->> " + keyCode + " -- LEFT \n");
+                    performSwipeToVideo();
+                }
                 break;
 
             default:
                 Log.i("testtest", "KeyUp ->> " + keyCode + " -- Not Defined!! \n");
                 break;
         }
-        return super.onKeyUp(keyCode, event);
     }
 
     private void initRecyclerView() {
         Log.d(TAG, "initRecyclerView: init recyclerview");
-        mCameraModes.add("                  ");
+        mCameraModes.add("               ");
         mCameraModes.add(getResources().getString(R.string.CAMERAMODE_PHOTO));
         mCameraModes.add(getResources().getString(R.string.CAMERAMODE_VIDEO));
-        mCameraModes.add("                  ");
+        mCameraModes.add("               ");
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recyclerView = findViewById(R.id.recyclerView);
@@ -1202,18 +1258,24 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     }
 
     private void performSwipeToVideo() {
-        cameraMode = CameraMode.VIDEO_STOPPED;
-        updateButtonText(cameraMode);
-        recyclerView.smoothScrollToPosition(3);
-        initCameraModeForPhoto();
+        // only can swipe to video if not currently recording
+        if (cameraMode != CameraMode.VIDEO_RECORDING) {
+            cameraMode = CameraMode.VIDEO_STOPPED;
+            updateButtonText(cameraMode);
+            recyclerView.smoothScrollToPosition(3);
+            initCameraModeForPhoto();
+        }
     }
 
     private void performSwipeToPhoto() {
-        cameraMode = CameraMode.PHOTO_STOPPED;
-        updateButtonText(cameraMode);
-        recyclerView.smoothScrollToPosition(0);
-        initCameraModeForVideo();
-        initPreview();
+        // only can swipe to photo if not currently recording
+        if (cameraMode != CameraMode.VIDEO_RECORDING) {
+            cameraMode = CameraMode.PHOTO_STOPPED;
+            updateButtonText(cameraMode);
+            recyclerView.smoothScrollToPosition(0);
+            initCameraModeForVideo();
+            initPreview();
+        }
     }
 
     private void performCameraButtonAction() {
@@ -1230,8 +1292,22 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     private void handleVideoButton() {
         if (mIsRecording) {
             mChronometer.stop();
-            mMediaRecorder.stop();
-            mMediaRecorder.reset();
+
+
+            try {
+                mMediaRecorder.stop();
+            } catch(RuntimeException e) {
+                //you must delete the outputfile when the recorder stop failed.
+//                mFile.delete();
+            } finally {
+//                mRecorder.release();
+//                mRecorder = null;
+
+                mMediaRecorder.reset();
+            }
+
+
+
             // app state and UI
             mIsRecording = false;
             cameraMode = CameraMode.VIDEO_STOPPED;
@@ -1283,6 +1359,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     private boolean arePermissionsGranted() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             permissionsAreGranted = true;
         } else {
@@ -1295,10 +1372,12 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     private void requestAllPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[] {
                     Manifest.permission.CAMERA,
                     Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE }, 8);
         }
     }
