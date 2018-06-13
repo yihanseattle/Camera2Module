@@ -1,4 +1,4 @@
-package com.rokid.camera.camera2videoimage.recyclerviews;
+package com.rokid.glass.camera.recyclerviews;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -11,9 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.rokid.camera.camera2videoimage.Constants;
-import com.rokid.camera.camera2videoimage.R;
-import com.rokid.camera.camera2videoimage.utils.Utils;
+import com.rokid.glass.camera.constant.Constants;
+import com.rokid.glass.camera.R;
+import com.rokid.glass.camera.utils.Utils;
 
 import java.util.ArrayList;
 

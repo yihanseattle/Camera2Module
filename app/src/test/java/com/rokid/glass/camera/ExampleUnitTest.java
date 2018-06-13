@@ -1,4 +1,4 @@
-package com.rokid.camera.camera2videoimage;
+package com.rokid.glass.camera;
 
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package com.rokid.camera.camera2videoimage;
+package com.rokid.glass.camera;
 
 import android.Manifest;
 import android.content.Context;
@@ -53,9 +53,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.rokid.camera.camera2videoimage.enums.CameraMode;
-import com.rokid.camera.camera2videoimage.recyclerviews.RecyclerViewAdapter;
-import com.rokid.camera.camera2videoimage.utils.Utils;
+import com.rokid.glass.camera.constant.Constants;
+import com.rokid.glass.camera.enums.CameraMode;
+import com.rokid.glass.camera.preview.AutoFitTextureView;
+import com.rokid.glass.camera.recyclerviews.RecyclerViewAdapter;
+import com.rokid.glass.camera.utils.OnSwipeTouchListener;
+import com.rokid.glass.camera.utils.Utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -70,7 +73,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Camera2VideoImageActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "Camera2VideoImage";
 
@@ -901,7 +904,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 
     private void createVideoFolder() {
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DCIM), "RokidCameraVideo");
+                Environment.DIRECTORY_DCIM + File.separator), "RokidCameraVideo");
         mVideoFolder = mediaStorageDir;
 
 //        File movieFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
@@ -927,7 +930,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 
 
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DCIM), "RokidCameraCamera");
+                Environment.DIRECTORY_DCIM + File.separator), "RokidCameraCamera");
         mImageFolder = mediaStorageDir;
         if (!mImageFolder.exists()) {
             mImageFolder.mkdirs();
@@ -1305,8 +1308,6 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 
                 mMediaRecorder.reset();
             }
-
-
 
             // app state and UI
             mIsRecording = false;

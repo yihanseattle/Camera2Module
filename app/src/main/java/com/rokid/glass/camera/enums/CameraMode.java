@@ -1,4 +1,4 @@
-package com.rokid.camera.camera2videoimage.enums;
+package com.rokid.glass.camera.enums;
 
 /**
  * Created by yihan on 5/16/18.
