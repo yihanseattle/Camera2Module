@@ -83,6 +83,9 @@ public class MainActivity extends AppCompatActivity {
     private static final int STATE_WAIT_LOCK = 1;
     private int mCaptureState = STATE_PREVIEW;
 
+    private boolean touchpadIsDisabled;
+    private final int touchpadAnimationInterval = 300;
+
     private AutoFitTextureView mTextureView;
     private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
         @Override
@@ -404,7 +407,7 @@ public class MainActivity extends AppCompatActivity {
 //                    rotatedHeight = width;
 //                }
 
-                                Point displaySize = new Point();
+                Point displaySize = new Point();
                 getWindowManager().getDefaultDisplay().getSize(displaySize);
                 int rotatedPreviewWidth = width;
                 int rotatedPreviewHeight = height;
@@ -660,8 +663,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
 
     private void startPreview() {
@@ -1046,10 +1047,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (DeviceConfig.isInRokidGlass) {
-            handleGlassAction(keyCode);
-        } else {
-            handleControllerAction(keyCode);
+        if (!touchpadIsDisabled) {
+            if (DeviceConfig.isInRokidGlass) {
+                handleGlassAction(keyCode);
+            } else {
+                handleControllerAction(keyCode);
+            }
         }
         return super.onKeyUp(keyCode, event);
     }
@@ -1153,8 +1156,9 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     ivCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.shutterinactive));
+                    touchpadIsDisabled = false;
                 }
-            }, 500);
+            }, touchpadAnimationInterval);
             this.cameraMode = CameraMode.PHOTO_STOPPED;
         } else if (cameraMode == CameraMode.VIDEO_STOPPED) {
             ivCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.videoinactive));
@@ -1282,8 +1286,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void performCameraButtonAction() {
+
         if (cameraMode == CameraMode.PHOTO_STOPPED) {
             cameraMode = CameraMode.PHOTO_TAKING;
+            touchpadIsDisabled = true;
             // get an image from the camera
             handleStillPictureButton();
             updateButtonText(cameraMode);
@@ -1295,7 +1301,6 @@ public class MainActivity extends AppCompatActivity {
     private void handleVideoButton() {
         if (mIsRecording) {
             mChronometer.stop();
-
 
             try {
                 mMediaRecorder.stop();
@@ -1343,6 +1348,8 @@ public class MainActivity extends AppCompatActivity {
 //        startContinuousAutoFocus();
         initPreview();
         initCamera();
+
+        touchpadIsDisabled = false;
     }
 
     private void initCamera() {
