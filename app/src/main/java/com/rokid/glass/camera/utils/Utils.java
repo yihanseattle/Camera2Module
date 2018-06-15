@@ -1,4 +1,4 @@
-package com.rokid.camera.camera2videoimage.utils;
+package com.rokid.glass.camera.utils;
 
 import android.content.Context;
 

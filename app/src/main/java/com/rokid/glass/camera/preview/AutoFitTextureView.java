@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rokid.camera.camera2videoimage;
+package com.rokid.glass.camera.preview;
 
 import android.content.Context;
 import android.util.AttributeSet;

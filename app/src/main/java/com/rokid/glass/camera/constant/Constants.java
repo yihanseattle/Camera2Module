@@ -1,4 +1,4 @@
-package com.rokid.camera.camera2videoimage;
+package com.rokid.glass.camera.constant;
 
 import android.util.Size;
 
@@ -23,6 +23,7 @@ public class Constants {
     public static final int STATE_WAIT_LOCK = 1;
     public static int mCaptureState = STATE_PREVIEW;
 
+
     /** ============== Customized constants for background image processing ============== **/
     /**
      * The {@link Size} of background image processing.
@@ -32,4 +33,6 @@ public class Constants {
     public static Size IMAGE_SIZE = new Size(640, 480);
 
     public static Size PREVIEW_SIZE = new Size(1920, 1080);
+
+
 }

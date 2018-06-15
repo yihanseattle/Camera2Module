@@ -6,12 +6,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#000000"
-    tools:context="com.rokid.camera.camera2videoimage.Camera2VideoImageActivity">
+    tools:context="com.rokid.glass.camera.MainActivity">
 
-    <com.rokid.camera.camera2videoimage.AutoFitTextureView
+    <com.rokid.glass.camera.preview.AutoFitTextureView
         android:id="@+id/textureView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
         android:visibility="visible"
         />
 
@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_alignBottom="@id/textureView"
+        android:layout_alignParentBottom="true"
         android:gravity="bottom"
         android:alpha="1.0"
         >

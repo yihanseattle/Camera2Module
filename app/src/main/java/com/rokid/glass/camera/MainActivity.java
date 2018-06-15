@@ -1,4 +1,4 @@
-package com.rokid.camera.camera2videoimage;
+package com.rokid.glass.camera;
 
 import android.Manifest;
 import android.content.Context;
@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.graphics.Typeface;
@@ -29,10 +30,12 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
@@ -50,9 +53,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.rokid.camera.camera2videoimage.enums.CameraMode;
-import com.rokid.camera.camera2videoimage.recyclerviews.RecyclerViewAdapter;
-import com.rokid.camera.camera2videoimage.utils.Utils;
+import com.rokid.glass.camera.constant.Constants;
+import com.rokid.glass.camera.enums.CameraMode;
+import com.rokid.glass.camera.preview.AutoFitTextureView;
+import com.rokid.glass.camera.recyclerviews.RecyclerViewAdapter;
+import com.rokid.glass.camera.utils.OnSwipeTouchListener;
+import com.rokid.glass.camera.utils.Utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -64,9 +70,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
-public class Camera2VideoImageActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "Camera2VideoImage";
 
@@ -75,6 +82,9 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     private static final int STATE_PREVIEW = 0;
     private static final int STATE_WAIT_LOCK = 1;
     private int mCaptureState = STATE_PREVIEW;
+
+    private boolean touchpadIsDisabled;
+    private final int touchpadAnimationInterval = 300;
 
     private AutoFitTextureView mTextureView;
     private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
@@ -176,6 +186,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     };
     private MediaRecorder mMediaRecorder;
     private boolean mAutoFocusSupported;
+    private boolean permissionsAreGranted;
 
     private class ImageSaver implements Runnable {
 
@@ -264,7 +275,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 
         @Override
         public int compare(Size lhs, Size rhs) {
-            return Long.signum((long) lhs.getWidth() * lhs.getHeight() /
+            return Long.signum((long) lhs.getWidth() * lhs.getHeight() -
                     (long) rhs.getWidth() * rhs.getHeight());
         }
     }
@@ -337,29 +348,31 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
 
-        initApp();
-
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (arePermissionsGranted()) {
+            initApp();
+        } else {
+            requestAllPermissions();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        startBackgroundThread();
-
-        if (mTextureView.isAvailable()) {
-            setupCamera(mTextureView.getWidth(), mTextureView.getHeight());
-            connectCamera();
-
-        } else {
-            mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
-        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
         closeCamera();
     }
 
@@ -392,17 +405,50 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
                 int deviceOrientation = getWindowManager().getDefaultDisplay().getRotation();
                 mTotalRotation = sensorToDeviceRotation(cameraCharacteristics, deviceOrientation);
                 boolean swapRotation = mTotalRotation == 90 || mTotalRotation == 270;
-                int rotatedWidth = width;
-                int rotatedHeight = height;
+//                int rotatedWidth = width;
+//                int rotatedHeight = height;
+//                if (swapRotation) {
+//                     in portrait mode, flip the orientation
+//                    rotatedWidth = height;
+//                    rotatedHeight = width;
+//                }
+
+                Point displaySize = new Point();
+                getWindowManager().getDefaultDisplay().getSize(displaySize);
+                int rotatedPreviewWidth = width;
+                int rotatedPreviewHeight = height;
+                int maxPreviewWidth = displaySize.x;
+                int maxPreviewHeight = displaySize.y;
+
                 if (swapRotation) {
-                    // in portrait mode, flip the orientation
-                    rotatedWidth = height;
-                    rotatedHeight = width;
+                    rotatedPreviewWidth = height;
+                    rotatedPreviewHeight = width;
+                    maxPreviewWidth = displaySize.y;
+                    maxPreviewHeight = displaySize.x;
                 }
-                mPreviewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedWidth, rotatedHeight);
-                mVideoSize = chooseOptimalSize(map.getOutputSizes(MediaRecorder.class), rotatedWidth, rotatedHeight);
-                mImageSize = chooseOptimalSize(map.getOutputSizes(ImageFormat.JPEG), rotatedWidth, rotatedHeight);
-                mImageReader = ImageReader.newInstance(mImageSize.getWidth(), mImageSize.getHeight(), ImageFormat.JPEG, 40);
+
+                /**if (maxPreviewWidth > MAX_PREVIEW_WIDTH) {
+                 maxPreviewWidth = MAX_PREVIEW_WIDTH;
+                 } */
+                if (maxPreviewWidth > Constants.PREVIEW_SIZE.getWidth()) {
+                    maxPreviewWidth = Constants.PREVIEW_SIZE.getWidth();
+                }
+
+                if (maxPreviewHeight > Constants.PREVIEW_SIZE.getHeight()) {
+                    maxPreviewHeight = Constants.PREVIEW_SIZE.getHeight();
+                }
+
+                    // Try to get the actual width and height of your phone.
+                DisplayMetrics displayMetrics = new DisplayMetrics();
+                getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                int screenHeight = displayMetrics.heightPixels;
+                int screenWidth = displayMetrics.widthPixels;
+                Size largest = new Size(screenWidth, screenHeight);
+
+                mPreviewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
+                mVideoSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
+                mImageSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
+                mImageReader = ImageReader.newInstance(mImageSize.getWidth(), mImageSize.getHeight(), ImageFormat.JPEG, 10);
                 mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, mBackgroundHandler);
 
                 // Check if auto focus is supported
@@ -584,7 +630,7 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
                     if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
                         Toast.makeText(this, "Video app required access to camera", Toast.LENGTH_SHORT).show();
                     }
-                    requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CAMERA_PERMISSION_RESULT);
+                    requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CAMERA_PERMISSION_RESULT);
                 }
             } else {
                 cameraManager.openCamera(mCameraId, mCameraDevicesStateCallback, mBackgroundHandler);
@@ -626,8 +672,6 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
 
     private void startPreview() {
@@ -694,26 +738,32 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CAMERA_PERMISSION_RESULT) {
-            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(getApplicationContext(), "Application will not run without camera services", Toast.LENGTH_SHORT).show();
-            }
-            if (grantResults[1] != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(getApplicationContext(), "Application will not run without audio", Toast.LENGTH_SHORT).show();
-            }
-        } else if (requestCode == REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION_RESULT) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                mIsRecording = true;
-//                mRecordImageButton.setImageResource(R.mipmap.ic_launcher);
-                try {
-                    createVidelFileName();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                Toast.makeText(getApplicationContext(), "Permission successfully granted! :)", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(getApplicationContext(), "App needs to save video to run", Toast.LENGTH_SHORT).show();
-            }
+//        if (requestCode == REQUEST_CAMERA_PERMISSION_RESULT) {
+//            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+//                Toast.makeText(getApplicationContext(), "Application will not run without camera services", Toast.LENGTH_SHORT).show();
+//            }
+//            if (grantResults[1] != PackageManager.PERMISSION_GRANTED) {
+//                Toast.makeText(getApplicationContext(), "Application will not run without audio", Toast.LENGTH_SHORT).show();
+//            }
+//        } else if (requestCode == REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION_RESULT) {
+//            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                mIsRecording = true;
+////                mRecordImageButton.setImageResource(R.mipmap.ic_launcher);
+//                try {
+//                    createVidelFileName();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//                Toast.makeText(getApplicationContext(), "Permission successfully granted! :)", Toast.LENGTH_SHORT).show();
+//            } else {
+//                Toast.makeText(getApplicationContext(), "App needs to save video to run", Toast.LENGTH_SHORT).show();
+//            }
+//        }
+
+        if (arePermissionsGranted()) {
+            initApp();
+        } else {
+            Toast.makeText(this, "Please grant all permission so the app will work properly.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -803,30 +853,76 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 //        }
 //    }
 
-    private static Size chooseOptimalSize(Size[] choices, int width, int height) {
+    /**
+     * Given {@code choices} of {@code Size}s supported by a camera, choose the smallest one that
+     * is at least as large as the respective texture view size, and that is at most as large as the
+     * respective max size, and whose aspect ratio matches with the specified value. If such size
+     * doesn't exist, choose the largest one that is at most as large as the respective max size,
+     * and whose aspect ratio matches with the specified value.
+     *
+     * @param choices           The list of sizes that the camera supports for the intended output
+     *                          class
+     * @param textureViewWidth  The width of the texture view relative to sensor coordinate
+     * @param textureViewHeight The height of the texture view relative to sensor coordinate
+     * @param maxWidth          The maximum width that can be chosen
+     * @param maxHeight         The maximum height that can be chosen
+     * @param aspectRatio       The aspect ratio
+     * @return The optimal {@code Size}, or an arbitrary one if none were big enough
+     */
+    private static Size chooseOptimalSize(Size[] choices, int textureViewWidth,
+                                          int textureViewHeight, int maxWidth, int maxHeight, Size aspectRatio) {
+
+        // Collect the supported resolutions that are at least as big as the preview Surface
         List<Size> bigEnough = new ArrayList<>();
+        // Collect the supported resolutions that are smaller than the preview Surface
         List<Size> notBigEnough = new ArrayList<>();
+
+        List<Double> ratio = new LinkedList<>();
+
+        int w = aspectRatio.getWidth();
+        int h = aspectRatio.getHeight();
         for (Size option : choices) {
-            if (option.getHeight() == option.getWidth() * height / width &&
-                    option.getWidth() >= width && option.getHeight() >= height) {
-                bigEnough.add(option);
+            if (option.getWidth() > option.getHeight()) {
+                ratio.add((double)option.getWidth() / option.getHeight());
             } else {
-                notBigEnough.add(option);
+                ratio.add((double)option.getHeight() / option.getWidth());
+            }
+            if (option.getWidth() <= maxWidth && option.getHeight() <= maxHeight &&
+                    option.getHeight() == option.getWidth() * h / w) {
+                if (option.getWidth() >= textureViewWidth &&
+                        option.getHeight() >= textureViewHeight) {
+                    bigEnough.add(option);
+                } else {
+                    notBigEnough.add(option);
+                }
             }
         }
 
+        // Pick the smallest of those big enough. If there is no one big enough, pick the
+        // largest of those not big enough.
         if (bigEnough.size() > 0) {
             return Collections.min(bigEnough, new CompareSizeByArea());
         } else if (notBigEnough.size() > 0) {
             return Collections.max(notBigEnough, new CompareSizeByArea());
         } else {
-            return choices[31];
+            Log.e(TAG, "Couldn't find any suitable preview size");
+            if (DeviceConfig.isInRokidGlass) {
+                return choices[5];
+            } else {
+                return choices[choices.length - 1];
+            }
         }
     }
 
     private void createVideoFolder() {
-        File movieFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-        mVideoFolder = new File(movieFile, "camera2VideoImage");
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DCIM + File.separator), "RokidCameraVideo");
+        mVideoFolder = mediaStorageDir;
+
+//        File movieFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+//        mVideoFolder = new File(movieFile, "camera2VideoImage");
+
+
         if (!mVideoFolder.exists()) {
             mVideoFolder.mkdirs();
         }
@@ -841,8 +937,13 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     }
 
     private void createImageFolder() {
-        File imageFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-        mImageFolder = new File(imageFile, "camera2VideoImage");
+//        File imageFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+//        mImageFolder = new File(imageFile, "camera2VideoImage");
+
+
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DCIM + File.separator), "RokidCameraCamera");
+        mImageFolder = mediaStorageDir;
         if (!mImageFolder.exists()) {
             mImageFolder.mkdirs();
         }
@@ -893,11 +994,11 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     }
 
     private void setupMediaRecorder() throws IOException {
-        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
         mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         mMediaRecorder.setOutputFile(mVideoFileName);
-        mMediaRecorder.setVideoEncodingBitRate(1000000);
+        mMediaRecorder.setVideoEncodingBitRate(10000000);
         mMediaRecorder.setVideoFrameRate(30);
         mMediaRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
         mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
@@ -957,6 +1058,44 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (!touchpadIsDisabled) {
+            if (DeviceConfig.isInRokidGlass) {
+                handleGlassAction(keyCode);
+            } else {
+                handleControllerAction(keyCode);
+            }
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
+    private void handleControllerAction(int keyCode) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BUTTON_A:
+                // ENTER
+                Log.i("testtest", "KeyUp ->> " + keyCode + " -- ENTER \n");
+
+                performCameraButtonAction();
+                break;
+
+            case 20:
+                // RIGHT
+                Log.i("testtest", "KeyUp ->> " + keyCode + " -- RIGHT \n");
+                performSwipeToPhoto();
+                break;
+
+            case 19:
+                // LEFT
+                Log.i("testtest", "KeyUp ->> " + keyCode + " -- LEFT \n");
+                performSwipeToVideo();
+                break;
+
+            default:
+                Log.i("testtest", "KeyUp ->> " + keyCode + " -- Not Defined!! \n");
+                break;
+        }
+    }
+
+    private void handleGlassAction(int keyCode) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENTER:
                 // ENTER
@@ -967,29 +1106,49 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 // RIGHT
-                Log.i("testtest", "KeyUp ->> " + keyCode + " -- RIGHT \n");
-                performSwipeToPhoto();
+                if (DeviceConfig.useKeyboardInGlassForDebuggingWithoutTouchpad) {
+                    Log.i("testtest", "KeyUp ->> " + keyCode + " -- RIGHT \n");
+                    performSwipeToPhoto();
+                }
                 break;
 
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 // LEFT
-                Log.i("testtest", "KeyUp ->> " + keyCode + " -- LEFT \n");
-                performSwipeToVideo();
+                if (DeviceConfig.useKeyboardInGlassForDebuggingWithoutTouchpad) {
+                    // debugging using keyboard via Vysor
+                    Log.i("testtest", "KeyUp ->> " + keyCode + " -- LEFT \n");
+                    performSwipeToVideo();
+                }
+                break;
+
+            case KeyEvent.KEYCODE_DPAD_UP:
+                // RIGHT
+                if (!DeviceConfig.useKeyboardInGlassForDebuggingWithoutTouchpad) {
+                    Log.i("testtest", "KeyUp ->> " + keyCode + " -- RIGHT \n");
+                    performSwipeToPhoto();
+                }
+                break;
+
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                // LEFT
+                if (!DeviceConfig.useKeyboardInGlassForDebuggingWithoutTouchpad) {
+                    Log.i("testtest", "KeyUp ->> " + keyCode + " -- LEFT \n");
+                    performSwipeToVideo();
+                }
                 break;
 
             default:
                 Log.i("testtest", "KeyUp ->> " + keyCode + " -- Not Defined!! \n");
                 break;
         }
-        return super.onKeyUp(keyCode, event);
     }
 
     private void initRecyclerView() {
         Log.d(TAG, "initRecyclerView: init recyclerview");
-        mCameraModes.add("                  ");
+        mCameraModes.add("               ");
         mCameraModes.add(getResources().getString(R.string.CAMERAMODE_PHOTO));
         mCameraModes.add(getResources().getString(R.string.CAMERAMODE_VIDEO));
-        mCameraModes.add("                  ");
+        mCameraModes.add("               ");
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recyclerView = findViewById(R.id.recyclerView);
@@ -1008,8 +1167,9 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     ivCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.shutterinactive));
+                    touchpadIsDisabled = false;
                 }
-            }, 500);
+            }, touchpadAnimationInterval);
             this.cameraMode = CameraMode.PHOTO_STOPPED;
         } else if (cameraMode == CameraMode.VIDEO_STOPPED) {
             ivCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.videoinactive));
@@ -1116,23 +1276,31 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     }
 
     private void performSwipeToVideo() {
-        cameraMode = CameraMode.VIDEO_STOPPED;
-        updateButtonText(cameraMode);
-        recyclerView.scrollToPosition(3);
-        initCameraModeForPhoto();
+        // only can swipe to video if not currently recording
+        if (cameraMode != CameraMode.VIDEO_RECORDING) {
+            cameraMode = CameraMode.VIDEO_STOPPED;
+            updateButtonText(cameraMode);
+            recyclerView.smoothScrollToPosition(3);
+            initCameraModeForPhoto();
+        }
     }
 
     private void performSwipeToPhoto() {
-        cameraMode = CameraMode.PHOTO_STOPPED;
-        updateButtonText(cameraMode);
-        recyclerView.scrollToPosition(0);
-        initCameraModeForVideo();
-        initPreview();
+        // only can swipe to photo if not currently recording
+        if (cameraMode != CameraMode.VIDEO_RECORDING) {
+            cameraMode = CameraMode.PHOTO_STOPPED;
+            updateButtonText(cameraMode);
+            recyclerView.smoothScrollToPosition(0);
+            initCameraModeForVideo();
+            initPreview();
+        }
     }
 
     private void performCameraButtonAction() {
+
         if (cameraMode == CameraMode.PHOTO_STOPPED) {
             cameraMode = CameraMode.PHOTO_TAKING;
+            touchpadIsDisabled = true;
             // get an image from the camera
             handleStillPictureButton();
             updateButtonText(cameraMode);
@@ -1144,8 +1312,19 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
     private void handleVideoButton() {
         if (mIsRecording) {
             mChronometer.stop();
-            mMediaRecorder.stop();
-            mMediaRecorder.reset();
+
+            try {
+                mMediaRecorder.stop();
+            } catch(RuntimeException e) {
+                //you must delete the outputfile when the recorder stop failed.
+//                mFile.delete();
+            } finally {
+//                mRecorder.release();
+//                mRecorder = null;
+
+                mMediaRecorder.reset();
+            }
+
             // app state and UI
             mIsRecording = false;
             cameraMode = CameraMode.VIDEO_STOPPED;
@@ -1179,5 +1358,46 @@ public class Camera2VideoImageActivity extends AppCompatActivity {
 //        mCamera.setDisplayOrientation(180);
 //        startContinuousAutoFocus();
         initPreview();
+        initCamera();
+
+        touchpadIsDisabled = false;
+    }
+
+    private void initCamera() {
+        startBackgroundThread();
+
+        if (mTextureView.isAvailable()) {
+            setupCamera(mTextureView.getWidth(), mTextureView.getHeight());
+            connectCamera();
+
+        } else {
+            mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
+        }
+    }
+
+    private boolean arePermissionsGranted() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            permissionsAreGranted = true;
+        } else {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void requestAllPermissions() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[] {
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE }, 8);
+        }
     }
 }
