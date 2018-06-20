@@ -57,7 +57,6 @@ import com.rokid.glass.camera.constant.Constants;
 import com.rokid.glass.camera.enums.CameraMode;
 import com.rokid.glass.camera.preview.AutoFitTextureView;
 import com.rokid.glass.camera.recyclerviews.RecyclerViewAdapter;
-import com.rokid.glass.camera.utils.OnSwipeTouchListener;
 import com.rokid.glass.camera.utils.Utils;
 
 import java.io.File;
@@ -266,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
 //    public static final int MEDIA_TYPE_IMAGE = 1;
 //    public static final int MEDIA_TYPE_VIDEO = 2;
 
-    private ArrayList<String> mCameraModes = new ArrayList<>();
+    private ArrayList<String> mCameraModes;
 
     private static class CompareSizeByArea implements Comparator<Size> {
 
@@ -370,6 +369,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        stopRecording();
         closeCamera();
     }
 
@@ -1150,6 +1150,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initRecyclerView() {
         Log.d(TAG, "initRecyclerView: init recyclerview");
+        mCameraModes = new ArrayList<>();
         mCameraModes.add("               ");
         mCameraModes.add(getResources().getString(R.string.CAMERAMODE_PHOTO));
         mCameraModes.add(getResources().getString(R.string.CAMERAMODE_VIDEO));
@@ -1183,7 +1184,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void initCameraModeForVideo() {
+    private void initCameraModeForPhoto() {
         View view = null;
         TextView textView = null;
         view = recyclerView.findViewHolderForAdapterPosition(1).itemView;
@@ -1208,7 +1209,7 @@ public class MainActivity extends AppCompatActivity {
         textView.setTypeface(null, Typeface.NORMAL);
     }
 
-    private void initCameraModeForPhoto() {
+    private void initCameraModeForVideo() {
         View view = null;
         TextView textView = null;
         view = recyclerView.findViewHolderForAdapterPosition(1).itemView;
@@ -1252,32 +1253,32 @@ public class MainActivity extends AppCompatActivity {
     private void initPreview() {
         // Create our Preview view and set it as the content of our activity.
         cameraMode = CameraMode.PHOTO_STOPPED;
-        mTextureView.setOnTouchListener(new OnSwipeTouchListener(this) {
-            View view = null;
-            TextView textView = null;
-
-            public void onSwipeTop() {
-//                Toast.makeText(getApplicationContext(), "top", Toast.LENGTH_SHORT).show();
-            }
-
-            public void onSwipeRight() {
-//                Toast.makeText(getApplicationContext(), "right", Toast.LENGTH_SHORT).show();
-
-                performSwipeToPhoto();
-            }
-
-            public void onSwipeLeft() {
-//                Toast.makeText(getApplicationContext(), "left", Toast.LENGTH_SHORT).show();
-
-                performSwipeToVideo();
-
-            }
-
-            public void onSwipeBottom() {
-//                Toast.makeText(getApplicationContext(), "bottom", Toast.LENGTH_SHORT).show();
-
-            }
-        });
+//        mTextureView.setOnTouchListener(new OnSwipeTouchListener(this) {
+//            View view = null;
+//            TextView textView = null;
+//
+//            public void onSwipeTop() {
+////                Toast.makeText(getApplicationContext(), "top", Toast.LENGTH_SHORT).show();
+//            }
+//
+//            public void onSwipeRight() {
+////                Toast.makeText(getApplicationContext(), "right", Toast.LENGTH_SHORT).show();
+//
+//                performSwipeToPhoto();
+//            }
+//
+//            public void onSwipeLeft() {
+////                Toast.makeText(getApplicationContext(), "left", Toast.LENGTH_SHORT).show();
+//
+//                performSwipeToVideo();
+//
+//            }
+//
+//            public void onSwipeBottom() {
+////                Toast.makeText(getApplicationContext(), "bottom", Toast.LENGTH_SHORT).show();
+//
+//            }
+//        });
     }
 
     private void performSwipeToVideo() {
@@ -1286,7 +1287,7 @@ public class MainActivity extends AppCompatActivity {
             cameraMode = CameraMode.VIDEO_STOPPED;
             updateButtonText(cameraMode);
             recyclerView.smoothScrollToPosition(3);
-            initCameraModeForPhoto();
+            initCameraModeForVideo();
         }
     }
 
@@ -1296,7 +1297,7 @@ public class MainActivity extends AppCompatActivity {
             cameraMode = CameraMode.PHOTO_STOPPED;
             updateButtonText(cameraMode);
             recyclerView.smoothScrollToPosition(0);
-            initCameraModeForVideo();
+            initCameraModeForPhoto();
             initPreview();
         }
     }
@@ -1316,25 +1317,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void handleVideoButton() {
         if (mIsRecording) {
-            mChronometer.stop();
-
-            try {
-                mMediaRecorder.stop();
-            } catch(RuntimeException e) {
-                //you must delete the outputfile when the recorder stop failed.
-//                mFile.delete();
-            } finally {
-//                mRecorder.release();
-//                mRecorder = null;
-
-                mMediaRecorder.reset();
-            }
-
-            // app state and UI
-            mIsRecording = false;
-            cameraMode = CameraMode.VIDEO_STOPPED;
-            updateButtonText(cameraMode);
-            disableProgressTextView();
+            stopRecording();
             // restart preview
             startPreview();
         } else {
@@ -1344,6 +1327,28 @@ public class MainActivity extends AppCompatActivity {
             enableProgressTextView();
             checkWriteStoragePermission();
         }
+    }
+
+    private void stopRecording() {
+        mChronometer.stop();
+
+
+        try {
+            mMediaRecorder.stop();
+        } catch(RuntimeException e) {
+            //you must delete the outputfile when the recorder stop failed.
+//                mFile.delete();
+        } finally {
+//                mRecorder.release();
+//                mRecorder = null;
+
+            mMediaRecorder.reset();
+        }
+        // app state and UI
+        mIsRecording = false;
+        cameraMode = CameraMode.VIDEO_STOPPED;
+        updateButtonText(cameraMode);
+        disableProgressTextView();
     }
 
     private void handleStillPictureButton() {
