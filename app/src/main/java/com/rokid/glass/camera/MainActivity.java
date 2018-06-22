@@ -920,13 +920,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createVideoFolder() {
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DCIM + File.separator), "RokidCameraVideo");
-        mVideoFolder = mediaStorageDir;
+//        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+//                Environment.DIRECTORY_MOVIES + File.separator), "RokidCameraVideo");
+//        mVideoFolder = mediaStorageDir;
 
-//        File movieFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
-//        mVideoFolder = new File(movieFile, "camera2VideoImage");
-
+        File movieFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+        mVideoFolder = new File(movieFile, "camera2VideoImage");
 
         if (!mVideoFolder.exists()) {
             mVideoFolder.mkdirs();
@@ -942,13 +941,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createImageFolder() {
-//        File imageFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-//        mImageFolder = new File(imageFile, "camera2VideoImage");
+//        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+//                Environment.DIRECTORY_PICTURES + File.separator), "RokidCameraCamera");
+//        mImageFolder = mediaStorageDir;
 
 
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DCIM + File.separator), "RokidCameraCamera");
-        mImageFolder = mediaStorageDir;
+        File imageFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        mImageFolder = new File(imageFile, "camera2VideoImage");
+
         if (!mImageFolder.exists()) {
             mImageFolder.mkdirs();
         }
