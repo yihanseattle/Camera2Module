@@ -2,6 +2,7 @@ package com.rokid.glass.camera;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
@@ -23,6 +24,8 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaRecorder;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -115,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
             mCameraDevice = cameraDevice;
             if (mIsRecording) {
                 try {
-                    createVidelFileName();
+                    mVideoFileTest = createVidelFileName();
                     startRecord();
                     mMediaRecorder.start();
                     new Handler(getMainLooper()).post(new Runnable() {
@@ -183,6 +186,8 @@ public class MainActivity extends AppCompatActivity {
     private MediaRecorder mMediaRecorder;
     private boolean mAutoFocusSupported;
     private boolean permissionsAreGranted;
+    private File imageFileTest;
+    private File mVideoFileTest;
 
     private class ImageSaver implements Runnable {
 
@@ -204,6 +209,39 @@ public class MainActivity extends AppCompatActivity {
 
                     fileOutputStream = new FileOutputStream(mImageFileName);
                     fileOutputStream.write(bytes);
+                    Log.i("testtest", "thread finished ");
+                    mImageFileName = null;
+
+                    // 1.
+//                    final Intent intent;
+//                    intent = new Intent(Intent.ACTION_MEDIA_MOUNTED);
+//                    intent.setClassName("com.android.providers.media", "com.android.providers.media.MediaScannerReceiver");
+//                    intent.setData(Uri.fromFile(Environment.getExternalStorageDirectory()));
+//                    Log.v("testtest", "directory changed, send broadcast:" + intent.toString());
+//                    sendBroadcast(intent);
+
+                    // 2.
+//                    sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://"+ Environment.getExternalStorageDirectory())));
+
+                    // 3.
+                    final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                    final Uri contentUri = Uri.fromFile(imageFileTest.getAbsoluteFile());
+                    scanIntent.setData(contentUri);
+                    sendBroadcast(scanIntent);
+
+
+                    MediaScannerConnection.scanFile(
+                            getApplicationContext(),
+                            new String[]{mImageFolder.getAbsolutePath()},
+                            null,
+                            new MediaScannerConnection.OnScanCompletedListener() {
+                                @Override
+                                public void onScanCompleted(String path, Uri uri) {
+                                    Log.v("testtest",
+                                            "file " + path + " was scanned seccessfully: " + uri);
+                                }
+                            });
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -216,6 +254,23 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
+
+
+
+//                sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://"+ Environment.getExternalStorageDirectory())));
+
+
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//                    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+//                    Uri contentUri = Uri.fromFile(mImageFolder);
+//                    mediaScanIntent.setData(contentUri);
+//                    sendBroadcast(mediaScanIntent);
+//                } else {
+//                    sendBroadcast(new Intent(
+//                            Intent.ACTION_MEDIA_MOUNTED,
+//                            Uri.parse("file://"
+//                                    + Environment.getExternalStorageDirectory())));
+//                }
             }
         }
     }
@@ -720,7 +775,7 @@ public class MainActivity extends AppCompatActivity {
                     super.onCaptureStarted(session, request, timestamp, frameNumber);
                     // create image when it's in focus
                     try {
-                        createImageFileName();
+                        imageFileTest = createImageFileName();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -915,7 +970,7 @@ public class MainActivity extends AppCompatActivity {
         if (DeviceConfig.isInRokidGlass) {
             return choices[5];
         } else {
-            return choices[choices.length - 1];
+            return choices[2];
         }
     }
 
@@ -924,8 +979,8 @@ public class MainActivity extends AppCompatActivity {
 //                Environment.DIRECTORY_MOVIES + File.separator), "RokidCameraVideo");
 //        mVideoFolder = mediaStorageDir;
 
-        File movieFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
-        mVideoFolder = new File(movieFile, "camera2VideoImage");
+        File movieFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+        mVideoFolder = new File(movieFile, "Camera");
 
         if (!mVideoFolder.exists()) {
             mVideoFolder.mkdirs();
@@ -934,7 +989,7 @@ public class MainActivity extends AppCompatActivity {
 
     private File createVidelFileName() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyHHdd_HHmmss").format(new Date());
-        String prepend = "VIDEO_" + "111" + "_";
+        String prepend = "ROKIDVIDEO_" + timeStamp;
         File videoFile = File.createTempFile(prepend, ".mp4", mVideoFolder);
         mVideoFileName = videoFile.getAbsolutePath();
         return videoFile;
@@ -945,9 +1000,8 @@ public class MainActivity extends AppCompatActivity {
 //                Environment.DIRECTORY_PICTURES + File.separator), "RokidCameraCamera");
 //        mImageFolder = mediaStorageDir;
 
-
-        File imageFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        mImageFolder = new File(imageFile, "camera2VideoImage");
+        File imageFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+        mImageFolder = new File(imageFile, "Camera");
 
         if (!mImageFolder.exists()) {
             mImageFolder.mkdirs();
@@ -956,8 +1010,9 @@ public class MainActivity extends AppCompatActivity {
 
     private File createImageFileName() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyHHdd_HHmmss").format(new Date());
-        String prepend = "IMAGE_" + timeStamp + "_";
-        File imageFile = File.createTempFile(prepend, ".jpg", mImageFolder);
+        String prepend = "ROKIDIMAGE_" + timeStamp;
+//        File imageFile = File.createTempFile("ROKIDTEST", ".jpg", mImageFolder);
+        File imageFile = new File(mImageFolder, prepend + ".jpg");
         mImageFileName = imageFile.getAbsolutePath();
         return imageFile;
     }
@@ -967,7 +1022,7 @@ public class MainActivity extends AppCompatActivity {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 mIsRecording = true;
                 try {
-                    createVidelFileName();
+                    mVideoFileTest = createVidelFileName();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -986,7 +1041,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             mIsRecording = true;
             try {
-                createVidelFileName();
+                mVideoFileTest = createVidelFileName();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -1349,6 +1404,28 @@ public class MainActivity extends AppCompatActivity {
         cameraMode = CameraMode.VIDEO_STOPPED;
         updateButtonText(cameraMode);
         disableProgressTextView();
+
+        final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        final Uri contentUri = Uri.fromFile(mVideoFileTest.getAbsoluteFile());
+        scanIntent.setData(contentUri);
+        sendBroadcast(scanIntent);
+
+
+        MediaScannerConnection.scanFile(
+                getApplicationContext(),
+                new String[]{mVideoFolder.getAbsolutePath()},
+                null,
+                new MediaScannerConnection.OnScanCompletedListener() {
+                    @Override
+                    public void onScanCompleted(String path, Uri uri) {
+                        Log.v("testtest",
+                                "file " + path + " was scanned seccessfully: " + uri);
+                    }
+                });
+
+
+
+
     }
 
     private void handleStillPictureButton() {
