@@ -735,6 +735,9 @@ public class MainActivity extends AppCompatActivity {
         return imageFile;
     }
 
+    /**
+     * Check for permissions and start video recording.
+     */
     private void checkWriteStoragePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
