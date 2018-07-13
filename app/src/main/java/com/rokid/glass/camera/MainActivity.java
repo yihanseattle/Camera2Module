@@ -172,7 +172,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Size mPreviewSize;
     private Size mVideoSize;
-    private Size mImageSize;
     private ImageReader mImageReader;
     private final ImageReader.OnImageAvailableListener mOnImageAvailableListener = new ImageReader.OnImageAvailableListener() {
         @Override
@@ -185,7 +184,6 @@ public class MainActivity extends AppCompatActivity {
     };
     private MediaRecorder mMediaRecorder;
     private boolean mAutoFocusSupported;
-    private boolean permissionsAreGranted;
     private File imageFileTest;
     private File mVideoFileTest;
 
@@ -317,10 +315,6 @@ public class MainActivity extends AppCompatActivity {
     private ImageView ivRecordingRedDot;
     private RecyclerView recyclerView;
 
-//    public static final int MEDIA_TYPE_IMAGE = 1;
-//    public static final int MEDIA_TYPE_VIDEO = 2;
-
-    private ArrayList<String> mCameraModes;
 
     private static class CompareSizeByArea implements Comparator<Size> {
 
@@ -499,7 +493,7 @@ public class MainActivity extends AppCompatActivity {
 
                 mPreviewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
                 mVideoSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
-                mImageSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
+                Size mImageSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
                 mImageReader = ImageReader.newInstance(mImageSize.getWidth(), mImageSize.getHeight(), ImageFormat.JPEG, 10);
                 mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, mBackgroundHandler);
 
@@ -1205,7 +1199,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initRecyclerView() {
         Log.d(TAG, "initRecyclerView: init recyclerview");
-        mCameraModes = new ArrayList<>();
+        ArrayList<String> mCameraModes = new ArrayList<>();
         mCameraModes.add("               ");
         mCameraModes.add(getResources().getString(R.string.CAMERAMODE_PHOTO));
         mCameraModes.add(getResources().getString(R.string.CAMERAMODE_VIDEO));
@@ -1240,8 +1234,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initCameraModeForPhoto() {
-        View view = null;
-        TextView textView = null;
+        View view;
+        TextView textView;
         view = recyclerView.findViewHolderForAdapterPosition(1).itemView;
         textView = view.findViewById(R.id.tvCameraMode);
         textView.setTextSize(Constants.CAMERA_MODE_TEXT_SIZE_SELECTED);
@@ -1265,8 +1259,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initCameraModeForVideo() {
-        View view = null;
-        TextView textView = null;
+        View view;
+        TextView textView;
         view = recyclerView.findViewHolderForAdapterPosition(1).itemView;
         textView = view.findViewById(R.id.tvCameraMode);
         textView.setTextSize(Constants.CAMERA_MODE_TEXT_SIZE_DESELECTED);
@@ -1467,7 +1461,6 @@ public class MainActivity extends AppCompatActivity {
                 ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            permissionsAreGranted = true;
         } else {
             return false;
         }

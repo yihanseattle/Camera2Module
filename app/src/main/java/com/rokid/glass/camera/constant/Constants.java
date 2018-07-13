@@ -3,6 +3,9 @@ package com.rokid.glass.camera.constant;
 import android.util.Size;
 
 /**
+ *
+ * Constant class
+ *
  * Created by yihan on 5/20/18.
  */
 
