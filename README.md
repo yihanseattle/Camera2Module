@@ -58,46 +58,46 @@ CameraDevice
         };
 	
 - CameraDevice.StateListener: used for opening camera and check if opening was successful or not.
-	lang=java
-	private CameraDevice.StateCallback mCameraDevicesStateCallback = new CameraDevice.StateCallback() {
-        @Override
-        public void onOpened(@NonNull CameraDevice cameraDevice) {
-            mCameraDevice = cameraDevice;
-            if (mIsRecording) {
-                try {
-                    mVideoFileTest = createVidelFileName();
-                    startRecord();
-                    mMediaRecorder.start();
-                    new Handler(getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mChronometer.setBase(SystemClock.elapsedRealtime());
-                            mChronometer.setVisibility(View.VISIBLE);
-                            mChronometer.start();
-                        }
-                    });
+		lang=java
+		private CameraDevice.StateCallback mCameraDevicesStateCallback = new CameraDevice.StateCallback() {
+	        @Override
+	        public void onOpened(@NonNull CameraDevice cameraDevice) {
+	            mCameraDevice = cameraDevice;
+	            if (mIsRecording) {
+	                try {
+	                    mVideoFileTest = createVidelFileName();
+	                    startRecord();
+	                    mMediaRecorder.start();
+	                    new Handler(getMainLooper()).post(new Runnable() {
+	                        @Override
+	                        public void run() {
+	                            mChronometer.setBase(SystemClock.elapsedRealtime());
+	                            mChronometer.setVisibility(View.VISIBLE);
+	                            mChronometer.start();
+	                        }
+	                    });
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                // Toast.makeText(getApplicationContext(), "Camera connection made!", Toast.LENGTH_SHORT).show();
-                startPreview();
-            }
-        }
+	                } catch (IOException e) {
+	                    e.printStackTrace();
+	                }
+	            } else {
+	                // Toast.makeText(getApplicationContext(), "Camera connection made!", Toast.LENGTH_SHORT).show();
+	                startPreview();
+	            }
+	        }
 
-        @Override
-        public void onDisconnected(@NonNull CameraDevice cameraDevice) {
-            cameraDevice.close();
-            mCameraDevice = null;
-        }
+	        @Override
+	        public void onDisconnected(@NonNull CameraDevice cameraDevice) {
+	            cameraDevice.close();
+	            mCameraDevice = null;
+	        }
 
-        @Override
-        public void onError(@NonNull CameraDevice cameraDevice, int i) {
-            cameraDevice.close();
-            mCameraDevice = null;
-        }
-    };
+	        @Override
+	        public void onError(@NonNull CameraDevice cameraDevice, int i) {
+	            cameraDevice.close();
+	            mCameraDevice = null;
+	        }
+	    };
 
 Video:
 ```
