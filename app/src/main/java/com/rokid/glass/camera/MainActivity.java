@@ -210,18 +210,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.i("testtest", "thread finished ");
                     mImageFileName = null;
 
-                    // 1.
-//                    final Intent intent;
-//                    intent = new Intent(Intent.ACTION_MEDIA_MOUNTED);
-//                    intent.setClassName("com.android.providers.media", "com.android.providers.media.MediaScannerReceiver");
-//                    intent.setData(Uri.fromFile(Environment.getExternalStorageDirectory()));
-//                    Log.v("testtest", "directory changed, send broadcast:" + intent.toString());
-//                    sendBroadcast(intent);
-
-                    // 2.
-//                    sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://"+ Environment.getExternalStorageDirectory())));
-
-                    // 3.
+                    // send global notification for new photo taken
+                    // so that the gallery app can view new photo
                     final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                     final Uri contentUri = Uri.fromFile(imageFileTest.getAbsoluteFile());
                     scanIntent.setData(contentUri);
@@ -252,23 +242,6 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
-
-
-
-//                sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://"+ Environment.getExternalStorageDirectory())));
-
-
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//                    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-//                    Uri contentUri = Uri.fromFile(mImageFolder);
-//                    mediaScanIntent.setData(contentUri);
-//                    sendBroadcast(mediaScanIntent);
-//                } else {
-//                    sendBroadcast(new Intent(
-//                            Intent.ACTION_MEDIA_MOUNTED,
-//                            Uri.parse("file://"
-//                                    + Environment.getExternalStorageDirectory())));
-//                }
             }
         }
     }
@@ -349,31 +322,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mTextureView = findViewById(R.id.textureView);
-//        mRecordImageButton = findViewById(R.id.ibVideoOnline);
-//        mRecordImageButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                if (mIsRecording) {
-//                    mChronometer.stop();
-//                    mChronometer.setVisibility(View.INVISIBLE);
-//                    mIsRecording = false;
-//                    mRecordImageButton.setImageResource(R.mipmap.btn_video_online);
-//                    mMediaRecorder.stop();
-//                    mMediaRecorder.reset();
-//                    startPreview();
-//                } else {
-//                    checkWriteStoragePermission();
-//                }
-//            }
-//        });
-//        mStillImageButton = findViewById(R.id.ibCamera);
-//        mStillImageButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                lockFocus();
-//            }
-//        });
-
         linearLayoutVideoProgress = findViewById(R.id.linearlayoutVideoProgress);
         ivRecordingRedDot = findViewById(R.id.ivVideoRecordingRedDot);
         Animation mAnimation = new AlphaAnimation(1, 0);
@@ -514,152 +462,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
-
-//        CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-//        try {
-//            for (String cameraId: manager.getCameraIdList()) {
-//                CameraCharacteristics characteristics
-//                        = manager.getCameraCharacteristics(cameraId);
-//
-//                Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
-//                if (facing != null && facing == CameraCharacteristics.LENS_FACING_FRONT) {
-//                    continue;
-//                }
-//
-//                StreamConfigurationMap map = characteristics.get(
-//                        CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-//                if (map == null)
-//                    continue;
-//
-//                /*Size largest = Collections.max(
-//                        Arrays.asList(map.getOutputSizes(ImageFormat.YUV_420_888)),
-//                        new CompareSizesByArea());*/
-//                // Try to get the actual width and height of your phone.
-//                DisplayMetrics displayMetrics = new DisplayMetrics();
-//                getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-//                int screenHeight = displayMetrics.heightPixels;
-//                int screenWidth = displayMetrics.widthPixels;
-//                Size largest = new Size(screenWidth, screenHeight);
-//
-//                /* Another way to get the full screen */
-//                /*Point screenSize = new Point();
-//                getWindowManager().getDefaultDisplay().getSize(screenSize);
-//                Size largest = new Size(screenSize.x, screenSize.y);*/
-//
-//                // Hard code
-//                //Size largest = new Size(640, 480);
-//
-//                /** Two observations:
-//                 *  1. Using JPEG is better than YUV_420_888, as currently in the
-//                 *  image to byte conversion, we finally always go from JPEG to byte. So it saves
-//                 *  an additional step from YUV to JPEG.
-//                 *  2. The pool size of the image reader needs to be large enough.
-//                 *  3. However, using YUV_420_888 can guarantee 30 fps, while JPEG can only get
-//                 *  roughly 10 fps. */
-//                mImageReader = ImageReader.newInstance(Constants.IMAGE_SIZE.getWidth(),
-//                        Constants.IMAGE_SIZE.getHeight(),
-//                        ImageFormat.JPEG, 40);
-//
-//                /** A separate thread in hope to speed-up. */
-//                mImageReader.setOnImageAvailableListener(mOnImageAvailableListener,
-//                        mBackgroundHandler);
-//
-//                // Find out if we need to swap dimension to get the preview size relative to sensor
-//                // coordinate.
-//                int displayRotation = getWindowManager().getDefaultDisplay().getRotation();
-//                //noinspection ConstantConditions
-//                mTotalRotation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
-//                boolean swappedDimensions = false;
-//                switch (displayRotation) {
-//                    case Surface.ROTATION_0:
-//                    case Surface.ROTATION_180:
-//                        if (mTotalRotation == 90 || mTotalRotation == 270) {
-//                            swappedDimensions = true;
-//                        }
-//                        break;
-//                    case Surface.ROTATION_90:
-//                    case Surface.ROTATION_270:
-//                        if (mTotalRotation == 0 || mTotalRotation == 180) {
-//                            swappedDimensions = true;
-//                        }
-//                        break;
-//                    default:
-//                        Log.e(TAG, "Display rotation is invalid: " + displayRotation);
-//                }
-//
-//                Point displaySize = new Point();
-//                getWindowManager().getDefaultDisplay().getSize(displaySize);
-//                int rotatedPreviewWidth = width;
-//                int rotatedPreviewHeight = height;
-//                int maxPreviewWidth = displaySize.x;
-//                int maxPreviewHeight = displaySize.y;
-//
-//                if (swappedDimensions) {
-//                    rotatedPreviewWidth = height;
-//                    rotatedPreviewHeight = width;
-//                    maxPreviewWidth = displaySize.y;
-//                    maxPreviewHeight = displaySize.x;
-//                }
-//
-//                /**if (maxPreviewWidth > MAX_PREVIEW_WIDTH) {
-//                 maxPreviewWidth = MAX_PREVIEW_WIDTH;
-//                 } */
-//                if (maxPreviewWidth > Constants.PREVIEW_SIZE.getWidth()) {
-//                    maxPreviewWidth = Constants.PREVIEW_SIZE.getWidth();
-//                }
-//
-//                if (maxPreviewHeight > Constants.PREVIEW_SIZE.getHeight()) {
-//                    maxPreviewHeight = Constants.PREVIEW_SIZE.getHeight();
-//                }
-//
-//                // Danger, W.R.! Attempting to use too large a preview size could  exceed the camera
-//                // bus' bandwidth limitation, resulting in gorgeous previews but the storage of
-//                // garbage capture data.
-//                mPreviewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class),
-//                        rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth,
-//                        maxPreviewHeight, largest);
-//
-//                mVideoSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class),
-//                        rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth,
-//                        maxPreviewHeight, largest);
-//                mImageSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class),
-//                        rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth,
-//                        maxPreviewHeight, largest);
-//
-//                // Log.d(TAG, "setUpCameraOutput: Final preview size = " + mPreviewSize.getWidth() + " " + mPreviewSize.getHeight());
-//
-//                // We fit the aspect ratio of TextureView to the size of preview we picked.
-//                int orientation = getResources().getConfiguration().orientation;
-//                if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//                    mTextureView.setAspectRatio(
-//                            mPreviewSize.getWidth(), mPreviewSize.getHeight());
-//                } else {
-//                    mTextureView.setAspectRatio(
-//                            mPreviewSize.getHeight(), mPreviewSize.getWidth());
-//                }
-//
-//                // Log.d(TAG, "setUpCameraOutput: mTextureView = " + mTextureView.getWidth() + " " + mTextureView.getHeight());
-//
-//                // Check if auto focus is supported
-//                int[] afAvailableModes = characteristics.get(
-//                        CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES);
-//                if (afAvailableModes.length == 0 ||
-//                        (afAvailableModes.length == 1
-//                                && afAvailableModes[0] == CameraMetadata.CONTROL_AF_MODE_OFF)) {
-////                    mAutoFocusSupported = false;
-//                } else {
-////                    mAutoFocusSupported = true;
-//                }
-//
-//                mCameraId = cameraId;
-//                return;
-//
-//            }
-//        } catch (CameraAccessException e) {
-//            e.printStackTrace();
-//        } catch (NullPointerException e) {
-//            Log.d(TAG, "The device does not support Camera2 API.");
-//        }
     }
 
     private void connectCamera() {
@@ -784,28 +586,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        if (requestCode == REQUEST_CAMERA_PERMISSION_RESULT) {
-//            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-//                Toast.makeText(getApplicationContext(), "Application will not run without camera services", Toast.LENGTH_SHORT).show();
-//            }
-//            if (grantResults[1] != PackageManager.PERMISSION_GRANTED) {
-//                Toast.makeText(getApplicationContext(), "Application will not run without audio", Toast.LENGTH_SHORT).show();
-//            }
-//        } else if (requestCode == REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION_RESULT) {
-//            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                mIsRecording = true;
-////                mRecordImageButton.setImageResource(R.mipmap.ic_launcher);
-//                try {
-//                    createVidelFileName();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                Toast.makeText(getApplicationContext(), "Permission successfully granted! :)", Toast.LENGTH_SHORT).show();
-//            } else {
-//                Toast.makeText(getApplicationContext(), "App needs to save video to run", Toast.LENGTH_SHORT).show();
-//            }
-//        }
-
         if (arePermissionsGranted()) {
             initApp();
         } else {
@@ -842,62 +622,6 @@ public class MainActivity extends AppCompatActivity {
         deviceOrientation = ORIENTATIONS.get(deviceOrientation);
         return (sensorOrientation + deviceOrientation + 270) % 360;
     }
-
-//    /**
-//     * Given {@code choices} of {@code Size}s supported by a camera, choose the smallest one that
-//     * is at least as large as the respective texture view size, and that is at most as large as the
-//     * respective max size, and whose aspect ratio matches with the specified value. If such size
-//     * doesn't exist, choose the largest one that is at most as large as the respective max size,
-//     * and whose aspect ratio matches with the specified value.
-//     *
-//     * @param choices           The list of sizes that the camera supports for the intended output
-//     *                          class
-//     * @param textureViewWidth  The width of the texture view relative to sensor coordinate
-//     * @param textureViewHeight The height of the texture view relative to sensor coordinate
-//     * @param maxWidth          The maximum width that can be chosen
-//     * @param maxHeight         The maximum height that can be chosen
-//     * @param aspectRatio       The aspect ratio
-//     * @return The optimal {@code Size}, or an arbitrary one if none were big enough
-//     */
-//    private static Size chooseOptimalSize(Size[] choices, int textureViewWidth,
-//                                          int textureViewHeight, int maxWidth, int maxHeight, Size aspectRatio) {
-//
-//        //Log.d(TAG, "chooseOptimalSize: tVW = " + textureViewWidth + " tVH = " + textureViewHeight);
-//        //Log.d(TAG, "chooseOptimalSize: maxW = " + maxWidth + " maxH = " + maxHeight);
-//        // Collect the supported resolutions that are at least as big as the preview Surface
-//        List<Size> bigEnough = new ArrayList<>();
-//        // Collect the supported resolutions that are smaller than the preview Surface
-//        List<Size> notBigEnough = new ArrayList<>();
-//        int w = aspectRatio.getWidth();
-//        int h = aspectRatio.getHeight();
-//        for (Size option : choices) {
-//            //Log.d(TAG, "chooseOptimalSize: option = " + option.getWidth() + " " + option.getHeight());
-//            if (option.getWidth() <= maxWidth && option.getHeight() <= maxHeight) {// &&
-//                //    option.getHeight() == option.getWidth() * h / w) {
-//                if (option.getHeight() != option.getWidth() * h / w) continue;
-//                if (option.getWidth() >= textureViewWidth &&
-//                        option.getHeight() >= textureViewHeight) {
-//                    bigEnough.add(option);
-//                } else {
-//                    notBigEnough.add(option);
-//                }
-//            }
-//        }
-//
-//        // Pick the smallest of those big enough. If there is no one big enough, pick the
-//        // largest of those not big enough.
-//        if (bigEnough.size() > 0) {
-//            //Log.d(TAG, "chooseOptimalSize: Goes to bigEnough");
-//            return Collections.min(bigEnough, new CompareSizeByArea());
-//        } else if (notBigEnough.size() > 0) {
-//            //Log.d(TAG, "chooseOptimalSize: Goes to notBigEnough");
-//            return Collections.max(notBigEnough, new CompareSizeByArea());
-//        } else {
-//            //Log.d(TAG, "chooseOptimalSize: Not find any suitable!");
-//            Log.e(TAG, "Couldn't find any suitable preview size");
-//            return choices[0];
-//        }
-//    }
 
     /**
      * Given {@code choices} of {@code Size}s supported by a camera, choose the smallest one that
@@ -1302,32 +1026,6 @@ public class MainActivity extends AppCompatActivity {
     private void initPreview() {
         // Create our Preview view and set it as the content of our activity.
         cameraMode = CameraMode.PHOTO_STOPPED;
-//        mTextureView.setOnTouchListener(new OnSwipeTouchListener(this) {
-//            View view = null;
-//            TextView textView = null;
-//
-//            public void onSwipeTop() {
-////                Toast.makeText(getApplicationContext(), "top", Toast.LENGTH_SHORT).show();
-//            }
-//
-//            public void onSwipeRight() {
-////                Toast.makeText(getApplicationContext(), "right", Toast.LENGTH_SHORT).show();
-//
-//                performSwipeToPhoto();
-//            }
-//
-//            public void onSwipeLeft() {
-////                Toast.makeText(getApplicationContext(), "left", Toast.LENGTH_SHORT).show();
-//
-//                performSwipeToVideo();
-//
-//            }
-//
-//            public void onSwipeBottom() {
-////                Toast.makeText(getApplicationContext(), "bottom", Toast.LENGTH_SHORT).show();
-//
-//            }
-//        });
     }
 
     private void performSwipeToVideo() {
