@@ -14,7 +14,7 @@ CameraDevice
 ### Note:
 	- CameraDevice.CaptureListener: 
 	1. used for auto-focus in `Preview` 
-	```java
+	```
 	private CameraCaptureSession.CaptureCallback mPreviewCaptureCallback = new CameraCaptureSession.CaptureCallback() {
 
         private void process(CaptureResult captureResult) {
@@ -43,7 +43,7 @@ CameraDevice
     };
 	```
 	2. and create image file in `still photo capture`
-	```java
+	```
 	CameraCaptureSession.CaptureCallback stillCaptureCallback = new CameraCaptureSession.CaptureCallback() {
                 @Override
                 public void onCaptureStarted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, long timestamp, long frameNumber) {
