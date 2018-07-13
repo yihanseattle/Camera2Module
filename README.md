@@ -148,15 +148,14 @@ Video:
 	- Get current hardware auto-focus support.
 
 		lang=java
-        int[] afAvailableModes = cameraCharacteristics.get(
-        CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES);
+        int[] afAvailableModes = cameraCharacteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES);
 
 	- Set correct rotation value for CameraDevice.
 
 	- Set optimal size for PreviewSize (Camera Preview for user to see what the camera sees).
 
 	- Set optimal size for VideoSize (Video Recording resolution).
-	
+
 	- Set optimal size for ImageReaderSize (Still photo resolution).
 
 		lang=java
