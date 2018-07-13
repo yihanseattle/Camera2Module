@@ -206,16 +206,16 @@ Video:
 1. This action is triggered by clicking on the touch pad
 2. Will try to auto-focus if auto-focus is available and request capture inside auto-focus callback. Or will request still photo capture right away if auto-focus is not available.
 
-	lang=java
-	private void handleStillPictureButton() {
-        if (mAutoFocusSupported) {
-            // try to auto focus
-            lockFocus();
-        } else {
-            // capture right now if auto-focus not supported
-            startStillCaptureRequest();
-        }
-	}
+		lang=java
+		private void handleStillPictureButton() {
+	        if (mAutoFocusSupported) {
+	            // try to auto focus
+	            lockFocus();
+	        } else {
+	            // capture right now if auto-focus not supported
+	            startStillCaptureRequest();
+	        }
+		}
 
 3. Use `CaptureRequestBuilder` to build the capture request. Builder setup includes setting request to `CameraDevice.TEMPLATE_STILL_CAPTURE`, adding `ImageReader` to target, setting same orientation as preview so that the captured image will be the correct orientation.
 4. Start the capture action.
