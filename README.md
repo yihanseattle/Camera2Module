@@ -121,9 +121,11 @@ Video:
 ---
 ## Basic App Initialization Workflow
 
+{F288, layout=left, size=full, alt="a duckling"}
+
 1. Make sure the file destination folders are available or create new one if does not exists.
 2. Init all UI, RecyclerView(used for button swiping), background thread, preview, and CameraDevice. 
-4. Dynamic permissions check and request permissions if needed.
+3. Dynamic permissions check and request permissions if needed.
 4. Steps for setting up CameraDevice:
 	- Get device rotation and camera sensor rotation.
 	- Get screen resolution.
@@ -140,7 +142,21 @@ Video:
 	- In state callback, the default is still photo because the default mode is photo. So as soon as Camera opens successfully, the preview will be shown. 
 
 ---
+## Prepare Still Photo Capture
+
+{F294, layout=left, size=full, alt="a duckling"}
+
+
+---
+## Start Preview
+
+{F290, layout=left, size=full, alt="a duckling"}
+
+
+---
 ## Taking Still Photo Workflow
+
+{F289, layout=left, size=full, alt="a duckling"}
 
 1. This action is triggered by clicking on the touch pad
 2. Will try to auto-focus if auto-focus is available and request capture inside auto-focus callback. Or will request still photo capture right away if auto-focus is not available.
