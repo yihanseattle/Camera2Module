@@ -206,7 +206,7 @@ Video:
 1. This action is triggered by clicking on the touch pad
 2. Will try to auto-focus if auto-focus is available and request capture inside auto-focus callback. Or will request still photo capture right away if auto-focus is not available.
 
-		lang=java
+	lang=java
 	private void handleStillPictureButton() {
         if (mAutoFocusSupported) {
             // try to auto focus
