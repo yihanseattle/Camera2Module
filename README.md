@@ -127,7 +127,9 @@ Video:
 2. Init all UI, RecyclerView(used for button swiping), background thread, preview, and CameraDevice. 
 3. Dynamic permissions check and request permissions if needed.
 4. Steps for setting up CameraDevice:
+
 	- Get device rotation and camera sensor rotation.
+
 		lang=java
 		int deviceOrientation = getWindowManager().getDefaultDisplay().getRotation();
         mTotalRotation = sensorToDeviceRotation(cameraCharacteristics, deviceOrientation);
@@ -141,14 +143,20 @@ Video:
 		lang=java
 		Point displaySize = new Point();
         getWindowManager().getDefaultDisplay().getSize(displaySize);
+
+
 	- Get current hardware auto-focus support.
 
 		lang=java
         int[] afAvailableModes = cameraCharacteristics.get(
         CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES);
+
 	- Set correct rotation value for CameraDevice.
+
 	- Set optimal size for PreviewSize (Camera Preview for user to see what the camera sees).
+
 	- Set optimal size for VideoSize (Video Recording resolution).
+	
 	- Set optimal size for ImageReaderSize (Still photo resolution).
 
 		lang=java
