@@ -14,34 +14,35 @@ CameraDevice
 ### Note:
 	- CameraDevice.CaptureListener: 
 	1. used for auto-focus in `Preview` 
+
 	
-  lang=java
+	lang=java
 	private CameraCaptureSession.CaptureCallback mPreviewCaptureCallback = new CameraCaptureSession.CaptureCallback() {
 
-        private void process(CaptureResult captureResult) {
-            switch (mCaptureState) {
-                case STATE_PREVIEW:
-                    // do nothing
-                    break;
-                case STATE_WAIT_LOCK:
-                    mCaptureState = STATE_PREVIEW
-                    Integer afState = captureResult.get(CaptureResult.CONTROL_AF_STATE);
-                    if (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED ||
-                            afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED) {
-                        Toast.makeText(getApplicationContext(), "AF Locked!", Toast.LENGTH_SHORT).show();
-                        startStillCaptureRequest();
-                    }
-                    break;
-            }
-        }
+	    private void process(CaptureResult captureResult) {
+	        switch (mCaptureState) {
+	            case STATE_PREVIEW:
+	                // do nothing
+	                break;
+	            case STATE_WAIT_LOCK:
+	                mCaptureState = STATE_PREVIEW
+	                Integer afState = captureResult.get(CaptureResult.CONTROL_AF_STATE);
+	                if (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED ||
+	                        afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED) {
+	                    Toast.makeText(getApplicationContext(), "AF Locked!", Toast.LENGTH_SHORT).show();
+	                    startStillCaptureRequest();
+	                }
+	                break;
+	        }
+	    }
 
-        @Override
-        public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
-            super.onCaptureCompleted(session, request, result);
+	    @Override
+	    public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
+	        super.onCaptureCompleted(session, request, result);
 
-            process(result);
-        }
-    };
+	        process(result);
+	    }
+	};
 	
 	2. and create image file in `still photo capture`
 	
