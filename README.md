@@ -15,7 +15,7 @@ CameraDevice
 	- CameraDevice.CaptureListener: 
 	1. used for auto-focus in `Preview` 
 	
-	lang=java
+  lang=java
 	private CameraCaptureSession.CaptureCallback mPreviewCaptureCallback = new CameraCaptureSession.CaptureCallback() {
 
         private void process(CaptureResult captureResult) {
