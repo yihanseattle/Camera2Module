@@ -12,8 +12,8 @@ CameraDevice
 {F291, layout=left, size=thumb, alt="a duckling"}
 
 ### Note:
-- CameraDevice.CaptureListener: 
-	- used for auto-focus in `Preview` 
+	- CameraDevice.CaptureListener: 
+	1. used for auto-focus in `Preview` 
 	```java
 	private CameraCaptureSession.CaptureCallback mPreviewCaptureCallback = new CameraCaptureSession.CaptureCallback() {
 
@@ -42,7 +42,7 @@ CameraDevice
         }
     };
 	```
-	- and create image file in `still photo capture`
+	2. and create image file in `still photo capture`
 	```java
 	CameraCaptureSession.CaptureCallback stillCaptureCallback = new CameraCaptureSession.CaptureCallback() {
                 @Override
