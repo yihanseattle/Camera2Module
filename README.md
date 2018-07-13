@@ -128,6 +128,14 @@ Video:
 3. Dynamic permissions check and request permissions if needed.
 4. Steps for setting up CameraDevice:
 	- Get device rotation and camera sensor rotation.
+		lang=java
+		int deviceOrientation = getWindowManager().getDefaultDisplay().getRotation();
+        mTotalRotation = sensorToDeviceRotation(cameraCharacteristics, deviceOrientation);
+        private static int sensorToDeviceRotation(CameraCharacteristics cameraCharacteristics, int deviceOrientation) {
+	        int sensorOrientation = cameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+	        deviceOrientation = ORIENTATIONS.get(deviceOrientation);
+	        return (sensorOrientation + deviceOrientation + 270) % 360;
+    	}
 	- Get screen resolution.
 	- Get current hardware auto-focus support.
 	- Set correct rotation value for CameraDevice.
@@ -142,16 +150,13 @@ Video:
 	- In state callback, the default is still photo because the default mode is photo. So as soon as Camera opens successfully, the preview will be shown. 
 
 ---
-## Prepare Still Photo Capture
-
-{F294, layout=left, size=full, alt="a duckling"}
-
-
----
 ## Start Preview
 
 {F290, layout=left, size=full, alt="a duckling"}
 
+- Steps to start the preview:
+	1. Add `Preview` target so that the preview will be shown
+	2. Request a `RepeatingRequest` for starting preview 
 
 ---
 ## Taking Still Photo Workflow
@@ -163,7 +168,8 @@ Video:
 3. Use `CaptureRequestBuilder` to build the capture request. Builder setup includes setting request to `CameraDevice.TEMPLATE_STILL_CAPTURE`, adding `ImageReader` to target, setting same orientation as preview so that the captured image will be the correct orientation.
 4. Start the capture action.
 5. Create image file for each new image when capture request has been sent.
-6. Save image to file when `ImageReader` has image available for saving.
+6. Use `AcquireLatestImage()` to get the image when the image is available in the callback.
+7. Use backgroudn thread to save image to file.
 
 ---
 ## Start and Stop Video Recording Workflow
