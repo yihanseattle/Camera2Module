@@ -9,6 +9,55 @@ Photo:
 ```
 CameraDevice
 ```
+{F291, layout=left, size=thumb, alt="a duckling"}
+
+### Note:
+- CameraDevice.CaptureListener: 
+	- used for auto-focus in `Preview` 
+	```java
+	private CameraCaptureSession.CaptureCallback mPreviewCaptureCallback = new CameraCaptureSession.CaptureCallback() {
+
+        private void process(CaptureResult captureResult) {
+            switch (mCaptureState) {
+                case STATE_PREVIEW:
+                    // do nothing
+                    break;
+                case STATE_WAIT_LOCK:
+                    mCaptureState = STATE_PREVIEW
+                    Integer afState = captureResult.get(CaptureResult.CONTROL_AF_STATE);
+                    if (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED ||
+                            afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED) {
+                        Toast.makeText(getApplicationContext(), "AF Locked!", Toast.LENGTH_SHORT).show();
+                        startStillCaptureRequest();
+                    }
+                    break;
+            }
+        }
+
+        @Override
+        public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
+            super.onCaptureCompleted(session, request, result);
+
+            process(result);
+        }
+    };
+	```
+	- and create image file in `still photo capture`
+	```java
+	CameraCaptureSession.CaptureCallback stillCaptureCallback = new CameraCaptureSession.CaptureCallback() {
+                @Override
+                public void onCaptureStarted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, long timestamp, long frameNumber) {
+                    super.onCaptureStarted(session, request, timestamp, frameNumber);
+                    // create image when it's in focus
+                    try {
+                        imageFileTest = createImageFileName();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+	```
+- CameraDevice.StateListener: used for 
 
 Video:
 ```
@@ -19,15 +68,15 @@ MediaRecorder
 
 Photo:
 
-``
+```
 2592 × 1944
-``
+```
 
 Video:
 
-``
+```
 2592 × 1944
-``
+```
 
 ---
 ## Basic App Initialization Workflow
