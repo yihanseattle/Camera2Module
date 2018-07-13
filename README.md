@@ -137,11 +137,28 @@ Video:
 	        return (sensorOrientation + deviceOrientation + 270) % 360;
     	}
 	- Get screen resolution.
+
+		lang=java
+		Point displaySize = new Point();
+        getWindowManager().getDefaultDisplay().getSize(displaySize);
 	- Get current hardware auto-focus support.
+
+		lang=java
+        int[] afAvailableModes = cameraCharacteristics.get(
+        CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES);
 	- Set correct rotation value for CameraDevice.
 	- Set optimal size for PreviewSize (Camera Preview for user to see what the camera sees).
 	- Set optimal size for VideoSize (Video Recording resolution).
 	- Set optimal size for ImageReaderSize (Still photo resolution).
+
+		lang=java
+		mPreviewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
+	    mVideoSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
+	    Size mImageSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
+	    mImageReader = ImageReader.newInstance(mImageSize.getWidth(), mImageSize.getHeight(), ImageFormat.JPEG, 10);
+	    mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, mBackgroundHandler);
+
+
 5. Steps for initialize CameraDevice
 	- Will wait for TextureView to be ready before initialize CameraDevice.
 	- If TextureView is ready, init now. Or will init camera in TextureView ready callback.
@@ -149,6 +166,13 @@ Video:
 	- Use CameraManager to open camera with state callback passed on.
 	- In state callback, the default is still photo because the default mode is photo. So as soon as Camera opens successfully, the preview will be shown. 
 
+		lang=java
+		if (mTextureView.isAvailable()) {
+            setupCamera(mTextureView.getWidth(), mTextureView.getHeight());
+            connectCamera();
+        } else {
+            mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
+        }
 ---
 ## Start Preview
 
@@ -156,7 +180,17 @@ Video:
 
 - Steps to start the preview:
 	1. Add `Preview` target so that the preview will be shown
+		lang=java
+		mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+        mCaptureRequestBuilder.addTarget(mImageReader.getSurface());
+
 	2. Request a `RepeatingRequest` for starting preview 
+		lang=java
+		try {
+            mPreviewCaptureSession.setRepeatingRequest(mCaptureRequestBuilder.build(), null, mBackgroundHandler);
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
 
 ---
 ## Taking Still Photo Workflow
