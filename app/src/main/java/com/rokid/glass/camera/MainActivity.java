@@ -1125,8 +1125,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void handleStillPictureButton() {
         if (mAutoFocusSupported) {
+            // try to auto focus
             lockFocus();
         } else {
+            // capture right now if auto-focus not supported
             startStillCaptureRequest();
         }
     }
