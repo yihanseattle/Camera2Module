@@ -46,19 +46,19 @@ CameraDevice
 		
 	2. and create image file in `still photo capture`
 	
-	lang=java
-	CameraCaptureSession.CaptureCallback stillCaptureCallback = new CameraCaptureSession.CaptureCallback() {
-                @Override
-                public void onCaptureStarted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, long timestamp, long frameNumber) {
-                    super.onCaptureStarted(session, request, timestamp, frameNumber);
-                    // create image when it's in focus
-                    try {
-                        imageFileTest = createImageFileName();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            };
+		lang=java
+		CameraCaptureSession.CaptureCallback stillCaptureCallback = new CameraCaptureSession.CaptureCallback() {
+	                @Override
+	                public void onCaptureStarted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, long timestamp, long frameNumber) {
+	                    super.onCaptureStarted(session, request, timestamp, frameNumber);
+	                    // create image when it's in focus
+	                    try {
+	                        imageFileTest = createImageFileName();
+	                    } catch (IOException e) {
+	                        e.printStackTrace();
+	                    }
+	                }
+	            };
 	
 - CameraDevice.StateListener: used for 
 
