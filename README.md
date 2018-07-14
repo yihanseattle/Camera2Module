@@ -252,6 +252,30 @@ Video:
 
 7. Use backgroudn thread to save image to file.
 
+		lang=java
+        private class ImageSaver implements Runnable {
+
+        private final Image mImage;
+
+        public ImageSaver(Image image) {
+            mImage = image;
+        }
+
+        @Override
+        public void run() {
+
+            FileOutputStream fileOutputStream = null;
+            try {
+                if (mImageFileName != null) {
+                    ByteBuffer byteBuffer = mImage.getPlanes()[0].getBuffer();
+                    byte[] bytes = new byte[byteBuffer.remaining()];
+                    byteBuffer.get(bytes);
+
+                    fileOutputStream = new FileOutputStream(mImageFileName);
+                    fileOutputStream.write(bytes);
+         ...
+         ...
+
 ---
 ## Start and Stop Video Recording Workflow
 
