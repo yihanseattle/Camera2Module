@@ -218,6 +218,14 @@ Video:
 		}
 
 3. Use `CaptureRequestBuilder` to build the capture request. Builder setup includes setting request to `CameraDevice.TEMPLATE_STILL_CAPTURE`, adding `ImageReader` to target, setting same orientation as preview so that the captured image will be the correct orientation.
+
+		lang=java
+		mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+        mCaptureRequestBuilder.addTarget(mImageReader.getSurface());
+        // not sure why we need to add 180 rotation here
+        // the original image was 180 degree off
+        mCaptureRequestBuilder.set(CaptureRequest.JPEG_ORIENTATION, mTotalRotation);
+            
 4. Start the capture action.
 5. Create image file for each new image when capture request has been sent.
 6. Use `AcquireLatestImage()` to get the image when the image is available in the callback.
