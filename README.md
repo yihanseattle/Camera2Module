@@ -124,7 +124,7 @@ Video:
 1. Make sure the file destination folders are available or create new one if does not exists.
 2. Init all UI, RecyclerView(used for button swiping), background thread, preview, and CameraDevice. 
 3. Dynamic permissions check and request permissions if needed.
-4. Steps for setting up CameraDevice:
+4. Steps for setting up CameraDevice: (`setupCamera()` method in `MainActivity`)
 
 	- Get device rotation and camera sensor rotation.
 
@@ -163,7 +163,7 @@ Video:
         mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, mBackgroundHandler);
 
 
-5. Steps for initialize CameraDevice
+5. Steps for initialize CameraDevice (`initCamera()` method in `MainActivity`)
 	- Will wait for TextureView to be ready before initialize CameraDevice.
 	- If TextureView is ready, init now. Or will init camera in TextureView ready callback.
 	- Get CameraManager from system service.
@@ -215,7 +215,7 @@ Video:
             }
         }
 
-3. Use `CaptureRequestBuilder` to build the capture request. Builder setup includes setting request to `CameraDevice.TEMPLATE_STILL_CAPTURE`, adding `ImageReader` to target, setting same orientation as preview so that the captured image will be the correct orientation.
+3. Use `CaptureRequestBuilder` to build the capture request. Builder setup includes setting request to `CameraDevice.TEMPLATE_STILL_CAPTURE`, adding `ImageReader` to target, setting same orientation as preview so that the captured image will be the correct orientation. (`startStillCaptureRequest()` method in `MainActivity`)
 
 		lang=java
         mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
@@ -229,13 +229,13 @@ Video:
 		lang=java
         mPreviewCaptureSession.capture(mCaptureRequestBuilder.build(), stillCaptureCallback, null);
 
-5. Create image file for each new image when capture request has been sent.
+5. Create image file for each new image when capture request has been sent. `CameraCaptureSession.CaptureCallback` callback in `startStillCaptureRequest()` method)
 		
 		lang=java
         imageFileTest = createImageFileName();
 
 
-6. Use `AcquireLatestImage()` to get the image when the image is available in the callback.
+6. Use `AcquireLatestImage()` to get the image when the image is available in the callback. (`ImageReader.OnImageAvailableListener` callback in `MainActivity`)
 
 		lang=java
         private final ImageReader.OnImageAvailableListener mOnImageAvailableListener = new ImageReader.OnImageAvailableListener() {
