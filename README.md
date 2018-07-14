@@ -225,8 +225,12 @@ Video:
         // not sure why we need to add 180 rotation here
         // the original image was 180 degree off
         mCaptureRequestBuilder.set(CaptureRequest.JPEG_ORIENTATION, mTotalRotation);
-            
+
 4. Start the capture action.
+
+		lang=java
+        mPreviewCaptureSession.capture(mCaptureRequestBuilder.build(), stillCaptureCallback, null);
+
 5. Create image file for each new image when capture request has been sent.
 6. Use `AcquireLatestImage()` to get the image when the image is available in the callback.
 7. Use backgroudn thread to save image to file.
