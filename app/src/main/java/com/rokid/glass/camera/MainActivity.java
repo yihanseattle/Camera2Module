@@ -176,6 +176,9 @@ public class MainActivity extends AppCompatActivity {
                         startStillCaptureRequest();
                     }
                     break;
+
+                // TODO: check for : case STATE_WAITING_PRECAPTURE: {
+
             }
         }
 
@@ -385,6 +388,8 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         stopRecording();
         closeCamera();
+
+        // TODO: look for background thread finish
         stopBackgroundThread();
     }
 
@@ -508,6 +513,7 @@ public class MainActivity extends AppCompatActivity {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
                         PackageManager.PERMISSION_GRANTED) {
                     // connect the camera
+                    // TODO: add comments
                     cameraManager.openCamera(mCameraId, mCameraDevicesStateCallback, mBackgroundHandler);
                 } else {
                     if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
@@ -605,6 +611,9 @@ public class MainActivity extends AppCompatActivity {
         try {
             mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             mCaptureRequestBuilder.addTarget(mImageReader.getSurface());
+
+            // TODO: update diagram
+
             // not sure why we need to add 180 rotation here
             // the original image was 180 degree off
             mCaptureRequestBuilder.set(CaptureRequest.JPEG_ORIENTATION, mTotalRotation);
@@ -1187,10 +1196,12 @@ public class MainActivity extends AppCompatActivity {
             // TODO: delete file if recording failed to prevent 0KB file (error file)
 //                mFile.delete();
         } finally {
-//                mRecorder.release();
-//                mRecorder = null;
+
 
             mMediaRecorder.reset();
+
+//                mRecorder.release();
+//                mRecorder = null;
         }
         // app state and UI
         mIsRecording = false;
@@ -1242,10 +1253,13 @@ public class MainActivity extends AppCompatActivity {
         startBackgroundThread();
 
         if (mTextureView.isAvailable()) {
+            // TODO: see Google Example add comments
+            // pause and resume
             setupCamera(mTextureView.getWidth(), mTextureView.getHeight());
             connectCamera();
 
         } else {
+            // first time
             mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
         }
     }

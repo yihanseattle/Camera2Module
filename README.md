@@ -106,7 +106,7 @@ MediaRecorder
 ---
 ## Output Resolution:
 
-Photo:
+Photo: (Add Format)
 
 ```
 2592 × 1944
@@ -181,6 +181,11 @@ Video:
 ## Start Preview
 
 {F290, layout=left, size=full, alt="a duckling"}
+
+*************
+
+
+
 
 - Steps to start the preview:
 	1. Add `Preview` target so that the preview will be shown
