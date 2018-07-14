@@ -17,34 +17,34 @@ CameraDevice
 	1. used for auto-focus in `Preview` 
 	
 		lang=java
-		private CameraCaptureSession.CaptureCallback mPreviewCaptureCallback = ne  CameraCaptureSession.CaptureCallback()   
-			private void process(CaptureResult captureResult) {
-			  switch (mCaptureState) {
-			      case STATE_PREVIEW:
-			          // do nothing
-			          break;
-			      case STATE_WAIT_LOCK:
-			          mCaptureState = STATE_PREVIEW
-			          Integer afState = captureResult.ge  CaptureResult.CONTROL_AF_STATE);
-			          if (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED ||
-			                  afState =  CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED) {
-			              Toast.makeText(getApplicationContext(), "AF Locked!"  Toast.LENGTH_SHORT).show();
-			              startStillCaptureRequest();
-			          }
-			          break;
-			  }
+        private CameraCaptureSession.CaptureCallback mPreviewCaptureCallback = ne  CameraCaptureSession.CaptureCallback()   
+            private void process(CaptureResult captureResult) {
+              switch (mCaptureState) {
+                  case STATE_PREVIEW:
+                      // do nothing
+                      break;
+                  case STATE_WAIT_LOCK:
+                      mCaptureState = STATE_PREVIEW
+                      Integer afState = captureResult.ge  CaptureResult.CONTROL_AF_STATE);
+                      if (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED ||
+                              afState =  CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED) {
+                          Toast.makeText(getApplicationContext(), "AF Locked!"  Toast.LENGTH_SHORT).show();
+                          startStillCaptureRequest();
+                      }
+                      break;
+              }
 
-			@Override
-			public void onCaptureCompleted(@NonNull CameraCaptureSession session  @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
-			  super.onCaptureCompleted(session, request, result)  
-			  process(result);
-			}
-		};
-		
+            @Override
+            public void onCaptureCompleted(@NonNull CameraCaptureSession session  @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
+              super.onCaptureCompleted(session, request, result)  
+              process(result);
+            }
+        };
+        
 	2. and create image file in `still photo capture`
 	
 		lang=java
-		CameraCaptureSession.CaptureCallback stillCaptureCallback = new CameraCaptureSession.CaptureCallback() {
+        CameraCaptureSession.CaptureCallback stillCaptureCallback = new CameraCaptureSession.CaptureCallback() {
             @Override
             public void onCaptureStarted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, long timestamp, long frameNumber) {
                 super.onCaptureStarted(session, request, timestamp, frameNumber);
@@ -56,48 +56,48 @@ CameraDevice
                 }
             }
         };
-	
+    
 - CameraDevice.StateListener: used for opening camera and check if opening was successful or not.
 		lang=java
-		private CameraDevice.StateCallback mCameraDevicesStateCallback = new CameraDevice.StateCallback() {
-	        @Override
-	        public void onOpened(@NonNull CameraDevice cameraDevice) {
-	            mCameraDevice = cameraDevice;
-	            if (mIsRecording) {
-	                try {
-	                    mVideoFileTest = createVidelFileName();
-	                    startRecord();
-	                    mMediaRecorder.start();
-	                    new Handler(getMainLooper()).post(new Runnable() {
-	                        @Override
-	                        public void run() {
-	                            mChronometer.setBase(SystemClock.elapsedRealtime());
-	                            mChronometer.setVisibility(View.VISIBLE);
-	                            mChronometer.start();
-	                        }
-	                    });
+        private CameraDevice.StateCallback mCameraDevicesStateCallback = new CameraDevice.StateCallback() {
+            @Override
+            public void onOpened(@NonNull CameraDevice cameraDevice) {
+                mCameraDevice = cameraDevice;
+                if (mIsRecording) {
+                    try {
+                        mVideoFileTest = createVidelFileName();
+                        startRecord();
+                        mMediaRecorder.start();
+                        new Handler(getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mChronometer.setBase(SystemClock.elapsedRealtime());
+                                mChronometer.setVisibility(View.VISIBLE);
+                                mChronometer.start();
+                            }
+                        });
 
-	                } catch (IOException e) {
-	                    e.printStackTrace();
-	                }
-	            } else {
-	                // Toast.makeText(getApplicationContext(), "Camera connection made!", Toast.LENGTH_SHORT).show();
-	                startPreview();
-	            }
-	        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    // Toast.makeText(getApplicationContext(), "Camera connection made!", Toast.LENGTH_SHORT).show();
+                    startPreview();
+                }
+            }
 
-	        @Override
-	        public void onDisconnected(@NonNull CameraDevice cameraDevice) {
-	            cameraDevice.close();
-	            mCameraDevice = null;
-	        }
+            @Override
+            public void onDisconnected(@NonNull CameraDevice cameraDevice) {
+                cameraDevice.close();
+                mCameraDevice = null;
+            }
 
-	        @Override
-	        public void onError(@NonNull CameraDevice cameraDevice, int i) {
-	            cameraDevice.close();
-	            mCameraDevice = null;
-	        }
-	    };
+            @Override
+            public void onError(@NonNull CameraDevice cameraDevice, int i) {
+                cameraDevice.close();
+                mCameraDevice = null;
+            }
+        };
 
 Video:
 ```
