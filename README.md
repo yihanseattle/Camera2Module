@@ -121,8 +121,6 @@ Video:
 ---
 ## Basic App Initialization Workflow
 
-{F288, layout=left, size=full, alt="a duckling"}
-
 1. Make sure the file destination folders are available or create new one if does not exists.
 2. Init all UI, RecyclerView(used for button swiping), background thread, preview, and CameraDevice. 
 3. Dynamic permissions check and request permissions if needed.
