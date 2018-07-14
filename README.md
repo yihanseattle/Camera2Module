@@ -239,7 +239,7 @@ Video:
 
 6. Use `AcquireLatestImage()` to get the image when the image is available in the callback.
 
-        lang=java
+		lang=java
         private final ImageReader.OnImageAvailableListener mOnImageAvailableListener = new ImageReader.OnImageAvailableListener() {
             @Override
             public void onImageAvailable(ImageReader imageReader) {
@@ -251,24 +251,6 @@ Video:
         };
 
 7. Use backgroudn thread to save image to file.
-
-        lang=java
-        private class ImageSaver implements Runnable {
-
-        private final Image mImage;
-
-        public ImageSaver(Image image) {
-            mImage = image;
-        }
-
-        @Override
-        public void run() {
-
-            FileOutputStream fileOutputStream = null;
-            try {
-                if (mImageFileName != null) {
-        ....
-        ....
 
 ---
 ## Start and Stop Video Recording Workflow
