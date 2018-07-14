@@ -50,7 +50,6 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.widget.Chronometer;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -76,15 +75,21 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "Camera2VideoImage";
 
+    // permission result ID
     private static final int REQUEST_CAMERA_PERMISSION_RESULT = 0;
     private static final int REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION_RESULT = 1;
+
+    // auto-focus lock
     private static final int STATE_PREVIEW = 0;
     private static final int STATE_WAIT_LOCK = 1;
     private int mCaptureState = STATE_PREVIEW;
 
+    // disable button press(touch pad event) during animation
     private boolean touchpadIsDisabled;
+    // animation
     private final int touchpadAnimationInterval = 300;
 
+    // preview texture
     private AutoFitTextureView mTextureView;
     private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
         @Override
@@ -111,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    // main components
     private CameraDevice mCameraDevice;
     private CameraDevice.StateCallback mCameraDevicesStateCallback = new CameraDevice.StateCallback() {
         @Override
@@ -152,17 +158,51 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    // preview callback
+    private CameraCaptureSession mPreviewCaptureSession;
+    private CameraCaptureSession.CaptureCallback mPreviewCaptureCallback = new CameraCaptureSession.CaptureCallback() {
+
+        private void process(CaptureResult captureResult) {
+            switch (mCaptureState) {
+                case STATE_PREVIEW:
+                    // do nothing
+                    break;
+                case STATE_WAIT_LOCK:
+                    mCaptureState = STATE_PREVIEW;
+                    Integer afState = captureResult.get(CaptureResult.CONTROL_AF_STATE);
+                    if (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED ||
+                            afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED) {
+                        Toast.makeText(getApplicationContext(), "AF Locked!", Toast.LENGTH_SHORT).show();
+                        startStillCaptureRequest();
+                    }
+                    break;
+            }
+        }
+
+        @Override
+        public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
+            super.onCaptureCompleted(session, request, result);
+
+            process(result);
+        }
+    };
+    private CaptureRequest.Builder mCaptureRequestBuilder;
+
+    // camera parameter
     private String mCameraId;
+    private int mTotalRotation;
+    // background thread for camera API actions and saving image to SD card
     private HandlerThread mBackgroundHandlerThread;
     private Handler mBackgroundHandler;
 
+    // destination folder
     private File mVideoFolder;
     private String mVideoFileName;
     private File mImageFolder;
     private String mImageFileName;
 
+    // orientation calculate
     private static SparseIntArray ORIENTATIONS = new SparseIntArray();
-
     static {
         ORIENTATIONS.append(Surface.ROTATION_0, 90);
         ORIENTATIONS.append(Surface.ROTATION_90, 0);
@@ -170,23 +210,30 @@ public class MainActivity extends AppCompatActivity {
         ORIENTATIONS.append(Surface.ROTATION_270, 180);
     }
 
+    // resolution size
     private Size mPreviewSize;
     private Size mVideoSize;
     private ImageReader mImageReader;
     private final ImageReader.OnImageAvailableListener mOnImageAvailableListener = new ImageReader.OnImageAvailableListener() {
         @Override
         public void onImageAvailable(ImageReader imageReader) {
+            // use background thread to save the image
             Image image = imageReader.acquireLatestImage();
             if (image != null) {
                 mBackgroundHandler.post(new ImageSaver(image));
             }
         }
     };
+
+    // media recorder for video recorder
     private MediaRecorder mMediaRecorder;
     private boolean mAutoFocusSupported;
     private File imageFileTest;
     private File mVideoFileTest;
 
+    /**
+     * Background thread for saving images to SD card
+     */
     private class ImageSaver implements Runnable {
 
         private final Image mImage;
@@ -217,7 +264,6 @@ public class MainActivity extends AppCompatActivity {
                     scanIntent.setData(contentUri);
                     sendBroadcast(scanIntent);
 
-
                     MediaScannerConnection.scanFile(
                             getApplicationContext(),
                             new String[]{mImageFolder.getAbsolutePath()},
@@ -229,7 +275,6 @@ public class MainActivity extends AppCompatActivity {
                                             "file " + path + " was scanned seccessfully: " + uri);
                                 }
                             });
-
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -246,47 +291,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // video recording timer
     private Chronometer mChronometer;
-    private int mTotalRotation;
-    private CameraCaptureSession mPreviewCaptureSession;
-    private CameraCaptureSession.CaptureCallback mPreviewCaptureCallback = new CameraCaptureSession.CaptureCallback() {
-
-        private void process(CaptureResult captureResult) {
-            switch (mCaptureState) {
-                case STATE_PREVIEW:
-                    // do nothing
-                    break;
-                case STATE_WAIT_LOCK:
-                    mCaptureState = STATE_PREVIEW;
-                    Integer afState = captureResult.get(CaptureResult.CONTROL_AF_STATE);
-                    if (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED ||
-                            afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED) {
-                        Toast.makeText(getApplicationContext(), "AF Locked!", Toast.LENGTH_SHORT).show();
-                        startStillCaptureRequest();
-                    }
-                    break;
-            }
-        }
-
-        @Override
-        public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
-            super.onCaptureCompleted(session, request, result);
-
-            process(result);
-        }
-    };
-    private CaptureRequest.Builder mCaptureRequestBuilder;
-
-    private ImageButton mRecordImageButton;
-    private ImageButton mStillImageButton;
-    private boolean mIsRecording = false;
 
     // camera 1
-    private CameraMode cameraMode;
-    private ImageView ivCameraButton;
-    private LinearLayout linearLayoutVideoProgress;
-    private ImageView ivRecordingRedDot;
-    private RecyclerView recyclerView;
+    private CameraMode mCameraMode;
+    private ImageView mIVCameraButton;
+    private LinearLayout mLinearLayoutVideoProgress;
+    private ImageView mIVRecordingRedDot;
+    private RecyclerView mRecyclerView;
+    private boolean mIsRecording = false;
 
 
     private static class CompareSizeByArea implements Comparator<Size> {
@@ -305,7 +319,10 @@ public class MainActivity extends AppCompatActivity {
 
         createVideoFolder();
         createImageFolder();
+        initLayoutAndUI();
+    }
 
+    private void initLayoutAndUI() {
         mMediaRecorder = new MediaRecorder();
         mChronometer = findViewById(R.id.chronometer);
         mChronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
@@ -322,18 +339,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mTextureView = findViewById(R.id.textureView);
-        linearLayoutVideoProgress = findViewById(R.id.linearlayoutVideoProgress);
-        ivRecordingRedDot = findViewById(R.id.ivVideoRecordingRedDot);
+        mLinearLayoutVideoProgress = findViewById(R.id.linearlayoutVideoProgress);
+        mIVRecordingRedDot = findViewById(R.id.ivVideoRecordingRedDot);
         Animation mAnimation = new AlphaAnimation(1, 0);
         mAnimation.setDuration(700);
         mAnimation.setInterpolator(new LinearInterpolator());
         mAnimation.setRepeatCount(Animation.INFINITE);
         mAnimation.setRepeatMode(Animation.REVERSE);
-        ivRecordingRedDot.startAnimation(mAnimation);
+        mIVRecordingRedDot.startAnimation(mAnimation);
 
         // Add a listener to the Capture button
-        ivCameraButton = findViewById(R.id.ivCameraButton);
-        ivCameraButton.setOnClickListener(
+        mIVCameraButton = findViewById(R.id.ivCameraButton);
+        mIVCameraButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -368,6 +385,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         stopRecording();
         closeCamera();
+        stopBackgroundThread();
     }
 
     @Override
@@ -384,6 +402,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Setup camera parameters:
+     *      - Rotation Degree
+     *      - Preview Size
+     *      - Video Recording Size
+     *      - ImageReader Size
+     *      - Auto-Focus Support
+     *      - CameraID (If has multiple cameras)
+     *
+     * @param width     : TexutreView width
+     * @param height    : TexutreView height
+     */
     private void setupCamera(int width, int height) {
         CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
 
@@ -399,13 +429,6 @@ public class MainActivity extends AppCompatActivity {
                 int deviceOrientation = getWindowManager().getDefaultDisplay().getRotation();
                 mTotalRotation = sensorToDeviceRotation(cameraCharacteristics, deviceOrientation);
                 boolean swapRotation = mTotalRotation == 90 || mTotalRotation == 270;
-//                int rotatedWidth = width;
-//                int rotatedHeight = height;
-//                if (swapRotation) {
-//                     in portrait mode, flip the orientation
-//                    rotatedWidth = height;
-//                    rotatedHeight = width;
-//                }
 
                 Point displaySize = new Point();
                 getWindowManager().getDefaultDisplay().getSize(displaySize);
@@ -421,9 +444,6 @@ public class MainActivity extends AppCompatActivity {
                     maxPreviewHeight = displaySize.x;
                 }
 
-                /**if (maxPreviewWidth > MAX_PREVIEW_WIDTH) {
-                 maxPreviewWidth = MAX_PREVIEW_WIDTH;
-                 } */
                 if (maxPreviewWidth > Constants.PREVIEW_SIZE.getWidth()) {
                     maxPreviewWidth = Constants.PREVIEW_SIZE.getWidth();
                 }
@@ -432,7 +452,7 @@ public class MainActivity extends AppCompatActivity {
                     maxPreviewHeight = Constants.PREVIEW_SIZE.getHeight();
                 }
 
-                    // Try to get the actual width and height of your phone.
+                // Try to get the actual width and height of your phone.
                 DisplayMetrics displayMetrics = new DisplayMetrics();
                 getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
                 int screenHeight = displayMetrics.heightPixels;
@@ -464,6 +484,21 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Help to calculate Camera Parameters
+     * @param cameraCharacteristics : current characteristics
+     * @param deviceOrientation     : device(screen) orientation
+     * @return : orientation for (sensor + device)
+     */
+    private static int sensorToDeviceRotation(CameraCharacteristics cameraCharacteristics, int deviceOrientation) {
+        int sensorOrientation = cameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+        deviceOrientation = ORIENTATIONS.get(deviceOrientation);
+        return (sensorOrientation + deviceOrientation + 270) % 360;
+    }
+
+    /**
+     * Opening Camera via CameraManager
+     */
     private void connectCamera() {
         CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         try {
@@ -488,6 +523,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Start video recording
+     */
     private void startRecord() {
         try {
             setupMediaRecorder();
@@ -522,6 +560,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Start preview
+     */
     private void startPreview() {
         SurfaceTexture surfaceTexture = mTextureView.getSurfaceTexture();
         assert surfaceTexture != null;
@@ -557,6 +598,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Capture still photo
+     */
     private void startStillCaptureRequest() {
         try {
             mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
@@ -593,6 +637,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Close Camera resource
+     */
     private void closeCamera() {
         if (mCameraDevice != null) {
             mCameraDevice.close();
@@ -600,12 +647,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Start background thread
+     */
     private void startBackgroundThread() {
         mBackgroundHandlerThread = new HandlerThread("Camera2VideoImage");
         mBackgroundHandlerThread.start();
         mBackgroundHandler = new Handler(mBackgroundHandlerThread.getLooper());
     }
 
+    /**
+     * Stop background thread
+     */
     private void stopBackgroundThread() {
         mBackgroundHandlerThread.quitSafely();
         try {
@@ -615,12 +668,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
-
-    private static int sensorToDeviceRotation(CameraCharacteristics cameraCharacteristics, int deviceOrientation) {
-        int sensorOrientation = cameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
-        deviceOrientation = ORIENTATIONS.get(deviceOrientation);
-        return (sensorOrientation + deviceOrientation + 270) % 360;
     }
 
     /**
@@ -692,6 +739,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // TODO: put to a Util class
     private void createVideoFolder() {
 //        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
 //                Environment.DIRECTORY_MOVIES + File.separator), "RokidCameraVideo");
@@ -774,6 +822,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Setup video recording
+     *
+     * @throws IOException : prepare Exception
+     */
     private void setupMediaRecorder() throws IOException {
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
@@ -788,6 +841,9 @@ public class MainActivity extends AppCompatActivity {
         mMediaRecorder.prepare();
     }
 
+    /**
+     * Auto-focus lock
+     */
     private void lockFocus() {
         mCaptureState = STATE_WAIT_LOCK;
         try {
@@ -836,6 +892,7 @@ public class MainActivity extends AppCompatActivity {
     // ----------------------
     // ----------------------
     // camera 1
+    // TODO: refactor Camera1 code
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
@@ -924,6 +981,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Button UI
+     */
     private void initRecyclerView() {
         Log.d(TAG, "initRecyclerView: init recyclerview");
         ArrayList<String> mCameraModes = new ArrayList<>();
@@ -933,37 +993,45 @@ public class MainActivity extends AppCompatActivity {
         mCameraModes.add("               ");
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(layoutManager);
+        mRecyclerView = findViewById(R.id.recyclerView);
+        mRecyclerView.setLayoutManager(layoutManager);
         RecyclerViewAdapter adapter = new RecyclerViewAdapter(this, mCameraModes);
-        recyclerView.setAdapter(adapter);
+        mRecyclerView.setAdapter(adapter);
 
     }
 
+    /**
+     * Update Text under the button
+     *
+     * @param cameraMode : update UI depends on the mode
+     */
     private void updateButtonText(final CameraMode cameraMode) {
         if (cameraMode == CameraMode.PHOTO_STOPPED) {
-            ivCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.shutterinactive));
+            mIVCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.shutterinactive));
         } else if (cameraMode == CameraMode.PHOTO_TAKING) {
-            ivCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.shutteractive));
+            mIVCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.shutteractive));
             new Handler(getMainLooper()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    ivCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.shutterinactive));
+                    mIVCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.shutterinactive));
                     touchpadIsDisabled = false;
                 }
             }, touchpadAnimationInterval);
-            this.cameraMode = CameraMode.PHOTO_STOPPED;
+            this.mCameraMode = CameraMode.PHOTO_STOPPED;
         } else if (cameraMode == CameraMode.VIDEO_STOPPED) {
-            ivCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.videoinactive));
+            mIVCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.videoinactive));
         } else if (cameraMode == CameraMode.VIDEO_RECORDING) {
-            ivCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.videoactive));
+            mIVCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.videoactive));
         }
     }
 
+    /**
+     * Switch to photo button
+     */
     private void initCameraModeForPhoto() {
         View view;
         TextView textView;
-        view = recyclerView.findViewHolderForAdapterPosition(1).itemView;
+        view = mRecyclerView.findViewHolderForAdapterPosition(1).itemView;
         textView = view.findViewById(R.id.tvCameraMode);
         textView.setTextSize(Constants.CAMERA_MODE_TEXT_SIZE_SELECTED);
         textView.setTextColor(Color.parseColor(Constants.CAMERA_MODE_TEXT_COLOR_SELECTED));
@@ -973,7 +1041,7 @@ public class MainActivity extends AppCompatActivity {
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
                 0);
         textView.setTypeface(null, Typeface.BOLD);
-        view = recyclerView.findViewHolderForAdapterPosition(2).itemView;
+        view = mRecyclerView.findViewHolderForAdapterPosition(2).itemView;
         textView = view.findViewById(R.id.tvCameraMode);
         textView.setTextSize(Constants.CAMERA_MODE_TEXT_SIZE_DESELECTED);
         textView.setTextColor(Color.parseColor(Constants.CAMERA_MODE_TEXT_COLOR_DESELECTED));
@@ -985,10 +1053,13 @@ public class MainActivity extends AppCompatActivity {
         textView.setTypeface(null, Typeface.NORMAL);
     }
 
+    /**
+     * Switch to video button
+     */
     private void initCameraModeForVideo() {
         View view;
         TextView textView;
-        view = recyclerView.findViewHolderForAdapterPosition(1).itemView;
+        view = mRecyclerView.findViewHolderForAdapterPosition(1).itemView;
         textView = view.findViewById(R.id.tvCameraMode);
         textView.setTextSize(Constants.CAMERA_MODE_TEXT_SIZE_DESELECTED);
         textView.setTextColor(Color.parseColor(Constants.CAMERA_MODE_TEXT_COLOR_DESELECTED));
@@ -998,7 +1069,7 @@ public class MainActivity extends AppCompatActivity {
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
                 0);
         textView.setTypeface(null, Typeface.NORMAL);
-        view = recyclerView.findViewHolderForAdapterPosition(2).itemView;
+        view = mRecyclerView.findViewHolderForAdapterPosition(2).itemView;
         textView = view.findViewById(R.id.tvCameraMode);
         textView.setTextSize(Constants.CAMERA_MODE_TEXT_SIZE_SELECTED);
         textView.setTextColor(Color.parseColor(Constants.CAMERA_MODE_TEXT_COLOR_SELECTED));
@@ -1010,61 +1081,86 @@ public class MainActivity extends AppCompatActivity {
         textView.setTypeface(null, Typeface.BOLD);
     }
 
+    /**
+     * Video recording progress UI
+     */
     private void disableProgressTextView() {
-        recyclerView.setVisibility(View.VISIBLE);
-        linearLayoutVideoProgress.setVisibility(View.GONE);
+        mRecyclerView.setVisibility(View.VISIBLE);
+        mLinearLayoutVideoProgress.setVisibility(View.GONE);
     }
 
+    /**
+     * Video recording progress UI
+     */
     private void enableProgressTextView() {
-        recyclerView.setVisibility(View.GONE);
-        linearLayoutVideoProgress.setVisibility(View.VISIBLE);
+        mRecyclerView.setVisibility(View.GONE);
+        mLinearLayoutVideoProgress.setVisibility(View.VISIBLE);
 
     }
 
+    /**
+     * Init UI
+     */
     private void initCameraButton() {
-        cameraMode = CameraMode.PHOTO_STOPPED;
-        updateButtonText(cameraMode);
+        mCameraMode = CameraMode.PHOTO_STOPPED;
+        updateButtonText(mCameraMode);
     }
 
+    /**
+     * Init preview
+     *
+     * Default mode is photo
+     */
     private void initPreview() {
         // Create our Preview view and set it as the content of our activity.
-        cameraMode = CameraMode.PHOTO_STOPPED;
+        mCameraMode = CameraMode.PHOTO_STOPPED;
     }
 
+    /**
+     * Key Event action : swipe
+     */
     private void performSwipeToVideo() {
         // only can swipe to video if not currently recording
-        if (cameraMode != CameraMode.VIDEO_RECORDING) {
-            cameraMode = CameraMode.VIDEO_STOPPED;
-            updateButtonText(cameraMode);
-            recyclerView.smoothScrollToPosition(3);
+        if (mCameraMode != CameraMode.VIDEO_RECORDING) {
+            mCameraMode = CameraMode.VIDEO_STOPPED;
+            updateButtonText(mCameraMode);
+            mRecyclerView.smoothScrollToPosition(3);
             initCameraModeForVideo();
         }
     }
 
+    /**
+     * Key Event action : swipe
+     */
     private void performSwipeToPhoto() {
         // only can swipe to photo if not currently recording
-        if (cameraMode != CameraMode.VIDEO_RECORDING) {
-            cameraMode = CameraMode.PHOTO_STOPPED;
-            updateButtonText(cameraMode);
-            recyclerView.smoothScrollToPosition(0);
+        if (mCameraMode != CameraMode.VIDEO_RECORDING) {
+            mCameraMode = CameraMode.PHOTO_STOPPED;
+            updateButtonText(mCameraMode);
+            mRecyclerView.smoothScrollToPosition(0);
             initCameraModeForPhoto();
             initPreview();
         }
     }
 
+    /**
+     * Key Event action: press the button
+     */
     private void performCameraButtonAction() {
-
-        if (cameraMode == CameraMode.PHOTO_STOPPED) {
-            cameraMode = CameraMode.PHOTO_TAKING;
+        if (mCameraMode == CameraMode.PHOTO_STOPPED) {
+            mCameraMode = CameraMode.PHOTO_TAKING;
             touchpadIsDisabled = true;
             // get an image from the camera
             handleStillPictureButton();
-            updateButtonText(cameraMode);
+            updateButtonText(mCameraMode);
         } else {
             handleVideoButton();
         }
     }
 
+    /**
+     * Video button event
+     */
     private void handleVideoButton() {
         if (mIsRecording) {
             stopRecording();
@@ -1072,21 +1168,23 @@ public class MainActivity extends AppCompatActivity {
             startPreview();
         } else {
             mIsRecording = true;
-            cameraMode = CameraMode.VIDEO_RECORDING;
-            updateButtonText(cameraMode);
+            mCameraMode = CameraMode.VIDEO_RECORDING;
+            updateButtonText(mCameraMode);
             enableProgressTextView();
             checkWriteStoragePermission();
         }
     }
 
+    /**
+     * Stop recording
+     */
     private void stopRecording() {
         mChronometer.stop();
-
 
         try {
             mMediaRecorder.stop();
         } catch(RuntimeException e) {
-            //you must delete the outputfile when the recorder stop failed.
+            // TODO: delete file if recording failed to prevent 0KB file (error file)
 //                mFile.delete();
         } finally {
 //                mRecorder.release();
@@ -1096,8 +1194,8 @@ public class MainActivity extends AppCompatActivity {
         }
         // app state and UI
         mIsRecording = false;
-        cameraMode = CameraMode.VIDEO_STOPPED;
-        updateButtonText(cameraMode);
+        mCameraMode = CameraMode.VIDEO_STOPPED;
+        updateButtonText(mCameraMode);
         disableProgressTextView();
 
         final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
@@ -1117,12 +1215,11 @@ public class MainActivity extends AppCompatActivity {
                                 "file " + path + " was scanned seccessfully: " + uri);
                     }
                 });
-
-
-
-
     }
 
+    /**
+     * Try to take picture
+     */
     private void handleStillPictureButton() {
         if (mAutoFocusSupported) {
             // try to auto focus
@@ -1136,14 +1233,8 @@ public class MainActivity extends AppCompatActivity {
     private void initApp() {
         initRecyclerView();
         initCameraButton();
-//        initTimerTask();
-        // Create an instance of Camera
-//        mCamera = getCameraInstance();
-//        mCamera.setDisplayOrientation(180);
-//        startContinuousAutoFocus();
         initPreview();
         initCamera();
-
         touchpadIsDisabled = false;
     }
 
