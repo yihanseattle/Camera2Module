@@ -131,7 +131,7 @@ Video:
 	- Get device rotation and camera sensor rotation.
 
 		lang=java
-		int deviceOrientation = getWindowManager().getDefaultDisplay().getRotation();
+        int deviceOrientation = getWindowManager().getDefaultDisplay().getRotation();
         mTotalRotation = sensorToDeviceRotation(cameraCharacteristics, deviceOrientation);
         private static int sensorToDeviceRotation(CameraCharacteristics cameraCharacteristics, int deviceOrientation) {
 	        int sensorOrientation = cameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
@@ -141,7 +141,7 @@ Video:
 	- Get screen resolution.
 
 		lang=java
-		Point displaySize = new Point();
+        Point displaySize = new Point();
 		getWindowManager().getDefaultDisplay().getSize(displaySize);
 
 	- Get current hardware auto-focus support.
@@ -158,7 +158,7 @@ Video:
 	- Set optimal size for ImageReaderSize (Still photo resolution).
 
 		lang=java
-		mPreviewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
+        mPreviewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
 	    mVideoSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
 	    Size mImageSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
 	    mImageReader = ImageReader.newInstance(mImageSize.getWidth(), mImageSize.getHeight(), ImageFormat.JPEG, 10);
@@ -173,7 +173,7 @@ Video:
 	- In state callback, the default is still photo because the default mode is photo. So as soon as Camera opens successfully, the preview will be shown. 
 
 		lang=java
-		if (mTextureView.isAvailable()) {
+        if (mTextureView.isAvailable()) {
             setupCamera(mTextureView.getWidth(), mTextureView.getHeight());
             connectCamera();
         } else {
@@ -187,12 +187,12 @@ Video:
 - Steps to start the preview:
 	1. Add `Preview` target so that the preview will be shown
 		lang=java
-		mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+        mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
         mCaptureRequestBuilder.addTarget(mImageReader.getSurface());
 
 	2. Request a `RepeatingRequest` for starting preview 
 		lang=java
-		try {
+        try {
             mPreviewCaptureSession.setRepeatingRequest(mCaptureRequestBuilder.build(), null, mBackgroundHandler);
         } catch (CameraAccessException e) {
             e.printStackTrace();
@@ -207,7 +207,7 @@ Video:
 2. Will try to auto-focus if auto-focus is available and request capture inside auto-focus callback. Or will request still photo capture right away if auto-focus is not available.
 
 		lang=java
-		private void handleStillPictureButton() {
+        private void handleStillPictureButton() {
 	        if (mAutoFocusSupported) {
 	            // try to auto focus
 	            lockFocus();
