@@ -581,7 +581,9 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-//            mCaptureRequestBuilder.addTarget(previewSurface);
+            if (DeviceConfig.isPreviewTurnedOn) {
+                mCaptureRequestBuilder.addTarget(previewSurface);
+            }
             mCaptureRequestBuilder.addTarget(mImageReader.getSurface());
 
             mCameraDevice.createCaptureSession(Arrays.asList(previewSurface, mImageReader.getSurface()), new CameraCaptureSession.StateCallback() {
