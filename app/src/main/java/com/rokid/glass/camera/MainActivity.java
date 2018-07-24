@@ -27,12 +27,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.rokid.glass.camera.cameramodule.RokidCamera;
-import com.rokid.glass.camera.cameramodule.RokidCamera.CameraMode;
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraIOListener;
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraStateListener;
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraVideoRecordingListener;
 import com.rokid.glass.camera.constant.Constants;
-import com.rokid.glass.camera.preview.AutoFitTextureView;
 import com.rokid.glass.camera.recyclerviews.RecyclerViewAdapter;
 import com.rokid.glass.camera.utils.Utils;
 
@@ -63,7 +61,16 @@ public class MainActivity extends AppCompatActivity implements RokidCameraIOList
 
     // new RokidCamera SDK
     RokidCamera mRokidCamera;
+    private boolean mIsRecording = false;
+    private CameraMode mCameraMode;
 
+    // Different camera modes for button control
+    public enum CameraMode {
+        PHOTO_STOPPED,
+        PHOTO_TAKING,
+        VIDEO_STOPPED,
+        VIDEO_RECORDING
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,20 +130,12 @@ public class MainActivity extends AppCompatActivity implements RokidCameraIOList
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
-
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
     protected void onStop() {
         super.onStop();
+
+        if (mIsRecording) {
+            mRokidCamera.stopRecording();
+        }
         mRokidCamera.onStop();
     }
 
@@ -165,18 +164,6 @@ public class MainActivity extends AppCompatActivity implements RokidCameraIOList
             Toast.makeText(this, "Please grant all permission so the app will work properly.", Toast.LENGTH_SHORT).show();
         }
     }
-
-
-
-
-
-    // ----------------------
-    // ----------------------
-    // ----------------------
-    // ----------------------
-    // ----------------------
-    // camera 1
-    // TODO: refactor Camera1 code
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
@@ -447,53 +434,38 @@ public class MainActivity extends AppCompatActivity implements RokidCameraIOList
      */
     private void handleVideoButton() {
         if (mIsRecording) {
-            stopRecording();
+            mRokidCamera.stopRecording();
             // restart preview
-            startPreview();
+            mRokidCamera.startPreview();
         } else {
             mIsRecording = true;
             mCameraMode = CameraMode.VIDEO_RECORDING;
             updateButtonText(mCameraMode);
             enableProgressTextView();
-            checkWriteStoragePermission();
+            mRokidCamera.checkWriteStoragePermission();
         }
     }
-
-
 
     /**
      * Try to take picture
      */
     private void handleStillPictureButton() {
-        if (mAutoFocusSupported) {
-            // try to auto focus
-            lockFocus();
-        } else {
-            // capture right now if auto-focus not supported
-            startStillCaptureRequest();
-        }
+        mRokidCamera.takeStillPictureButton();
     }
 
     private void initApp() {
         initRecyclerView();
         initCameraButton();
         initPreview();
-        initCamera();
+        mRokidCamera.initCamera();
         touchpadIsDisabled = false;
     }
 
-
-
     private boolean arePermissionsGranted() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
+        return (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-        } else {
-            return false;
-        }
-
-        return true;
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
     }
 
     private void requestAllPermissions() {
@@ -521,11 +493,22 @@ public class MainActivity extends AppCompatActivity implements RokidCameraIOList
 
     @Override
     public void onRokidCameraRecordingStarted() {
-
+        mChronometer.setBase(SystemClock.elapsedRealtime());
+        mChronometer.setVisibility(View.VISIBLE);
+        mChronometer.start();
+        mIsRecording = true;
     }
 
     @Override
     public void onRokidCameraRocordingFinished() {
+        mChronometer.stop();
+        updateButtonText(mCameraMode);
+        disableProgressTextView();
+
+        mCameraMode = CameraMode.VIDEO_STOPPED;
+        // app state and UI
+        mIsRecording = false;
+
 
     }
 }

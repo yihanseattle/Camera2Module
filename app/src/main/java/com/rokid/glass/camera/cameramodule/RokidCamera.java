@@ -28,7 +28,6 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
@@ -37,7 +36,6 @@ import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
-import android.view.View;
 import android.widget.Toast;
 
 import com.rokid.glass.camera.DeviceConfig;
@@ -45,7 +43,6 @@ import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraIOListener;
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraStateListener;
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraVideoRecordingListener;
 import com.rokid.glass.camera.constant.Constants;
-import com.rokid.glass.camera.preview.AutoFitTextureView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -103,15 +100,15 @@ public class RokidCamera {
         this.mRokidCameraRecordingListener = mRokidCameraRecordingListener;
     }
 
-    public void setmRokidCameraStateListener(RokidCameraStateListener mRokidCameraStateListener) {
+    public void setRokidCameraStateListener(RokidCameraStateListener mRokidCameraStateListener) {
         this.mRokidCameraStateListener = mRokidCameraStateListener;
     }
 
-    public void setmRokidCameraIOListener(RokidCameraIOListener mRokidCameraIOListener) {
+    public void setRokidCameraIOListener(RokidCameraIOListener mRokidCameraIOListener) {
         this.mRokidCameraIOListener = mRokidCameraIOListener;
     }
 
-    public void setmRokidCameraRecordingListener(RokidCameraVideoRecordingListener mRokidCameraRecordingListener) {
+    public void setRokidCameraRecordingListener(RokidCameraVideoRecordingListener mRokidCameraRecordingListener) {
         this.mRokidCameraRecordingListener = mRokidCameraRecordingListener;
     }
 
@@ -274,25 +271,26 @@ public class RokidCamera {
     private File imageFileTest;
     private File mVideoFileTest;
 
-    private CameraMode mCameraMode;
+
 
     public void onStop() {
-        if (mIsRecording) {
-            stopRecording();
-        }
         closeCamera();
 
         // TODO: look for background thread finish
         stopBackgroundThread();
     }
 
-    // Different camera modes for button control
-    public enum CameraMode {
-        PHOTO_STOPPED,
-        PHOTO_TAKING,
-        VIDEO_STOPPED,
-        VIDEO_RECORDING
+    public void takeStillPictureButton() {
+        if (mAutoFocusSupported) {
+            // try to auto focus
+            lockFocus();
+        } else {
+            // capture right now if auto-focus not supported
+            startStillCaptureRequest();
+        }
     }
+
+
 
     /**
      * Background thread for saving images to SD card
@@ -360,9 +358,6 @@ public class RokidCamera {
             }
         }
     }
-
-    private boolean mIsRecording = false;
-
 
     private static class CompareSizeByArea implements Comparator<Size> {
 
@@ -542,7 +537,7 @@ public class RokidCamera {
     /**
      * Start preview
      */
-    private void startPreview() {
+    public void startPreview() {
         SurfaceTexture surfaceTexture = mTextureView.getSurfaceTexture();
         assert surfaceTexture != null;
         surfaceTexture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
@@ -758,8 +753,8 @@ public class RokidCamera {
     /**
      * Check for permissions and start video recording.
      */
-    private void checkWriteStoragePermission() {
-        mIsRecording = true;
+    public void checkWriteStoragePermission() {
+
         try {
             mVideoFileTest = createVidelFileName();
         } catch (IOException e) {
@@ -772,22 +767,17 @@ public class RokidCamera {
         if (mRokidCameraRecordingListener != null) {
             mRokidCameraRecordingListener.onRokidCameraRecordingStarted();
         }
-
-        mChronometer.setBase(SystemClock.elapsedRealtime());
-        mChronometer.setVisibility(View.VISIBLE);
-        mChronometer.start();
     }
 
     /**
      * Stop recording
      */
-    private void stopRecording() {
+    public void stopRecording() {
 
         if (mRokidCameraRecordingListener != null) {
             mRokidCameraRecordingListener.onRokidCameraRocordingFinished();
         }
 
-        mChronometer.stop();
 
         try {
             mMediaRecorder.stop();
@@ -802,13 +792,6 @@ public class RokidCamera {
 //                mRecorder.release();
 //                mRecorder = null;
         }
-        // app state and UI
-        mIsRecording = false;
-        mCameraMode = CameraMode.VIDEO_STOPPED;
-        updateButtonText(mCameraMode);
-        disableProgressTextView();
-
-
 
         final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         final Uri contentUri = Uri.fromFile(mVideoFileTest.getAbsoluteFile());
@@ -892,7 +875,7 @@ public class RokidCamera {
         mTextureView.setTransform(matrix);
     }
 
-    private void initCamera() {
+    public void initCamera() {
 
         createVideoFolder();
         createImageFolder();
