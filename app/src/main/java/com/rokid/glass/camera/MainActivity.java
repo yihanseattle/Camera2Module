@@ -27,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.rokid.glass.camera.cameramodule.RokidCamera;
+import com.rokid.glass.camera.cameramodule.RokidCameraBuilder;
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraIOListener;
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraStateListener;
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraVideoRecordingListener;
@@ -39,6 +40,8 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements RokidCameraIOListener, RokidCameraStateListener, RokidCameraVideoRecordingListener {
 
     public static final String TAG = "Camera2VideoImage";
+
+
 
     // permission result ID
 //    private static final int REQUEST_CAMERA_PERMISSION_RESULT = 0;
@@ -79,7 +82,17 @@ public class MainActivity extends AppCompatActivity implements RokidCameraIOList
 
         initLayoutAndUI();
 
-        mRokidCamera = new RokidCamera(this, mTextureView, this, this, this);
+//        mRokidCamera = new RokidCamera(this, mTextureView);
+//        mRokidCamera.setRokidCameraIOListener(this);
+//        mRokidCamera.setRokidCameraRecordingListener(this);
+//        mRokidCamera.setRokidCameraStateListener(this);
+
+        mRokidCamera = new RokidCameraBuilder(this, mTextureView)
+                .setRokidCameraIOListener(this)
+                .setRokidCameraRecordingListener(this)
+                .setRokidCameraStateListener(this)
+                .build();
+
     }
 
     private void initLayoutAndUI() {
@@ -442,7 +455,7 @@ public class MainActivity extends AppCompatActivity implements RokidCameraIOList
             mCameraMode = CameraMode.VIDEO_RECORDING;
             updateButtonText(mCameraMode);
             enableProgressTextView();
-            mRokidCamera.checkWriteStoragePermission();
+            mRokidCamera.startVideoRecording();
         }
     }
 
@@ -450,14 +463,14 @@ public class MainActivity extends AppCompatActivity implements RokidCameraIOList
      * Try to take picture
      */
     private void handleStillPictureButton() {
-        mRokidCamera.takeStillPictureButton();
+        mRokidCamera.takeStillPicture();
     }
 
     private void initApp() {
         initRecyclerView();
         initCameraButton();
         initPreview();
-        mRokidCamera.initCamera();
+        mRokidCamera.onStart();
         touchpadIsDisabled = false;
     }
 
@@ -508,7 +521,5 @@ public class MainActivity extends AppCompatActivity implements RokidCameraIOList
         mCameraMode = CameraMode.VIDEO_STOPPED;
         // app state and UI
         mIsRecording = false;
-
-
     }
 }

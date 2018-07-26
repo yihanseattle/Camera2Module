@@ -25,7 +25,6 @@ import android.media.ImageReader;
 import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
@@ -38,20 +37,18 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.widget.Toast;
 
-import com.rokid.glass.camera.DeviceConfig;
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraIOListener;
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraStateListener;
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraVideoRecordingListener;
+import com.rokid.glass.camera.cameramodule.utils.CameraDeviceUtils;
+import com.rokid.glass.camera.cameramodule.utils.FileUtils;
 import com.rokid.glass.camera.constant.Constants;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
 
 /**
  * Camera Module that can be use for projects with needs for Camera features.
@@ -64,58 +61,28 @@ import java.util.Date;
 
 public class RokidCamera {
 
+    private static RokidCamera instance;
+
+    public static RokidCamera getInstance() {
+        if (instance == null) {
+            return new RokidCamera(null, null);
+        }
+
+        return instance;
+    }
+
+//    public Activity getmActivity() {
+//        return mActivity;
+//    }
+//
+//    public void setmActivity(Activity mActivity) {
+//        this.mActivity = mActivity;
+//    }
+
     private Activity mActivity;
     private RokidCameraStateListener mRokidCameraStateListener;
     private RokidCameraIOListener mRokidCameraIOListener;
     private RokidCameraVideoRecordingListener mRokidCameraRecordingListener;
-
-    // TODO: default constructor?
-    private RokidCamera() {
-        // don't allow to use the default constructor
-    }
-
-    public RokidCamera(Activity activity, TextureView textureView) {
-        this.mActivity = activity;
-        this.mTextureView = textureView;
-    }
-
-    public RokidCamera(Activity activity, TextureView textureView, RokidCameraStateListener rokidCameraStateListener) {
-        this.mActivity = activity;
-        this.mTextureView = textureView;
-        this.mRokidCameraStateListener = rokidCameraStateListener;
-    }
-
-    public RokidCamera(Activity mActivity, TextureView textureView, RokidCameraStateListener mRokidCameraStateListener, RokidCameraIOListener mRokidCameraIOListener) {
-        this.mActivity = mActivity;
-        this.mTextureView = textureView;
-        this.mRokidCameraStateListener = mRokidCameraStateListener;
-        this.mRokidCameraIOListener = mRokidCameraIOListener;
-    }
-
-    public RokidCamera(Activity mActivity, TextureView textureView, RokidCameraStateListener mRokidCameraStateListener, RokidCameraIOListener mRokidCameraIOListener, RokidCameraVideoRecordingListener mRokidCameraRecordingListener) {
-        this.mActivity = mActivity;
-        this.mTextureView = textureView;
-        this.mRokidCameraStateListener = mRokidCameraStateListener;
-        this.mRokidCameraIOListener = mRokidCameraIOListener;
-        this.mRokidCameraRecordingListener = mRokidCameraRecordingListener;
-    }
-
-    public void setRokidCameraStateListener(RokidCameraStateListener mRokidCameraStateListener) {
-        this.mRokidCameraStateListener = mRokidCameraStateListener;
-    }
-
-    public void setRokidCameraIOListener(RokidCameraIOListener mRokidCameraIOListener) {
-        this.mRokidCameraIOListener = mRokidCameraIOListener;
-    }
-
-    public void setRokidCameraRecordingListener(RokidCameraVideoRecordingListener mRokidCameraRecordingListener) {
-        this.mRokidCameraRecordingListener = mRokidCameraRecordingListener;
-    }
-
-    // auto-focus lock
-    private static final int STATE_PREVIEW = 0;
-    private static final int STATE_WAIT_LOCK = 1;
-    private int mCaptureState = STATE_PREVIEW;
 
     // preview texture
     private TextureView mTextureView;
@@ -130,7 +97,6 @@ public class RokidCamera {
         @Override
         public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int width, int height) {
             configureTransform(width, height);
-
         }
 
         @Override
@@ -169,8 +135,8 @@ public class RokidCamera {
 //                    e.printStackTrace();
 //                }
 //            } else {
-                // Toast.makeText(getApplicationContext(), "Camera connection made!", Toast.LENGTH_SHORT).show();
-                startPreview();
+            // Toast.makeText(getApplicationContext(), "Camera connection made!", Toast.LENGTH_SHORT).show();
+            startPreview();
 //            }
 
 
@@ -205,17 +171,14 @@ public class RokidCamera {
                 case STATE_WAIT_LOCK:
                     mCaptureState = STATE_PREVIEW;
                     Integer afState = captureResult.get(CaptureResult.CONTROL_AF_STATE);
-                    if (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED ||
-                            afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED) {
+                    if (afState != null && (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED ||
+                            afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED)) {
                         if (mActivity != null) {
                             Toast.makeText(mActivity, "AF Locked!", Toast.LENGTH_SHORT).show();
                         }
-                        startStillCaptureRequest();
+                        sendStillCaptureRequest();
                     }
                     break;
-
-                // TODO: check for : case STATE_WAITING_PRECAPTURE: {
-
             }
         }
 
@@ -226,20 +189,16 @@ public class RokidCamera {
             process(result);
         }
     };
-    private CaptureRequest.Builder mCaptureRequestBuilder;
 
     // camera parameter
     private String mCameraId;
     private int mTotalRotation;
-    // background thread for camera API actions and saving image to SD card
-    private HandlerThread mBackgroundHandlerThread;
-    private Handler mBackgroundHandler;
 
-    // destination folder
-    private File mVideoFolder;
-    private String mVideoFileName;
-    private File mImageFolder;
-    private String mImageFileName;
+    // auto-focus lock
+    private static final int STATE_PREVIEW = 0;
+    private static final int STATE_WAIT_LOCK = 1;
+    private int mCaptureState = STATE_PREVIEW;
+    private boolean mAutoFocusSupported;
 
     // orientation calculate
     private static SparseIntArray ORIENTATIONS = new SparseIntArray();
@@ -259,46 +218,22 @@ public class RokidCamera {
         public void onImageAvailable(ImageReader imageReader) {
             // use background thread to save the image
             Image image = imageReader.acquireLatestImage();
+            Log.i("testtest", "onImageAvailable: Called");
             if (image != null) {
+                Log.i("testtest", "onImageAvailable: hasImage");
                 mBackgroundHandler.post(new ImageSaver(image));
             }
         }
     };
 
+    // request builder for still photo and video
+    private CaptureRequest.Builder mCaptureRequestBuilder;
     // media recorder for video recorder
     private MediaRecorder mMediaRecorder;
-    private boolean mAutoFocusSupported;
-    private File imageFileTest;
-    private File mVideoFileTest;
 
-
-
-    public void onStop() {
-        closeCamera();
-
-        // TODO: look for background thread finish
-        stopBackgroundThread();
-    }
-
-    public void takeStillPictureButton() {
-        if (mAutoFocusSupported) {
-            // try to auto focus
-            lockFocus();
-        } else {
-            // capture right now if auto-focus not supported
-            startStillCaptureRequest();
-        }
-    }
-
-
-
-    /**
-     * Background thread for saving images to SD card
-     */
     private class ImageSaver implements Runnable {
 
         private final Image mImage;
-
         ImageSaver(Image image) {
             mImage = image;
         }
@@ -308,16 +243,14 @@ public class RokidCamera {
 
             FileOutputStream fileOutputStream = null;
             try {
-                if (mImageFileName != null) {
+                if (mImageFile != null) {
                     ByteBuffer byteBuffer = mImage.getPlanes()[0].getBuffer();
                     byte[] bytes = new byte[byteBuffer.remaining()];
                     byteBuffer.get(bytes);
 
-                    fileOutputStream = new FileOutputStream(mImageFileName);
+                    fileOutputStream = new FileOutputStream(mImageFile.getAbsoluteFile());
                     fileOutputStream.write(bytes);
                     Log.i("testtest", "thread finished ");
-                    mImageFileName = null;
-
 
                     // callback to user
                     if (mRokidCameraIOListener != null) {
@@ -328,7 +261,7 @@ public class RokidCamera {
                     // send global notification for new photo taken
                     // so that the gallery app can view new photo
                     final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                    final Uri contentUri = Uri.fromFile(imageFileTest.getAbsoluteFile());
+                    final Uri contentUri = Uri.fromFile(mImageFile.getAbsoluteFile());
                     scanIntent.setData(contentUri);
                     mActivity.sendBroadcast(scanIntent);
 
@@ -359,13 +292,88 @@ public class RokidCamera {
         }
     }
 
-    private static class CompareSizeByArea implements Comparator<Size> {
+    // background thread for camera API actions and saving image to SD card
+    private HandlerThread mBackgroundHandlerThread;
+    private Handler mBackgroundHandler;
 
-        @Override
-        public int compare(Size lhs, Size rhs) {
-            return Long.signum((long) lhs.getWidth() * lhs.getHeight() -
-                    (long) rhs.getWidth() * rhs.getHeight());
+    // destination folder
+    private File mImageFolder;
+    private File mImageFile;
+    private File mVideoFolder;
+    private File mVideoFile;
+
+    // flag to enable the preview
+    private boolean previewEnabled;
+
+    /**
+     * Minimum constructor because RokidCamera will need at least an Activity and a TextureView.
+     * User can choose to add callback using the later setter methods.
+     *
+     * @param activity      : App Activity
+     * @param textureView   : App UI TextureView
+     */
+    RokidCamera(Activity activity, TextureView textureView) {
+        this.mActivity = activity;
+        this.mTextureView = textureView;
+    }
+
+    void setRokidCameraStateListener(RokidCameraStateListener mRokidCameraStateListener) {
+        this.mRokidCameraStateListener = mRokidCameraStateListener;
+    }
+
+    void setRokidCameraIOListener(RokidCameraIOListener mRokidCameraIOListener) {
+        this.mRokidCameraIOListener = mRokidCameraIOListener;
+    }
+
+    void setRokidCameraRecordingListener(RokidCameraVideoRecordingListener mRokidCameraRecordingListener) {
+        this.mRokidCameraRecordingListener = mRokidCameraRecordingListener;
+    }
+
+    void setPreviewEnabled(boolean previewEnabled) {
+        this.previewEnabled = previewEnabled;
+    }
+
+    /**
+     * Background thread for saving images to SD card
+     */
+    public void onStart() {
+
+        mVideoFolder = FileUtils.createVideoFolder();
+        mImageFolder = FileUtils.createImageFolder();
+        mMediaRecorder = new MediaRecorder();
+
+        startBackgroundThread();
+
+        if (mTextureView.isAvailable()) {
+            // TODO: see Google Example add comments
+            // pause and resume
+            setupCamera(mTextureView.getWidth(), mTextureView.getHeight());
+            connectCamera();
+
+        } else {
+            // first time
+            mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
         }
+    }
+
+    public void onStop() {
+        closeCamera();
+
+        // TODO: look for background thread finish
+        stopBackgroundThread();
+
+        mActivity = null;
+    }
+
+
+
+    /**
+     * Start background thread
+     */
+    private void startBackgroundThread() {
+        mBackgroundHandlerThread = new HandlerThread("Camera2VideoImage");
+        mBackgroundHandlerThread.start();
+        mBackgroundHandler = new Handler(mBackgroundHandlerThread.getLooper());
     }
 
     /**
@@ -383,17 +391,26 @@ public class RokidCamera {
     private void setupCamera(int width, int height) {
         CameraManager cameraManager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
 
+        if (cameraManager == null) {
+            return;
+        }
 
         try {
             for (String cameraId : cameraManager.getCameraIdList()) {
                 // get camera characteristics
                 CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId);
-                if (cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT) {
+
+                Integer currentCameraId = cameraCharacteristics.get(CameraCharacteristics.LENS_FACING);
+                if (currentCameraId == null) {
+                    // The return value of that key could be null if the field is not set.
+                    return;
+                }
+                if (currentCameraId == CameraCharacteristics.LENS_FACING_FRONT) {
                     continue;
                 }
                 StreamConfigurationMap map = cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
                 int deviceOrientation = mActivity.getWindowManager().getDefaultDisplay().getRotation();
-                mTotalRotation = sensorToDeviceRotation(cameraCharacteristics, deviceOrientation);
+                mTotalRotation = CameraDeviceUtils.sensorToDeviceRotation(cameraCharacteristics, deviceOrientation, ORIENTATIONS);
                 boolean swapRotation = mTotalRotation == 90 || mTotalRotation == 270;
 
                 Point displaySize = new Point();
@@ -404,9 +421,15 @@ public class RokidCamera {
                 int maxPreviewHeight = displaySize.y;
 
                 if (swapRotation) {
+                    // suppress because we could be swapping height with width
+
+                    //noinspection SuspiciousNameCombination
                     rotatedPreviewWidth = height;
+                    //noinspection SuspiciousNameCombination
                     rotatedPreviewHeight = width;
+                    //noinspection SuspiciousNameCombination
                     maxPreviewWidth = displaySize.y;
+                    //noinspection SuspiciousNameCombination
                     maxPreviewHeight = displaySize.x;
                 }
 
@@ -425,9 +448,9 @@ public class RokidCamera {
                 int screenWidth = displayMetrics.widthPixels;
                 Size largest = new Size(screenWidth, screenHeight);
 
-                mPreviewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
-                mVideoSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
-                Size mImageSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
+                mPreviewSize = CameraDeviceUtils.chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
+                mVideoSize = CameraDeviceUtils.chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
+                Size mImageSize = CameraDeviceUtils.chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
                 mImageReader = ImageReader.newInstance(mImageSize.getWidth(), mImageSize.getHeight(), ImageFormat.JPEG, 10);
                 mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, mBackgroundHandler);
 
@@ -451,25 +474,13 @@ public class RokidCamera {
     }
 
     /**
-     * Help to calculate Camera Parameters
-     * @param cameraCharacteristics : current characteristics
-     * @param deviceOrientation     : device(screen) orientation
-     * @return : orientation for (sensor + device)
-     */
-    private static int sensorToDeviceRotation(CameraCharacteristics cameraCharacteristics, int deviceOrientation) {
-        int sensorOrientation = cameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
-        deviceOrientation = ORIENTATIONS.get(deviceOrientation);
-        return (sensorOrientation + deviceOrientation + 270) % 360;
-    }
-
-    /**
      * Opening Camera via CameraManager
      */
     private void connectCamera() {
         CameraManager cameraManager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
         try {
             if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.CAMERA) ==
-                        PackageManager.PERMISSION_GRANTED) {
+                    PackageManager.PERMISSION_GRANTED) {
                 // connect the camera
                 // TODO: add comments
                 cameraManager.openCamera(mCameraId, mCameraDevicesStateCallback, mBackgroundHandler);
@@ -498,43 +509,6 @@ public class RokidCamera {
     }
 
     /**
-     * Start video recording
-     */
-    private void startRecord() {
-        try {
-            setupMediaRecorder();
-            SurfaceTexture surfaceTexture = mTextureView.getSurfaceTexture();
-            assert surfaceTexture != null;
-            surfaceTexture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
-            Surface previewSurface = new Surface(surfaceTexture);
-            Surface recordSurface = mMediaRecorder.getSurface();
-            mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
-            mCaptureRequestBuilder.addTarget(previewSurface);
-//            mCaptureRequestBuilder.addTarget(mImageReader.getSurface());
-
-            mCaptureRequestBuilder.addTarget(recordSurface);
-
-            mCameraDevice.createCaptureSession(Arrays.asList(previewSurface, recordSurface), new CameraCaptureSession.StateCallback() {
-                @Override
-                public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
-                    try {
-                        cameraCaptureSession.setRepeatingRequest(mCaptureRequestBuilder.build(), null, null);
-                    } catch (CameraAccessException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                @Override
-                public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
-
-                }
-            }, null);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * Start preview
      */
     public void startPreview() {
@@ -544,8 +518,20 @@ public class RokidCamera {
         Surface previewSurface = new Surface(surfaceTexture);
 
         try {
+            // create Request for Preview template
+            /**
+             * Create a request suitable for a camera preview window. Specifically, this
+             * means that high frame rate is given priority over the highest-quality
+             * post-processing. These requests would normally be used with the
+             * {@link CameraCaptureSession#setRepeatingRequest} method.
+             * This template is guaranteed to be supported on all camera devices.
+             *
+             * @see #createCaptureRequest
+             */
             mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-//            mCaptureRequestBuilder.addTarget(previewSurface);
+            if (previewEnabled) {
+                mCaptureRequestBuilder.addTarget(previewSurface);
+            }
             mCaptureRequestBuilder.addTarget(mImageReader.getSurface());
 
             mCameraDevice.createCaptureSession(Arrays.asList(previewSurface, mImageReader.getSurface()), new CameraCaptureSession.StateCallback() {
@@ -572,11 +558,45 @@ public class RokidCamera {
         }
     }
 
+    public void takeStillPicture() {
+        if (mAutoFocusSupported) {
+            // try to auto focus
+            lockFocus();
+        } else {
+            // capture right now if auto-focus not supported
+            sendStillCaptureRequest();
+        }
+    }
+
+    /**
+     * Auto-focus lock
+     */
+    private void lockFocus() {
+        mCaptureState = STATE_WAIT_LOCK;
+        try {
+            mCaptureRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_START);
+            mPreviewCaptureSession.capture(mCaptureRequestBuilder.build(), mPreviewCaptureCallback, mBackgroundHandler);
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Capture still photo
      */
-    private void startStillCaptureRequest() {
+    private void sendStillCaptureRequest() {
         try {
+            // create request for STILL PICTURE type
+            /**
+             * Create a request suitable for still image capture. Specifically, this
+             * means prioritizing image quality over frame rate. These requests would
+             * commonly be used with the {@link CameraCaptureSession#capture} method.
+             * This template is guaranteed to be supported on all camera devices except
+             * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT DEPTH_OUTPUT} devices
+             * that are not {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE
+             * BACKWARD_COMPATIBLE}.
+             * @see #createCaptureRequest
+             */
             mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             mCaptureRequestBuilder.addTarget(mImageReader.getSurface());
 
@@ -592,7 +612,7 @@ public class RokidCamera {
                     super.onCaptureStarted(session, request, timestamp, frameNumber);
                     // create image when it's in focus
                     try {
-                        imageFileTest = createImageFileName();
+                        mImageFile = FileUtils.createImageFile(mImageFolder);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -605,167 +625,103 @@ public class RokidCamera {
     }
 
     /**
-     * Close Camera resource
-     */
-    private void closeCamera() {
-        if (mCameraDevice != null) {
-            mCameraDevice.close();
-            mCameraDevice = null;
-        }
-    }
-
-    /**
-     * Start background thread
-     */
-    private void startBackgroundThread() {
-        mBackgroundHandlerThread = new HandlerThread("Camera2VideoImage");
-        mBackgroundHandlerThread.start();
-        mBackgroundHandler = new Handler(mBackgroundHandlerThread.getLooper());
-    }
-
-    /**
-     * Stop background thread
-     */
-    private void stopBackgroundThread() {
-        mBackgroundHandlerThread.quitSafely();
-        try {
-            mBackgroundHandlerThread.join();
-            mBackgroundHandlerThread = null;
-            mBackgroundHandler = null;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Given {@code choices} of {@code Size}s supported by a camera, choose the smallest one that
-     * is at least as large as the respective texture view size, and that is at most as large as the
-     * respective max size, and whose aspect ratio matches with the specified value. If such size
-     * doesn't exist, choose the largest one that is at most as large as the respective max size,
-     * and whose aspect ratio matches with the specified value.
-     *
-     * @param choices           The list of sizes that the camera supports for the intended output
-     *                          class
-     * @param textureViewWidth  The width of the texture view relative to sensor coordinate
-     * @param textureViewHeight The height of the texture view relative to sensor coordinate
-     * @param maxWidth          The maximum width that can be chosen
-     * @param maxHeight         The maximum height that can be chosen
-     * @param aspectRatio       The aspect ratio
-     * @return The optimal {@code Size}, or an arbitrary one if none were big enough
-     */
-    private static Size chooseOptimalSize(Size[] choices, int textureViewWidth,
-                                          int textureViewHeight, int maxWidth, int maxHeight, Size aspectRatio) {
-
-//        // Collect the supported resolutions that are at least as big as the preview Surface
-//        List<Size> bigEnough = new ArrayList<>();
-//        // Collect the supported resolutions that are smaller than the preview Surface
-//        List<Size> notBigEnough = new ArrayList<>();
-//
-//        List<Double> ratio = new LinkedList<>();
-//
-//        int w = aspectRatio.getWidth();
-//        int h = aspectRatio.getHeight();
-//        for (Size option : choices) {
-//            if (option.getWidth() > option.getHeight()) {
-//                ratio.add((double)option.getWidth() / option.getHeight());
-//            } else {
-//                ratio.add((double)option.getHeight() / option.getWidth());
-//            }
-//            if (option.getWidth() <= maxWidth && option.getHeight() <= maxHeight &&
-//                    option.getHeight() == option.getWidth() * h / w) {
-//                if (option.getWidth() >= textureViewWidth &&
-//                        option.getHeight() >= textureViewHeight) {
-//                    bigEnough.add(option);
-//                } else {
-//                    notBigEnough.add(option);
-//                }
-//            }
-//        }
-//
-//        // Pick the smallest of those big enough. If there is no one big enough, pick the
-//        // largest of those not big enough.
-//        if (bigEnough.size() > 0) {
-//            return Collections.min(bigEnough, new CompareSizeByArea());
-//        } else if (notBigEnough.size() > 0) {
-//            return Collections.max(notBigEnough, new CompareSizeByArea());
-//        } else {
-//            Log.e(TAG, "Couldn't find any suitable preview size");
-//            if (DeviceConfig.isInRokidGlass) {
-//                return choices[5];
-//            } else {
-//                return choices[choices.length - 1];
-//            }
-//        }
-
-        // TODO: temporary fix because the preview size in xml has been set to [1dp x 1dp]
-
-        if (DeviceConfig.isInRokidGlass) {
-            return choices[5];
-        } else {
-            return choices[2];
-        }
-    }
-
-    // TODO: put to a Util class
-    private void createVideoFolder() {
-//        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-//                Environment.DIRECTORY_MOVIES + File.separator), "RokidCameraVideo");
-//        mVideoFolder = mediaStorageDir;
-
-        File movieFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-        mVideoFolder = new File(movieFile, "Camera");
-
-        if (!mVideoFolder.exists()) {
-            mVideoFolder.mkdirs();
-        }
-    }
-
-    private File createVidelFileName() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyHHdd_HHmmss").format(new Date());
-        String prepend = "ROKIDVIDEO_" + timeStamp;
-        File videoFile = File.createTempFile(prepend, ".mp4", mVideoFolder);
-        mVideoFileName = videoFile.getAbsolutePath();
-        return videoFile;
-    }
-
-    private void createImageFolder() {
-//        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-//                Environment.DIRECTORY_PICTURES + File.separator), "RokidCameraCamera");
-//        mImageFolder = mediaStorageDir;
-
-        File imageFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-        mImageFolder = new File(imageFile, "Camera");
-
-        if (!mImageFolder.exists()) {
-            mImageFolder.mkdirs();
-        }
-    }
-
-    private File createImageFileName() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyHHdd_HHmmss").format(new Date());
-        String prepend = "ROKIDIMAGE_" + timeStamp;
-//        File imageFile = File.createTempFile("ROKIDTEST", ".jpg", mImageFolder);
-        File imageFile = new File(mImageFolder, prepend + ".jpg");
-        mImageFileName = imageFile.getAbsolutePath();
-        return imageFile;
-    }
-
-    /**
      * Check for permissions and start video recording.
      */
-    public void checkWriteStoragePermission() {
+    public void startVideoRecording() {
 
         try {
-            mVideoFileTest = createVidelFileName();
+            mVideoFile = FileUtils.createVidelFile(mVideoFolder);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        startRecord();
+        // set up Recorder
+        try {
+            setupMediaRecorder();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // prepare for recording
+        sendVideoRecordingRequest();
+
+        // start recording
         mMediaRecorder.start();
 
         if (mRokidCameraRecordingListener != null) {
             mRokidCameraRecordingListener.onRokidCameraRecordingStarted();
+        }
+    }
+
+    /**
+     * Setup video recording
+     *
+     * @throws IOException : prepare Exception
+     */
+    private void setupMediaRecorder() throws IOException {
+        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        mMediaRecorder.setOutputFile(mVideoFile.getAbsolutePath());
+        mMediaRecorder.setVideoEncodingBitRate(10000000);
+        mMediaRecorder.setVideoFrameRate(30);
+        mMediaRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
+        mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+        mMediaRecorder.setOrientationHint(mTotalRotation);
+        mMediaRecorder.prepare();
+    }
+
+    /**
+     * Set up Preview surface and Recording surface to prepare for recording
+     */
+    private void sendVideoRecordingRequest() {
+        SurfaceTexture surfaceTexture = mTextureView.getSurfaceTexture();
+        assert surfaceTexture != null;
+        surfaceTexture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+        Surface previewSurface = new Surface(surfaceTexture);
+
+        try {
+
+            // create request for RECORDING template
+            /**
+             * Create a request suitable for video recording. Specifically, this means
+             * that a stable frame rate is used, and post-processing is set for
+             * recording quality. These requests would commonly be used with the
+             * {@link CameraCaptureSession#setRepeatingRequest} method.
+             * This template is guaranteed to be supported on all camera devices except
+             * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT DEPTH_OUTPUT} devices
+             * that are not {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE
+             * BACKWARD_COMPATIBLE}.
+             *
+             * @see #createCaptureRequest
+             */
+            mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
+
+            // add Preview surface to target
+            mCaptureRequestBuilder.addTarget(previewSurface);
+
+            // add Record surface to target
+            Surface recordSurface = mMediaRecorder.getSurface();
+            mCaptureRequestBuilder.addTarget(recordSurface);
+
+            mCameraDevice.createCaptureSession(Arrays.asList(previewSurface, recordSurface), new CameraCaptureSession.StateCallback() {
+                @Override
+                public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
+                    try {
+                        cameraCaptureSession.setRepeatingRequest(mCaptureRequestBuilder.build(), null, null);
+                    } catch (CameraAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
+
+                }
+            }, null);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -778,15 +734,12 @@ public class RokidCamera {
             mRokidCameraRecordingListener.onRokidCameraRocordingFinished();
         }
 
-
         try {
             mMediaRecorder.stop();
         } catch(RuntimeException e) {
             // TODO: delete file if recording failed to prevent 0KB file (error file)
 //                mFile.delete();
         } finally {
-
-
             mMediaRecorder.reset();
 
 //                mRecorder.release();
@@ -794,7 +747,7 @@ public class RokidCamera {
         }
 
         final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        final Uri contentUri = Uri.fromFile(mVideoFileTest.getAbsoluteFile());
+        final Uri contentUri = Uri.fromFile(mVideoFile.getAbsoluteFile());
         scanIntent.setData(contentUri);
         mActivity.sendBroadcast(scanIntent);
 
@@ -812,34 +765,26 @@ public class RokidCamera {
     }
 
     /**
-     * Setup video recording
-     *
-     * @throws IOException : prepare Exception
+     * Stop background thread
      */
-    private void setupMediaRecorder() throws IOException {
-        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
-        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-        mMediaRecorder.setOutputFile(mVideoFileName);
-        mMediaRecorder.setVideoEncodingBitRate(10000000);
-        mMediaRecorder.setVideoFrameRate(60);
-        mMediaRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
-        mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-        mMediaRecorder.setOrientationHint(mTotalRotation);
-        mMediaRecorder.prepare();
+    private void stopBackgroundThread() {
+        mBackgroundHandlerThread.quitSafely();
+        try {
+            mBackgroundHandlerThread.join();
+            mBackgroundHandlerThread = null;
+            mBackgroundHandler = null;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
-     * Auto-focus lock
+     * Close Camera resource
      */
-    private void lockFocus() {
-        mCaptureState = STATE_WAIT_LOCK;
-        try {
-            mCaptureRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_START);
-            mPreviewCaptureSession.capture(mCaptureRequestBuilder.build(), mPreviewCaptureCallback, mBackgroundHandler);
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
+    private void closeCamera() {
+        if (mCameraDevice != null) {
+            mCameraDevice.close();
+            mCameraDevice = null;
         }
     }
 
@@ -874,27 +819,4 @@ public class RokidCamera {
         }
         mTextureView.setTransform(matrix);
     }
-
-    public void initCamera() {
-
-        createVideoFolder();
-        createImageFolder();
-        mMediaRecorder = new MediaRecorder();
-
-
-        startBackgroundThread();
-
-        if (mTextureView.isAvailable()) {
-            // TODO: see Google Example add comments
-            // pause and resume
-            setupCamera(mTextureView.getWidth(), mTextureView.getHeight());
-            connectCamera();
-
-        } else {
-            // first time
-            mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
-        }
-    }
-
-
 }
