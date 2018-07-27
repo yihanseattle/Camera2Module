@@ -71,14 +71,6 @@ public class RokidCamera {
         return instance;
     }
 
-//    public Activity getmActivity() {
-//        return mActivity;
-//    }
-//
-//    public void setmActivity(Activity mActivity) {
-//        this.mActivity = mActivity;
-//    }
-
     private Activity mActivity;
     private RokidCameraStateListener mRokidCameraStateListener;
     private RokidCameraIOListener mRokidCameraIOListener;
@@ -305,6 +297,13 @@ public class RokidCamera {
     // flag to enable the preview
     private boolean previewEnabled;
 
+    RokidCamera(RokidCameraBuilder rokidCameraBuilder) {
+        this(rokidCameraBuilder.getActivity(), rokidCameraBuilder.getTextureView());
+        this.setRokidCameraStateListener(rokidCameraBuilder.getRokidCameraStateListener());
+        this.setRokidCameraIOListener(rokidCameraBuilder.getRokidCameraIOListener());
+        this.setRokidCameraRecordingListener(rokidCameraBuilder.getRokidCameraRecordingListener());
+    }
+
     /**
      * Minimum constructor because RokidCamera will need at least an Activity and a TextureView.
      * User can choose to add callback using the later setter methods.
@@ -312,7 +311,7 @@ public class RokidCamera {
      * @param activity      : App Activity
      * @param textureView   : App UI TextureView
      */
-    RokidCamera(Activity activity, TextureView textureView) {
+    private RokidCamera(Activity activity, TextureView textureView) {
         this.mActivity = activity;
         this.mTextureView = textureView;
     }
@@ -532,6 +531,9 @@ public class RokidCamera {
             if (previewEnabled) {
                 mCaptureRequestBuilder.addTarget(previewSurface);
             }
+
+
+            //
             mCaptureRequestBuilder.addTarget(mImageReader.getSurface());
 
             mCameraDevice.createCaptureSession(Arrays.asList(previewSurface, mImageReader.getSurface()), new CameraCaptureSession.StateCallback() {
@@ -630,7 +632,7 @@ public class RokidCamera {
     public void startVideoRecording() {
 
         try {
-            mVideoFile = FileUtils.createVidelFile(mVideoFolder);
+            mVideoFile = FileUtils.createVideoFile(mVideoFolder);
         } catch (IOException e) {
             e.printStackTrace();
         }

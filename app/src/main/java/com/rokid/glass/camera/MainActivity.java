@@ -88,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements RokidCameraIOList
 //        mRokidCamera.setRokidCameraStateListener(this);
 
         mRokidCamera = new RokidCameraBuilder(this, mTextureView)
+                .setPreviewEnabled(true)
                 .setRokidCameraIOListener(this)
                 .setRokidCameraRecordingListener(this)
                 .setRokidCameraStateListener(this)

@@ -30,7 +30,7 @@ public class FileUtils {
         return mVideoFolder;
     }
 
-    public static File createVidelFile(File mVideoFolder) throws IOException {
+    public static File createVideoFile(File mVideoFolder) throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyHHdd_HHmmss").format(new Date());
         String prepend = "ROKIDVIDEO_" + timeStamp;
         File videoFile = File.createTempFile(prepend, ".mp4", mVideoFolder);
