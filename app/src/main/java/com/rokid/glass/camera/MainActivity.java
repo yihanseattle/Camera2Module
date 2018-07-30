@@ -3,6 +3,7 @@ package com.rokid.glass.camera;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.ImageFormat;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -88,11 +89,13 @@ public class MainActivity extends AppCompatActivity implements RokidCameraIOList
 //        mRokidCamera.setRokidCameraStateListener(this);
 
         mRokidCamera = new RokidCameraBuilder(this, mTextureView)
-                .setPreviewEnabled(true)
-                .setRokidCameraIOListener(this)
-                .setRokidCameraRecordingListener(this)
-                .setRokidCameraStateListener(this)
-                .build();
+                            .setPreviewEnabled(true)
+                            .setImageFormat(ImageFormat.JPEG)
+                            .setMaximumImages(5)
+                            .setRokidCameraIOListener(this)
+                            .setRokidCameraRecordingListener(this)
+                            .setRokidCameraStateListener(this)
+                            .build();
 
     }
 

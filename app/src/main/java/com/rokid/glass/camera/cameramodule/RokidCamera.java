@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.RectF;
@@ -107,30 +106,10 @@ public class RokidCamera {
     private CameraDevice.StateCallback mCameraDevicesStateCallback = new CameraDevice.StateCallback() {
         @Override
         public void onOpened(@NonNull CameraDevice cameraDevice) {
-            mCameraDevice = cameraDevice;
-//            if (mIsRecording) {
-//                try {
-//                    mVideoFileTest = createVidelFileName();
-//                    startRecord();
-//                    mMediaRecorder.start();
-//
-//                    new Handler(getMainLooper()).post(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            mChronometer.setBase(SystemClock.elapsedRealtime());
-//                            mChronometer.setVisibility(View.VISIBLE);
-//                            mChronometer.start();
-//                        }
-//                    });
-//
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            } else {
-            // Toast.makeText(getApplicationContext(), "Camera connection made!", Toast.LENGTH_SHORT).show();
-            startPreview();
-//            }
 
+            mCameraDevice = cameraDevice;
+
+            startPreview();
 
             // callbacks to user
             if (mRokidCameraStateListener != null) {
@@ -210,9 +189,9 @@ public class RokidCamera {
         public void onImageAvailable(ImageReader imageReader) {
             // use background thread to save the image
             Image image = imageReader.acquireLatestImage();
-            Log.i("testtest", "onImageAvailable: Called");
+//            Log.i("testtest", "onImageAvailable: Called");
             if (image != null) {
-                Log.i("testtest", "onImageAvailable: hasImage");
+//                Log.i("testtest", "onImageAvailable: hasImage");
                 mBackgroundHandler.post(new ImageSaver(image));
             }
         }
@@ -296,12 +275,22 @@ public class RokidCamera {
 
     // flag to enable the preview
     private boolean previewEnabled;
+    private int mImageFormat;
+    private int mMaxImages;
 
+    /**
+     * User RokidCameraBuilder to create an instance of RokidCamera
+     *
+     * @param rokidCameraBuilder : user specified RokidCameraBuilder
+     */
     RokidCamera(RokidCameraBuilder rokidCameraBuilder) {
         this(rokidCameraBuilder.getActivity(), rokidCameraBuilder.getTextureView());
-        this.setRokidCameraStateListener(rokidCameraBuilder.getRokidCameraStateListener());
-        this.setRokidCameraIOListener(rokidCameraBuilder.getRokidCameraIOListener());
-        this.setRokidCameraRecordingListener(rokidCameraBuilder.getRokidCameraRecordingListener());
+        this.mRokidCameraStateListener = rokidCameraBuilder.getRokidCameraStateListener();
+        this.mRokidCameraIOListener = rokidCameraBuilder.getRokidCameraIOListener();
+        this.mRokidCameraRecordingListener = rokidCameraBuilder.getRokidCameraRecordingListener();
+        this.previewEnabled = rokidCameraBuilder.isPreviewEnabled();
+        this.mImageFormat = rokidCameraBuilder.getImageFormat();
+        this.mMaxImages = rokidCameraBuilder.getMaxImages();
     }
 
     /**
@@ -314,22 +303,6 @@ public class RokidCamera {
     private RokidCamera(Activity activity, TextureView textureView) {
         this.mActivity = activity;
         this.mTextureView = textureView;
-    }
-
-    void setRokidCameraStateListener(RokidCameraStateListener mRokidCameraStateListener) {
-        this.mRokidCameraStateListener = mRokidCameraStateListener;
-    }
-
-    void setRokidCameraIOListener(RokidCameraIOListener mRokidCameraIOListener) {
-        this.mRokidCameraIOListener = mRokidCameraIOListener;
-    }
-
-    void setRokidCameraRecordingListener(RokidCameraVideoRecordingListener mRokidCameraRecordingListener) {
-        this.mRokidCameraRecordingListener = mRokidCameraRecordingListener;
-    }
-
-    void setPreviewEnabled(boolean previewEnabled) {
-        this.previewEnabled = previewEnabled;
     }
 
     /**
@@ -450,7 +423,7 @@ public class RokidCamera {
                 mPreviewSize = CameraDeviceUtils.chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
                 mVideoSize = CameraDeviceUtils.chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
                 Size mImageSize = CameraDeviceUtils.chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
-                mImageReader = ImageReader.newInstance(mImageSize.getWidth(), mImageSize.getHeight(), ImageFormat.JPEG, 10);
+                mImageReader = ImageReader.newInstance(mImageSize.getWidth(), mImageSize.getHeight(), mImageFormat, mMaxImages);
                 mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, mBackgroundHandler);
 
                 // Check if auto focus is supported

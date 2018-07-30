@@ -17,12 +17,14 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
 
     // flag to enable the preview
     private boolean previewEnabled;
-
-    private Activity mActivity;
+    private int mImageFormat;
+    private int mMaxImages;
 
     // preview texture
     private TextureView mTextureView;
 
+    // activity and activity callbacks
+    private Activity mActivity;
     private RokidCameraStateListener mRokidCameraStateListener;
     private RokidCameraIOListener mRokidCameraIOListener;
     private RokidCameraVideoRecordingListener mRokidCameraRecordingListener;
@@ -54,6 +56,26 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
     public RokidCameraBuilder setPreviewEnabled(boolean previewEnabled) {
         this.previewEnabled = previewEnabled;
         return this;
+    }
+
+    @Override
+    public RokidCameraBuilder setImageFormat(int imageFormat) {
+        mImageFormat = imageFormat;
+        return this;
+    }
+
+    @Override
+    public RokidCameraBuilder setMaximumImages(int maxImages) {
+        this.mMaxImages = maxImages;
+        return this;
+    }
+
+    public int getMaxImages() {
+        return mMaxImages;
+    }
+
+    public int getImageFormat() {
+        return mImageFormat;
     }
 
     public boolean isPreviewEnabled() {

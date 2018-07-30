@@ -12,10 +12,9 @@ import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraVideoRecordingLi
 public interface RokidCameraBuilderPlan {
 
     RokidCameraBuilder setRokidCameraStateListener(RokidCameraStateListener rokidCameraStateListener);
-
     RokidCameraBuilder setRokidCameraIOListener(RokidCameraIOListener rokidCameraIOListener);
-
     RokidCameraBuilder setRokidCameraRecordingListener(RokidCameraVideoRecordingListener rokidCameraVideoRecordingListener);
-
     RokidCameraBuilder setPreviewEnabled(boolean previewEnabled);
+    RokidCameraBuilder setImageFormat(int imageFormat);
+    RokidCameraBuilder setMaximumImages(int maxImages);
 }
