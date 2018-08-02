@@ -1,6 +1,8 @@
 package com.rokid.glass.camera.cameramodule;
 
 import android.app.Activity;
+import android.graphics.ImageFormat;
+import android.support.annotation.NonNull;
 import android.view.TextureView;
 
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraIOListener;
@@ -35,30 +37,39 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
     public RokidCameraBuilder (Activity activity, TextureView textureView) {
         this.mActivity = activity;
         this.mTextureView = textureView;
+        setDefaultConfig();
+    }
+
+    /**
+     * Set default value for RokidCamera configurations.
+     *
+     */
+    private void setDefaultConfig() {
+         previewEnabled = false;
+         mImageFormat = ImageFormat.JPEG;
+         mMaxImages = 2;
+         mImageReaderCallbackMode = RokidCamera.STILL_PHOTO_MODE_SINGLE_NO_CALLBACK;
     }
 
     @Override
-    public RokidCameraBuilder setRokidCameraStateListener(RokidCameraStateListener rokidCameraStateListener) {
+    public RokidCameraBuilder setRokidCameraStateListener(@NonNull RokidCameraStateListener rokidCameraStateListener) {
         this.mRokidCameraStateListener = rokidCameraStateListener;
         return this;
     }
 
     @Override
-    public RokidCameraBuilder setRokidCameraIOListener(RokidCameraIOListener rokidCameraIOListener) {
-        this.mRokidCameraIOListener = rokidCameraIOListener;
-        return this;
-    }
-
-    @Override
-    public RokidCameraBuilder setRokidCameraRecordingListener(RokidCameraVideoRecordingListener rokidCameraRecordingListener) {
+    public RokidCameraBuilder setRokidCameraRecordingListener(@NonNull RokidCameraVideoRecordingListener rokidCameraRecordingListener) {
         this.mRokidCameraRecordingListener = rokidCameraRecordingListener;
         return this;
     }
 
     @Override
-    public RokidCameraBuilder setRokidCameraOnImageAvailableListener(int imageReaderCallbackMode, RokidCameraOnImageAvailableListener rokidCameraOnImageAvailableListener) {
+    public RokidCameraBuilder setRokidCameraOnImageAvailableListener(int imageReaderCallbackMode,
+                                                                     @NonNull RokidCameraOnImageAvailableListener rokidCameraOnImageAvailableListener,
+                                                                     @NonNull RokidCameraIOListener rokidCameraIOListener) {
         this.mImageReaderCallbackMode = imageReaderCallbackMode;
         this.mRokidCameraOnImageAvailableListener = rokidCameraOnImageAvailableListener;
+        this.mRokidCameraIOListener = rokidCameraIOListener;
         return this;
     }
 

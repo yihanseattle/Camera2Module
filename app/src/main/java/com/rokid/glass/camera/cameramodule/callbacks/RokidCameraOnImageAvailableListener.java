@@ -7,5 +7,12 @@ import android.media.Image;
  */
 
 public interface RokidCameraOnImageAvailableListener {
+
+    /**
+     * Callback when Image available to send back to Activity.
+     *
+     * @param image : Image in a Camera Frame
+     */
     void onRokidCameraImageAvailable(Image image);
+
 }

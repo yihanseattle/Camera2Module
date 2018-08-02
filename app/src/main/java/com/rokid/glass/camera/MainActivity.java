@@ -93,10 +93,9 @@ public class MainActivity extends AppCompatActivity implements
                             .setPreviewEnabled(true)
                             .setImageFormat(ImageFormat.JPEG)
                             .setMaximumImages(5)
-                            .setRokidCameraIOListener(this)
                             .setRokidCameraRecordingListener(this)
                             .setRokidCameraStateListener(this)
-                            .setRokidCameraOnImageAvailableListener(RokidCamera.STILL_PHOTO_MODE_SINGLE_NO_CALLBACK, this)
+                            .setRokidCameraOnImageAvailableListener(RokidCamera.STILL_PHOTO_MODE_SINGLE_NO_CALLBACK, this, this)
                             .build();
 
     }

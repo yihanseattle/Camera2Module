@@ -8,6 +8,9 @@ package com.rokid.glass.camera.cameramodule.callbacks;
 
 public interface RokidCameraIOListener {
 
+    /**
+     * Callback when File IO is completed.
+     */
     void onRokidCameraFileSaved();
 
 }
