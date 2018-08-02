@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.view.TextureView;
 
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraIOListener;
+import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraOnImageAvailableListener;
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraStateListener;
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraVideoRecordingListener;
 import com.rokid.glass.camera.cameramodule.rokidcamerabuilder.RokidCameraBuilderPlan;
@@ -19,15 +20,17 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
     private boolean previewEnabled;
     private int mImageFormat;
     private int mMaxImages;
-
-    // preview texture
-    private TextureView mTextureView;
+    private int mImageReaderCallbackMode;
 
     // activity and activity callbacks
     private Activity mActivity;
+    // preview texture
+    private TextureView mTextureView;
+    // callbacks
     private RokidCameraStateListener mRokidCameraStateListener;
     private RokidCameraIOListener mRokidCameraIOListener;
     private RokidCameraVideoRecordingListener mRokidCameraRecordingListener;
+    private RokidCameraOnImageAvailableListener mRokidCameraOnImageAvailableListener;
 
     public RokidCameraBuilder (Activity activity, TextureView textureView) {
         this.mActivity = activity;
@@ -36,19 +39,26 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
 
     @Override
     public RokidCameraBuilder setRokidCameraStateListener(RokidCameraStateListener rokidCameraStateListener) {
-        mRokidCameraStateListener = rokidCameraStateListener;
+        this.mRokidCameraStateListener = rokidCameraStateListener;
         return this;
     }
 
     @Override
     public RokidCameraBuilder setRokidCameraIOListener(RokidCameraIOListener rokidCameraIOListener) {
-        mRokidCameraIOListener = rokidCameraIOListener;
+        this.mRokidCameraIOListener = rokidCameraIOListener;
         return this;
     }
 
     @Override
     public RokidCameraBuilder setRokidCameraRecordingListener(RokidCameraVideoRecordingListener rokidCameraRecordingListener) {
-        mRokidCameraRecordingListener = rokidCameraRecordingListener;
+        this.mRokidCameraRecordingListener = rokidCameraRecordingListener;
+        return this;
+    }
+
+    @Override
+    public RokidCameraBuilder setRokidCameraOnImageAvailableListener(int imageReaderCallbackMode, RokidCameraOnImageAvailableListener rokidCameraOnImageAvailableListener) {
+        this.mImageReaderCallbackMode = imageReaderCallbackMode;
+        this.mRokidCameraOnImageAvailableListener = rokidCameraOnImageAvailableListener;
         return this;
     }
 
@@ -60,7 +70,7 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
 
     @Override
     public RokidCameraBuilder setImageFormat(int imageFormat) {
-        mImageFormat = imageFormat;
+        this.mImageFormat = imageFormat;
         return this;
     }
 
@@ -82,6 +92,10 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
         return previewEnabled;
     }
 
+    public int getImageReaderCallbackMode() {
+        return mImageReaderCallbackMode;
+    }
+
     public Activity getActivity() {
         return mActivity;
     }
@@ -100,6 +114,10 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
 
     public RokidCameraVideoRecordingListener getRokidCameraRecordingListener() {
         return mRokidCameraRecordingListener;
+    }
+
+    public RokidCameraOnImageAvailableListener getRokidCameraOnImageAvailableListener() {
+        return mRokidCameraOnImageAvailableListener;
     }
 
     public RokidCamera build() {

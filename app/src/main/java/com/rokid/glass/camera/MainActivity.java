@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Typeface;
+import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -30,6 +31,7 @@ import android.widget.Toast;
 import com.rokid.glass.camera.cameramodule.RokidCamera;
 import com.rokid.glass.camera.cameramodule.RokidCameraBuilder;
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraIOListener;
+import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraOnImageAvailableListener;
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraStateListener;
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraVideoRecordingListener;
 import com.rokid.glass.camera.constant.Constants;
@@ -38,7 +40,11 @@ import com.rokid.glass.camera.utils.Utils;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements RokidCameraIOListener, RokidCameraStateListener, RokidCameraVideoRecordingListener {
+public class MainActivity extends AppCompatActivity implements
+        RokidCameraIOListener,
+        RokidCameraStateListener,
+        RokidCameraVideoRecordingListener,
+        RokidCameraOnImageAvailableListener {
 
     public static final String TAG = "Camera2VideoImage";
 
@@ -83,11 +89,6 @@ public class MainActivity extends AppCompatActivity implements RokidCameraIOList
 
         initLayoutAndUI();
 
-//        mRokidCamera = new RokidCamera(this, mTextureView);
-//        mRokidCamera.setRokidCameraIOListener(this);
-//        mRokidCamera.setRokidCameraRecordingListener(this);
-//        mRokidCamera.setRokidCameraStateListener(this);
-
         mRokidCamera = new RokidCameraBuilder(this, mTextureView)
                             .setPreviewEnabled(true)
                             .setImageFormat(ImageFormat.JPEG)
@@ -95,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements RokidCameraIOList
                             .setRokidCameraIOListener(this)
                             .setRokidCameraRecordingListener(this)
                             .setRokidCameraStateListener(this)
+                            .setRokidCameraOnImageAvailableListener(RokidCamera.STILL_PHOTO_MODE_SINGLE_NO_CALLBACK, this)
                             .build();
 
     }
@@ -525,5 +527,15 @@ public class MainActivity extends AppCompatActivity implements RokidCameraIOList
         mCameraMode = CameraMode.VIDEO_STOPPED;
         // app state and UI
         mIsRecording = false;
+    }
+
+    /**
+     *
+     *
+     * @param image
+     */
+    @Override
+    public void onRokidCameraImageAvailable(Image image) {
+
     }
 }

@@ -37,6 +37,7 @@ import android.view.TextureView;
 import android.widget.Toast;
 
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraIOListener;
+import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraOnImageAvailableListener;
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraStateListener;
 import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraVideoRecordingListener;
 import com.rokid.glass.camera.cameramodule.utils.CameraDeviceUtils;
@@ -60,20 +61,25 @@ import java.util.Arrays;
 
 public class RokidCamera {
 
-    private static RokidCamera instance;
-
-    public static RokidCamera getInstance() {
-        if (instance == null) {
-            return new RokidCamera(null, null);
-        }
-
-        return instance;
-    }
-
+    // SDK variables
     private Activity mActivity;
     private RokidCameraStateListener mRokidCameraStateListener;
     private RokidCameraIOListener mRokidCameraIOListener;
     private RokidCameraVideoRecordingListener mRokidCameraRecordingListener;
+    private RokidCameraOnImageAvailableListener mRokidCameraOnImageAvailableListener;
+    // flags
+    private boolean mPreviewEnabled;
+    private int mImageFormat;
+    private int mMaxImages;
+    private int mImageReaderCallbackMode;
+
+    // public static variables
+    /** Single photo with no callback. Will use default path (/sdcard/DCIM/Camera) for saving. */
+    public static int STILL_PHOTO_MODE_SINGLE_NO_CALLBACK = 0;
+    /** Single photo with one Image callback. So user can handle the Image on their own. */
+    public static int STILL_PHOTO_MODE_SINGLE_IMAGE_CALLBACK = 1;
+    /** CONTINUOUS photo with Image callback to Activity. So user can process the Image. */
+    public static int STILL_PHOTO_MODE_CONTINUOUS_IMAGE_CALLBACK = 2;
 
     // preview texture
     private TextureView mTextureView;
@@ -187,12 +193,30 @@ public class RokidCamera {
     private final ImageReader.OnImageAvailableListener mOnImageAvailableListener = new ImageReader.OnImageAvailableListener() {
         @Override
         public void onImageAvailable(ImageReader imageReader) {
-            // use background thread to save the image
-            Image image = imageReader.acquireLatestImage();
-//            Log.i("testtest", "onImageAvailable: Called");
-            if (image != null) {
-//                Log.i("testtest", "onImageAvailable: hasImage");
-                mBackgroundHandler.post(new ImageSaver(image));
+
+            if (mImageReaderCallbackMode == STILL_PHOTO_MODE_CONTINUOUS_IMAGE_CALLBACK) {
+                // use case: algorithm
+                // use `acquireNextImage()` here because we need continuous image for algorithm
+                Image image = imageReader.acquireNextImage();
+                if (image != null) {
+                    mBackgroundHandler.post(new ImageCallback(image));
+                }
+
+            } else {
+                // use background thread to save the image
+                // use `acquireLatestImage()` here because we only need one image
+                Image image = imageReader.acquireLatestImage();
+
+                if (mImageReaderCallbackMode == STILL_PHOTO_MODE_SINGLE_IMAGE_CALLBACK) {
+                    if (image != null) {
+                        mBackgroundHandler.post(new ImageCallback(image));
+                    }
+                } else if (mImageReaderCallbackMode == STILL_PHOTO_MODE_SINGLE_NO_CALLBACK) {
+                    // save to SD card
+                    if (image != null) {
+                        mBackgroundHandler.post(new ImageSaver(image));
+                    }
+                }
             }
         }
     };
@@ -201,6 +225,26 @@ public class RokidCamera {
     private CaptureRequest.Builder mCaptureRequestBuilder;
     // media recorder for video recorder
     private MediaRecorder mMediaRecorder;
+
+    private class ImageCallback implements Runnable {
+
+        private final Image mImage;
+
+        ImageCallback(Image image) {
+            mImage = image;
+        }
+
+        @Override
+        public void run() {
+
+            try {
+                mRokidCameraOnImageAvailableListener.onRokidCameraImageAvailable(mImage);
+            } finally {
+                mImage.close();
+            }
+
+        }
+    }
 
     private class ImageSaver implements Runnable {
 
@@ -214,6 +258,7 @@ public class RokidCamera {
 
             FileOutputStream fileOutputStream = null;
             try {
+                // use File to save
                 if (mImageFile != null) {
                     ByteBuffer byteBuffer = mImage.getPlanes()[0].getBuffer();
                     byte[] bytes = new byte[byteBuffer.remaining()];
@@ -222,6 +267,8 @@ public class RokidCamera {
                     fileOutputStream = new FileOutputStream(mImageFile.getAbsoluteFile());
                     fileOutputStream.write(bytes);
                     Log.i("testtest", "thread finished ");
+                    // reset to null for the next incoming Image
+                    mImageFile = null;
 
                     // callback to user
                     if (mRokidCameraIOListener != null) {
@@ -243,8 +290,8 @@ public class RokidCamera {
                             new MediaScannerConnection.OnScanCompletedListener() {
                                 @Override
                                 public void onScanCompleted(String path, Uri uri) {
-                                    Log.v("testtest",
-                                            "file " + path + " was scanned seccessfully: " + uri);
+//                                    Log.v("testtest",
+//                                            "file " + path + " was scanned seccessfully: " + uri);
                                 }
                             });
                 }
@@ -273,11 +320,6 @@ public class RokidCamera {
     private File mVideoFolder;
     private File mVideoFile;
 
-    // flag to enable the preview
-    private boolean previewEnabled;
-    private int mImageFormat;
-    private int mMaxImages;
-
     /**
      * User RokidCameraBuilder to create an instance of RokidCamera
      *
@@ -288,7 +330,9 @@ public class RokidCamera {
         this.mRokidCameraStateListener = rokidCameraBuilder.getRokidCameraStateListener();
         this.mRokidCameraIOListener = rokidCameraBuilder.getRokidCameraIOListener();
         this.mRokidCameraRecordingListener = rokidCameraBuilder.getRokidCameraRecordingListener();
-        this.previewEnabled = rokidCameraBuilder.isPreviewEnabled();
+        this.mRokidCameraOnImageAvailableListener = rokidCameraBuilder.getRokidCameraOnImageAvailableListener();
+        this.mImageReaderCallbackMode = rokidCameraBuilder.getImageReaderCallbackMode();
+        this.mPreviewEnabled = rokidCameraBuilder.isPreviewEnabled();
         this.mImageFormat = rokidCameraBuilder.getImageFormat();
         this.mMaxImages = rokidCameraBuilder.getMaxImages();
     }
@@ -501,7 +545,7 @@ public class RokidCamera {
              * @see #createCaptureRequest
              */
             mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-            if (previewEnabled) {
+            if (mPreviewEnabled) {
                 mCaptureRequestBuilder.addTarget(previewSurface);
             }
 
