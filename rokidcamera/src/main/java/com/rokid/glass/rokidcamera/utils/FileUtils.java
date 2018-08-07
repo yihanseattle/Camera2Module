@@ -1,4 +1,4 @@
-package com.rokid.glass.camera.cameramodule.utils;
+package com.rokid.glass.rokidcamera.utils;
 
 import android.os.Environment;
 

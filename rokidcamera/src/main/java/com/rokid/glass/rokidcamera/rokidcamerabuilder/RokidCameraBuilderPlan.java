@@ -1,15 +1,16 @@
-package com.rokid.glass.camera.cameramodule.rokidcamerabuilder;
+package com.rokid.glass.rokidcamera.rokidcamerabuilder;
 
 import android.media.Image;
 import android.media.ImageReader;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.rokid.glass.camera.cameramodule.RokidCameraBuilder;
-import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraIOListener;
-import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraOnImageAvailableListener;
-import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraStateListener;
-import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraVideoRecordingListener;
+import com.rokid.glass.rokidcamera.RokidCameraBuilder;
+import com.rokid.glass.rokidcamera.RokidCamera;
+import com.rokid.glass.rokidcamera.callbacks.RokidCameraIOListener;
+import com.rokid.glass.rokidcamera.callbacks.RokidCameraOnImageAvailableListener;
+import com.rokid.glass.rokidcamera.callbacks.RokidCameraStateListener;
+import com.rokid.glass.rokidcamera.callbacks.RokidCameraVideoRecordingListener;
 
 /**
  * All methods for building RokidCamera.
@@ -39,22 +40,22 @@ public interface RokidCameraBuilderPlan {
 
     /**
      * Set Image related mode and callback.
-     *  - Mode {@link com.rokid.glass.camera.cameramodule.RokidCamera#STILL_PHOTO_MODE_SINGLE_NO_CALLBACK} :
+     *  - Mode {@link RokidCamera#STILL_PHOTO_MODE_SINGLE_NO_CALLBACK} :
      *      - Uses {@link ImageReader#acquireLatestImage()} and will use default path (/sdcard/DCIM/Camera/).
      *      - Callback {@link RokidCameraIOListener#onRokidCameraFileSaved()} is called when saving is done.
      *      - {@link RokidCameraOnImageAvailableListener} will NOT be called and can be null.
-     *  - Mode {@link com.rokid.glass.camera.cameramodule.RokidCamera#STILL_PHOTO_MODE_SINGLE_IMAGE_CALLBACK} :
+     *  - Mode {@link RokidCamera#STILL_PHOTO_MODE_SINGLE_IMAGE_CALLBACK} :
      *      - Uses {@link ImageReader#acquireLatestImage()} and will call {@link RokidCameraOnImageAvailableListener#onRokidCameraImageAvailable(Image)}
      *      to send Image back.
      *      - {@link RokidCameraIOListener} will NOT be called and can be null.
-     *  - Mode {@link com.rokid.glass.camera.cameramodule.RokidCamera#STILL_PHOTO_MODE_CONTINUOUS_IMAGE_CALLBACK} :
+     *  - Mode {@link RokidCamera#STILL_PHOTO_MODE_CONTINUOUS_IMAGE_CALLBACK} :
      *      - Uses {@link ImageReader#acquireNextImage()} and will call {@link RokidCameraOnImageAvailableListener#onRokidCameraImageAvailable(Image)}
      *      to send every Image frame back.
      *      - {@link RokidCameraIOListener} will NOT be called and can be null.
      *
-     * @param imageReaderCallbackMode : three modes:    {@link com.rokid.glass.camera.cameramodule.RokidCamera#STILL_PHOTO_MODE_SINGLE_NO_CALLBACK}
-     *                                                  {@link com.rokid.glass.camera.cameramodule.RokidCamera#STILL_PHOTO_MODE_SINGLE_IMAGE_CALLBACK}
-     *                                                  {@link com.rokid.glass.camera.cameramodule.RokidCamera#STILL_PHOTO_MODE_CONTINUOUS_IMAGE_CALLBACK}
+     * @param imageReaderCallbackMode : three modes:    {@link RokidCamera#STILL_PHOTO_MODE_SINGLE_NO_CALLBACK}
+     *                                                  {@link RokidCamera#STILL_PHOTO_MODE_SINGLE_IMAGE_CALLBACK}
+     *                                                  {@link RokidCamera#STILL_PHOTO_MODE_CONTINUOUS_IMAGE_CALLBACK}
      * @param rokidCameraOnImageAvailableListener : when there is an Image to be used for callback
      * @param rokidCameraIOListener : callback when default saving is done
      * @return : RokidCameraBuilder

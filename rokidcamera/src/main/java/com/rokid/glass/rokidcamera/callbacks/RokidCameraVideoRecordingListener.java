@@ -1,4 +1,4 @@
-package com.rokid.glass.camera.cameramodule.callbacks;
+package com.rokid.glass.rokidcamera.callbacks;
 
 /**
  * Callback for Video Recording status.

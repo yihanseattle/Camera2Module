@@ -1,10 +1,8 @@
-package com.rokid.glass.camera.cameramodule.utils;
+package com.rokid.glass.rokidcamera.utils;
 
 import android.hardware.camera2.CameraCharacteristics;
 import android.util.Size;
 import android.util.SparseIntArray;
-
-import com.rokid.glass.camera.DeviceConfig;
 
 import java.util.Comparator;
 
@@ -98,10 +96,10 @@ public class CameraDeviceUtils {
 
         // TODO: temporary fix because the preview size in xml has been set to [1dp x 1dp]
 
-        if (DeviceConfig.isInRokidGlass) {
+//        if (isInRokidGlass) {
             return choices[5];
-        } else {
-            return choices[2];
-        }
+//        } else {
+//            return choices[2];
+//        }
     }
 }

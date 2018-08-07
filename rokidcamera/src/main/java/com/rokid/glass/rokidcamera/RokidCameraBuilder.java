@@ -1,15 +1,15 @@
-package com.rokid.glass.camera.cameramodule;
+package com.rokid.glass.rokidcamera;
 
 import android.app.Activity;
 import android.graphics.ImageFormat;
 import android.support.annotation.NonNull;
 import android.view.TextureView;
 
-import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraIOListener;
-import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraOnImageAvailableListener;
-import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraStateListener;
-import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraVideoRecordingListener;
-import com.rokid.glass.camera.cameramodule.rokidcamerabuilder.RokidCameraBuilderPlan;
+import com.rokid.glass.rokidcamera.callbacks.RokidCameraIOListener;
+import com.rokid.glass.rokidcamera.callbacks.RokidCameraOnImageAvailableListener;
+import com.rokid.glass.rokidcamera.callbacks.RokidCameraStateListener;
+import com.rokid.glass.rokidcamera.callbacks.RokidCameraVideoRecordingListener;
+import com.rokid.glass.rokidcamera.rokidcamerabuilder.RokidCameraBuilderPlan;
 
 /**
  *

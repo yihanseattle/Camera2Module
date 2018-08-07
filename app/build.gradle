@@ -36,4 +36,6 @@ dependencies {
 
     // circle imageview
     compile 'de.hdodenhof:circleimageview:2.2.0'
+
+    compile project(path: ':rokidcamera')
 }

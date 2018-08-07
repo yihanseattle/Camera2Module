@@ -28,15 +28,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.rokid.glass.camera.cameramodule.RokidCamera;
-import com.rokid.glass.camera.cameramodule.RokidCameraBuilder;
-import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraIOListener;
-import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraOnImageAvailableListener;
-import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraStateListener;
-import com.rokid.glass.camera.cameramodule.callbacks.RokidCameraVideoRecordingListener;
 import com.rokid.glass.camera.constant.Constants;
 import com.rokid.glass.camera.recyclerviews.RecyclerViewAdapter;
 import com.rokid.glass.camera.utils.Utils;
+import com.rokid.glass.rokidcamera.RokidCamera;
+import com.rokid.glass.rokidcamera.RokidCameraBuilder;
+import com.rokid.glass.rokidcamera.callbacks.RokidCameraIOListener;
+import com.rokid.glass.rokidcamera.callbacks.RokidCameraOnImageAvailableListener;
+import com.rokid.glass.rokidcamera.callbacks.RokidCameraStateListener;
+import com.rokid.glass.rokidcamera.callbacks.RokidCameraVideoRecordingListener;
 
 import java.util.ArrayList;
 

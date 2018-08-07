@@ -1,4 +1,4 @@
-package com.rokid.glass.camera.cameramodule.callbacks;
+package com.rokid.glass.rokidcamera.callbacks;
 
 /**
  * Created by yihan on 7/23/18.
