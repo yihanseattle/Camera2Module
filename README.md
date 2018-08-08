@@ -109,7 +109,7 @@ MediaRecorder
 Photo: (Add Format)
 
 ```
-2592 × 1944
+4000 × 3000
 ```
 
 Video:
@@ -204,7 +204,7 @@ Video:
 ---
 ## Taking Still Photo Workflow
 
-{F289, layout=left, size=full, alt="a duckling"}
+{F1092, layout=left, size=full, alt="a duckling"}
 
 1. This action is triggered by clicking on the touch pad
 2. Will try to auto-focus if auto-focus is available and request capture inside auto-focus callback. Or will request still photo capture right away if auto-focus is not available.

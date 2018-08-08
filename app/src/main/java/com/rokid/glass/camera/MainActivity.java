@@ -48,8 +48,6 @@ public class MainActivity extends AppCompatActivity implements
 
     public static final String TAG = "Camera2VideoImage";
 
-
-
     // permission result ID
 //    private static final int REQUEST_CAMERA_PERMISSION_RESULT = 0;
 //    private static final int REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION_RESULT = 1;
@@ -170,8 +168,6 @@ public class MainActivity extends AppCompatActivity implements
                             | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         }
     }
-
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
