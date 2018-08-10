@@ -313,6 +313,10 @@ The RokidCamera module manage the Camera2 API cycle and automatically set up Cam
 
 Current Available Functions:
 
-{F1476, layout=left, size=full, alt="a duckling"}
-
+- ``setRokidCameraStateListener`` method is listening to Camera state like opening Camera. The callback is called when Camera is opened successfully.
+- ``setRokidCameraRocordingListener`` method is listening to recording state change. 
+- ``setRokidCameraOnImageAvailableListener`` method 
+- ``setPreviewEnabled`` method
+- ``setImageFormat`` method
+- ``setMaximumImages`` method
 
