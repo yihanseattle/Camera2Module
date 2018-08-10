@@ -297,7 +297,7 @@ Video:
 - Close any camera resource for other app to use in the future.
 
 ---
-# RokidCamera module introduction
+# RokidCamera Module Introduction
 
 The RokidCamera module manage the Camera2 API cycle and automatically set up Camera class. Developers can use RokidCamera module to set Camera parameters, callbacks, format, etc. Example Camera setup using RokidCamera module:
 
@@ -311,7 +311,8 @@ The RokidCamera module manage the Camera2 API cycle and automatically set up Cam
                 .setRokidCameraOnImageAvailableListener(RokidCamera.STILL_PHOTO_MODE_SINGLE_NO_CALLBACK, this, this)
                 .build();
 
+Current Available Functions:
 
-
+{F1476, layout=left, size=full, alt="a duckling"}
 
 

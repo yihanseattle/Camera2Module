@@ -15,7 +15,6 @@ import com.rokid.glass.rokidcamera.callbacks.RokidCameraVideoRecordingListener;
 /**
  * All methods for building RokidCamera.
  *
- * Created by yihan on 7/26/18.
  */
 
 public interface RokidCameraBuilderPlan {
