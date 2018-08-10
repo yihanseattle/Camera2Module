@@ -296,5 +296,22 @@ Video:
 - Stop recording if currently in recording session.
 - Close any camera resource for other app to use in the future.
 
+---
+# RokidCamera module introduction
+
+The RokidCamera module manage the Camera2 API cycle and automatically set up Camera class. Developers can use RokidCamera module to set Camera parameters, callbacks, format, etc. Example Camera setup using RokidCamera module:
+
+		lang=java
+        mRokidCamera = new RokidCameraBuilder(this, mTextureView)
+                .setPreviewEnabled(true)
+                .setImageFormat(ImageFormat.JPEG)
+                .setMaximumImages(5)
+                .setRokidCameraRecordingListener(this)
+                .setRokidCameraStateListener(this)
+                .setRokidCameraOnImageAvailableListener(RokidCamera.STILL_PHOTO_MODE_SINGLE_NO_CALLBACK, this, this)
+                .build();
+
+
+
 
 

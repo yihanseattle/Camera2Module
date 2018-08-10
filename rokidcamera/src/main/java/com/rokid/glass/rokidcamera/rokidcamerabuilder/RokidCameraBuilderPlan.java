@@ -21,75 +21,89 @@ import com.rokid.glass.rokidcamera.callbacks.RokidCameraVideoRecordingListener;
 public interface RokidCameraBuilderPlan {
 
     /**
-     * Callback {@link RokidCameraStateListener#onRokidCameraOpened()} is called when RokidCamera is opened.
+     * Assign callback for State change listener. Callback {@link RokidCameraStateListener#onRokidCameraOpened()} is called when RokidCamera is opened
      *
      * @param rokidCameraStateListener : listener from Activity
-     * @return : RokidCameraBuilder
+     * @return : RokidCameraBuilder object
      */
     RokidCameraBuilder setRokidCameraStateListener(@NonNull RokidCameraStateListener rokidCameraStateListener);
 
     /**
-     * Callbacks below will be called when Video Recording state changes:
-     *      - Recording starts {@link RokidCameraVideoRecordingListener#onRokidCameraRecordingStarted()}
-     *      - Recording ends {@link RokidCameraVideoRecordingListener#onRokidCameraRocordingFinished()}
+     * Assign callback for Recording state change listener
+     * <p>Callbacks below will be called when Video Recording state changes:
+     * <ul>
+     * <li>When Recording starts, the {@link RokidCameraVideoRecordingListener#onRokidCameraRecordingStarted()} will be called
+     * <li>When Recording ends, the {@link RokidCameraVideoRecordingListener#onRokidCameraRocordingFinished()} will be called
+     * </ul>
      *
      * @param rokidCameraVideoRecordingListener : listener from Activity
-     * @return : RokidCameraBuilder
+     * @return : RokidCameraBuilder object
      */
     RokidCameraBuilder setRokidCameraRecordingListener(@NonNull RokidCameraVideoRecordingListener rokidCameraVideoRecordingListener);
 
     /**
-     * Set Image related mode and callback.
-     *  - Mode {@link RokidCamera#STILL_PHOTO_MODE_SINGLE_NO_CALLBACK} :
-     *      - Uses {@link ImageReader#acquireLatestImage()} and will use default path (/sdcard/DCIM/Camera/).
-     *      - Callback {@link RokidCameraIOListener#onRokidCameraFileSaved()} is called when saving is done.
-     *      - {@link RokidCameraOnImageAvailableListener} will NOT be called and can be null.
-     *  - Mode {@link RokidCamera#STILL_PHOTO_MODE_SINGLE_IMAGE_CALLBACK} :
-     *      - Uses {@link ImageReader#acquireLatestImage()} and will call {@link RokidCameraOnImageAvailableListener#onRokidCameraImageAvailable(Image)}
+     * Set Image retrieval mode and callback. There are three Image modes:
+     * <p>Mode {@link RokidCamera#STILL_PHOTO_MODE_SINGLE_NO_CALLBACK}
+     * <ul>
+     *     <li>Uses {@link ImageReader#acquireLatestImage()} and will use default path (/sdcard/DCIM/Camera/)
+     *     <li>Callback {@link RokidCameraIOListener#onRokidCameraFileSaved()} is called when saving is done
+     *     <li>{@link RokidCameraOnImageAvailableListener} will NOT be called and can be null
+     * </ul>
+     * <p>Mode {@link RokidCamera#STILL_PHOTO_MODE_SINGLE_IMAGE_CALLBACK}
+     * <ul>
+     *      <li>Uses {@link ImageReader#acquireLatestImage()} and will call {@link RokidCameraOnImageAvailableListener#onRokidCameraImageAvailable(Image)}
      *      to send Image back.
-     *      - {@link RokidCameraIOListener} will NOT be called and can be null.
-     *  - Mode {@link RokidCamera#STILL_PHOTO_MODE_CONTINUOUS_IMAGE_CALLBACK} :
-     *      - Uses {@link ImageReader#acquireNextImage()} and will call {@link RokidCameraOnImageAvailableListener#onRokidCameraImageAvailable(Image)}
+     *      <li>{@link RokidCameraIOListener} will NOT be called and can be null.
+     * </ul>
+     * <p>Mode {@link RokidCamera#STILL_PHOTO_MODE_CONTINUOUS_IMAGE_CALLBACK} :
+     * <ul>
+     *     <li>Uses {@link ImageReader#acquireNextImage()} and will call {@link RokidCameraOnImageAvailableListener#onRokidCameraImageAvailable(Image)}
      *      to send every Image frame back.
-     *      - {@link RokidCameraIOListener} will NOT be called and can be null.
+     *     <li>{@link RokidCameraIOListener} will NOT be called and can be null.
+     * </ul>
      *
-     * @param imageReaderCallbackMode : three modes:    {@link RokidCamera#STILL_PHOTO_MODE_SINGLE_NO_CALLBACK}
-     *                                                  {@link RokidCamera#STILL_PHOTO_MODE_SINGLE_IMAGE_CALLBACK}
-     *                                                  {@link RokidCamera#STILL_PHOTO_MODE_CONTINUOUS_IMAGE_CALLBACK}
-     * @param rokidCameraOnImageAvailableListener : when there is an Image to be used for callback
-     * @param rokidCameraIOListener : callback when default saving is done
-     * @return : RokidCameraBuilder
+     * @param imageReaderCallbackMode : the different Image mode that user wants the Camera to function. Below are three modes supported
+     *                                <ul>
+     *                                <li>{@link RokidCamera#STILL_PHOTO_MODE_SINGLE_NO_CALLBACK}
+     *                                <li>{@link RokidCamera#STILL_PHOTO_MODE_SINGLE_IMAGE_CALLBACK}
+     *                                <li>{@link RokidCamera#STILL_PHOTO_MODE_CONTINUOUS_IMAGE_CALLBACK}
+     *                                </ul>
+     * @param rokidCameraOnImageAvailableListener : the callback used in Image modes that will use callback
+     * @param rokidCameraIOListener : callback when Image saving is done and Image mode is {@link RokidCamera#STILL_PHOTO_MODE_SINGLE_NO_CALLBACK}
+     * @return : RokidCameraBuilder object
      */
     RokidCameraBuilder setRokidCameraOnImageAvailableListener(int imageReaderCallbackMode,
                                                               @Nullable RokidCameraOnImageAvailableListener rokidCameraOnImageAvailableListener,
                                                               @Nullable RokidCameraIOListener rokidCameraIOListener);
 
     /**
-     * Flag to enable the Camera Preview.
+     * Change visibility of Camera Preview.
      * Camera Preview is disabled by default.
      *
-     * @param previewEnabled : true if set to enabled
-     * @return : RokidCameraBuilder
+     * @param previewEnabled : enabled if set to TRUE
+     * @return : RokidCameraBuilder object
      */
     RokidCameraBuilder setPreviewEnabled(boolean previewEnabled);
 
     /**
-     * Set ImageFormat to user specified. Default is set to {@link android.graphics.ImageFormat#JPEG}
-     *  - Common types are :
-     *      - {@link android.graphics.ImageFormat#JPEG}
-     *      - {@link android.graphics.ImageFormat#YUV_420_888}
+     * Change ImageFormat to user specified output format. Default format is set to {@link android.graphics.ImageFormat#JPEG}
+     * <p>Common ImageFormat are :
+     * <ul>
+     *     <li>{@link android.graphics.ImageFormat#JPEG}
+     *     <li>{@link android.graphics.ImageFormat#YUV_420_888}
+     * </ul>
      *
-     * @param imageFormat : input format
-     * @return : RokidCameraBuilder
+     * @param imageFormat : the input format
+     * @return : RokidCameraBuilder object
      */
     RokidCameraBuilder setImageFormat(int imageFormat);
 
     /**
-     * MaxImageBuffer size for ImageReader.
+     * Set MaxImageBuffer size for ImageReader. Let the ImageReader create buffer automatically.
      * Refer to `maxImages` in {@link ImageReader#newInstance(int, int, int, int)}
      *
-     * @param maxImages : number of Maximum Images
-     * @return : RokidCameraBuilder
+     * @param maxImages : number of Maximum Images buffer
+     * @return : RokidCameraBuilder object
      */
     RokidCameraBuilder setMaximumImages(int maxImages);
 }

@@ -34,6 +34,7 @@ import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraIOListener;
