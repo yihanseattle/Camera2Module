@@ -299,6 +299,8 @@ Video:
 ---
 # RokidCamera Module Introduction
 
+##[Camera2 Maven Remote URL](https://jitpack.io/#yihanseattle/Camera2Module/master)
+
 The RokidCamera module manage the Camera2 API cycle and automatically set up Camera class. Developers can use RokidCamera module to set Camera parameters, callbacks, format, etc. Example Camera setup using RokidCamera module:
 
 		lang=java
