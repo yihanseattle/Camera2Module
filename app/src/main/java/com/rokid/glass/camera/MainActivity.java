@@ -497,16 +497,17 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onRokidCameraFileSaved() {
-
+        // UI update or other actions
     }
 
     @Override
     public void onRokidCameraOpened() {
-
+        // UI update or other actions
     }
 
     @Override
     public void onRokidCameraRecordingStarted() {
+        // UI update
         mChronometer.setBase(SystemClock.elapsedRealtime());
         mChronometer.setVisibility(View.VISIBLE);
         mChronometer.start();
@@ -515,6 +516,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onRokidCameraRocordingFinished() {
+        // UI update
         mChronometer.stop();
         updateButtonText(mCameraMode);
         disableProgressTextView();
@@ -531,6 +533,6 @@ public class MainActivity extends AppCompatActivity implements
      */
     @Override
     public void onRokidCameraImageAvailable(Image image) {
-
+        // handle Image object here
     }
 }

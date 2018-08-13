@@ -315,10 +315,61 @@ The RokidCamera module manage the Camera2 API cycle and automatically set up Cam
 
 Current Available Functions:
 
-- `setRokidCameraStateListener` method : Assign callback for Camera State change listener.
+- `setRokidCameraStateListener` method : Assign callback for Camera State change listener. Callback implementation example: 
+
+		lang=java
+        @Override
+        public void onRokidCameraOpened() {
+            // UI update or other actions
+        }
+
 - `setRokidCameraRocordingListener` method : Assign callback for Recording state change listener
+
+		lang=java
+        @Override
+        public void onRokidCameraRecordingStarted() {
+            // UI update
+            mChronometer.setBase(SystemClock.elapsedRealtime());
+            mChronometer.setVisibility(View.VISIBLE);
+            mChronometer.start();
+            mIsRecording = true;
+        }
+
+        @Override
+        public void onRokidCameraRocordingFinished() {
+            // UI update
+            mChronometer.stop();
+            updateButtonText(mCameraMode);
+            disableProgressTextView();
+
+            mCameraMode = CameraMode.VIDEO_STOPPED;
+            // app state and UI
+            mIsRecording = false;
+        }
+
 - `setRokidCameraOnImageAvailableListener` method : Set Image retrieval mode and callback. There are three Image modes
+
+		lang=java
+        @Override
+        public void onRokidCameraImageAvailable(Image image) {
+            // handle Image object here
+        }
+
 - `setPreviewEnabled` method : Change visibility of Camera Preview.
+
+        lang=java
+        new RokidCameraBuilder(this, mTextureView)
+                            .setPreviewEnabled(true)
+
 - `setImageFormat` method : Change ImageFormat to user specified output format.
+
+        lang=java
+        new RokidCameraBuilder(this, mTextureView)
+                            .setImageFormat(ImageFormat.JPEG)
+
 - `setMaximumImages` method : Set MaxImageBuffer size for ImageReader.
+
+        lang=java
+        new RokidCameraBuilder(this, mTextureView)
+                            .setMaximumImages(5)
 
