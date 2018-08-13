@@ -313,10 +313,10 @@ The RokidCamera module manage the Camera2 API cycle and automatically set up Cam
 
 Current Available Functions:
 
-- `setRokidCameraStateListener` method is listening to Camera state like opening Camera. The callback is called when Camera is opened successfully.
-- `setRokidCameraRocordingListener` method is listening to recording state change. 
-- `setRokidCameraOnImageAvailableListener` method 
-- `setPreviewEnabled` method
-- `setImageFormat` method
-- `setMaximumImages` method
+- `setRokidCameraStateListener` method : Assign callback for Camera State change listener.
+- `setRokidCameraRocordingListener` method : Assign callback for Recording state change listener
+- `setRokidCameraOnImageAvailableListener` method : Set Image retrieval mode and callback. There are three Image modes
+- `setPreviewEnabled` method : Change visibility of Camera Preview.
+- `setImageFormat` method : Change ImageFormat to user specified output format.
+- `setMaximumImages` method : Set MaxImageBuffer size for ImageReader.
 
