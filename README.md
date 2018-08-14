@@ -303,6 +303,10 @@ Video:
 
 The RokidCamera module manage the Camera2 API cycle and automatically set up Camera class. Developers can use RokidCamera module to set Camera parameters, callbacks, format, etc. Example Camera setup using RokidCamera module:
 
+## How to use Rokid Camera
+
+### Use builder to create an instance of RokidCamera
+
 		lang=java
         mRokidCamera = new RokidCameraBuilder(this, mTextureView)
                 .setPreviewEnabled(true)
@@ -313,7 +317,40 @@ The RokidCamera module manage the Camera2 API cycle and automatically set up Cam
                 .setRokidCameraOnImageAvailableListener(RokidCamera.STILL_PHOTO_MODE_SINGLE_NO_CALLBACK, this, this)
                 .build();
 
-Current Available Functions:
+### Sync RokidCamera with Activity lifecycle
+
+		lang=java
+        @Override
+        protected void onStart() {
+            super.onStart();
+            mRokidCamera.onStart();
+        }
+
+		lang=java
+        @Override
+        protected void onStop() {
+            super.onStop();
+            if (mIsRecording) {
+                mRokidCamera.stopRecording();
+            }
+            mRokidCamera.onStop();
+        }
+
+### Support Actions
+
+		lang=java
+        mRokidCamera.startPreview();
+
+		lang=java
+        mRokidCamera.stopRecording();
+
+		lang=java
+        mRokidCamera.startVideoRecording();
+
+		lang=java
+        mRokidCamera.takeStillPicture();
+
+## Current Available Functions:
 
 - `setRokidCameraStateListener` method : Assign callback for Camera State change listener. Callback implementation example: 
 
