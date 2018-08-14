@@ -357,19 +357,19 @@ Current Available Functions:
 
 - `setPreviewEnabled` method : Change visibility of Camera Preview.
 
-        lang=java
+		lang=java
         new RokidCameraBuilder(this, mTextureView)
                             .setPreviewEnabled(true)
 
 - `setImageFormat` method : Change ImageFormat to user specified output format.
 
-        lang=java
+		lang=java
         new RokidCameraBuilder(this, mTextureView)
                             .setImageFormat(ImageFormat.JPEG)
 
 - `setMaximumImages` method : Set MaxImageBuffer size for ImageReader.
 
-        lang=java
+		lang=java
         new RokidCameraBuilder(this, mTextureView)
                             .setMaximumImages(5)
 
