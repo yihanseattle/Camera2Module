@@ -319,12 +319,16 @@ The RokidCamera module manage the Camera2 API cycle and automatically set up Cam
 
 ### Sync RokidCamera with Activity lifecycle
 
+Activity onStart() method:
+
 		lang=java
         @Override
         protected void onStart() {
             super.onStart();
             mRokidCamera.onStart();
         }
+
+Acitivity onStop() method:
 
 		lang=java
         @Override
@@ -338,14 +342,21 @@ The RokidCamera module manage the Camera2 API cycle and automatically set up Cam
 
 ### Support Actions
 
+Start Camera Preview:
 		lang=java
         mRokidCamera.startPreview();
+
+Start Recording:
+
+        lang=java
+        mRokidCamera.startVideoRecording();
+
+Stop Recording:
 
 		lang=java
         mRokidCamera.stopRecording();
 
-		lang=java
-        mRokidCamera.startVideoRecording();
+Take photo:
 
 		lang=java
         mRokidCamera.takeStillPicture();
