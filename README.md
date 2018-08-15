@@ -106,13 +106,13 @@ MediaRecorder
 ---
 ## Output Resolution:
 
-Photo: (Add Format)
+Photo: (Format : JPEG)
 
 ```
 4000 × 3000
 ```
 
-Video:
+Video: (Format : MP4)
 
 ```
 2592 × 1944
@@ -183,9 +183,6 @@ Video:
 {F290, layout=left, size=full, alt="a duckling"}
 
 *************
-
-
-
 
 - Steps to start the preview:
 	1. Add `Preview` target so that the preview will be shown
@@ -305,12 +302,17 @@ The RokidCamera module manage the Camera2 API cycle and automatically set up Cam
 
 ## How to use Rokid Camera
 
-### Use builder to create an instance of RokidCamera
+### Use builder to create an instance of RokidCamera (recommend to create inside of onCreate() method)
 
 		lang=java
         mRokidCamera = new RokidCameraBuilder(this, mTextureView)
                 .setPreviewEnabled(true)
                 .setImageFormat(ImageFormat.JPEG)
+
+                // rename the method
+
+
+
                 .setMaximumImages(5)
                 .setRokidCameraRecordingListener(this)
                 .setRokidCameraStateListener(this)
@@ -337,6 +339,8 @@ Acitivity onStop() method:
             if (mIsRecording) {
                 mRokidCamera.stopRecording();
             }
+
+            // test stop before start
             mRokidCamera.onStop();
         }
 
@@ -363,15 +367,52 @@ Take photo:
 
 ## Current Available Functions:
 
-- `setRokidCameraStateListener` method : Assign callback for Camera State change listener. Callback implementation example: 
+
+
+
+
+
+
+// add interface definition to Design Doc
+
+
+
+
+
+
+
+- `setRokidCameraStateListener` interface: 
 
 		lang=java
-        @Override
-        public void onRokidCameraOpened() {
-            // UI update or other actions
-        }
+		/**
+		 * Callbacks from CameraDevice inside RokidCamera class. The purpose is to let the user know
+		 * if camera states has changed.
+		 *
+		 * Currently only send callback when:
+		 *      - RokidCamera is opened
+		 */
+		public interface RokidCameraStateListener {
+		    /**
+		     * Callback when RokidCamera opened successfully.
+		     */
+		    void onRokidCameraOpened();
+		}
 
-- `setRokidCameraRocordingListener` method : Assign callback for Recording state change listener
+- Implementation example inside Activity class for listening events: 
+
+		lang=java
+
+		public class mainActivity implements RokidCameraStateListener {
+
+		...
+		...
+
+            @Override
+            public void onRokidCameraOpened() {
+                // UI update or other actions
+            }
+
+- `setRokidCameraRocordingListener` interface method : Assign callback for Recording state change listener
 
 		lang=java
         @Override
@@ -395,7 +436,7 @@ Take photo:
             mIsRecording = false;
         }
 
-- `setRokidCameraOnImageAvailableListener` method : Set Image retrieval mode and callback. There are three Image modes
+- `setRokidCameraOnImageAvailableListener` interface method : Set Image retrieval mode and callback. There are three Image modes
 
 		lang=java
         @Override
@@ -403,13 +444,13 @@ Take photo:
             // handle Image object here
         }
 
-- `setPreviewEnabled` method : Change visibility of Camera Preview.
+- `setPreviewEnabled` interface method : Change visibility of Camera Preview.
 
 		lang=java
         new RokidCameraBuilder(this, mTextureView)
                             .setPreviewEnabled(true)
 
-- `setImageFormat` method : Change ImageFormat to user specified output format.
+- `setImageFormat` interface method : Change ImageFormat to user specified output format.
 
 		lang=java
         new RokidCameraBuilder(this, mTextureView)

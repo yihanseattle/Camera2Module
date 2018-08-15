@@ -34,7 +34,6 @@ import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraIOListener;
@@ -81,6 +80,22 @@ public class RokidCamera {
     public static int STILL_PHOTO_MODE_SINGLE_IMAGE_CALLBACK = 1;
     /** CONTINUOUS photo with Image callback to Activity. So user can process the Image. */
     public static int STILL_PHOTO_MODE_CONTINUOUS_IMAGE_CALLBACK = 2;
+
+    /** Size for ImageReader for FaceID Algorithm */
+    public static Size SIZE_IMAGE_READER_ALGORITHM_FACEID   = new Size(1280, 720);
+    /** Size for ImageReader for SLAM Algorithm */
+    public static Size SIZE_IMAGE_READER_ALGORITHM_SLAM     = new Size(640, 480);
+    /** Size for ImageReader for Landmark Algorithm */
+    public static Size SIZE_IMAGE_READER_ALGORITHM_LANDMARK = new Size(320, 480);
+    /** Size for ImageReader for ARSDK Algorithm */
+    public static Size SIZE_IMAGE_READER_ALGORITHM_ARSDK    = new Size(640, 480);
+    /** Size for ImageReader for Still Photo */
+    public static Size SIZE_IMAGE_READER_STILL_PHOTO        = new Size(4000, 3000);
+    /** Size for ImageReader for Camera Preview */
+    public static Size SIZE_PREVIEW                         = new Size(1600, 1200);
+    /** Size for ImageReader for Video Recording */
+    public static Size SIZE_VIDEO_RECORDING                 = new Size(2592, 1944);
+
 
     // preview texture
     private TextureView mTextureView;
