@@ -367,7 +367,9 @@ Take photo:
 
 ## Current Available Functions:
 
-- `setRokidCameraStateListener` interface: 
+### RokidCameraStateListener: 
+
+- `RokidCameraStateListener` interface: 
 
 		lang=java
         /**
@@ -387,7 +389,6 @@ Take photo:
 - Implementation example inside Activity class for listening events: 
 
 		lang=java
-
         public class mainActivity implements RokidCameraStateListener {
 
         ...
@@ -398,9 +399,33 @@ Take photo:
                 // UI update or other actions
             }
 
-- `setRokidCameraRocordingListener` interface method : Assign callback for Recording state change listener
+### RokidCameraRocordingListener
 
+- `RokidCameraRocordingListener` interface: 
 		lang=java
+        /**
+         * Callback for Video Recording status.
+         * One for recording started and one for Recording ended.
+         */
+        public interface RokidCameraVideoRecordingListener {
+            /**
+             * Callback when video recording started.
+             */
+            void onRokidCameraRecordingStarted();
+
+            /**
+             * Callback when video recording ended.
+             */
+            void onRokidCameraRocordingFinished();
+        }
+
+- Implementation example inside Activity class for listening events: 
+		lang=java
+        public class mainActivity implements RokidCameraStateListener {
+
+        ...
+        ...
+
         @Override
         public void onRokidCameraRecordingStarted() {
             // UI update
