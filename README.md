@@ -496,33 +496,47 @@ Take photo:
 - `setPreviewEnabled` interface method : Change visibility of Camera Preview.
 
 		lang=java
-        public class mainActivity implements RokidCameraVideoRecordingListener {
+        public class mainActivity {
 
         ...
         ...
 
-        new RokidCameraBuilder(this, mTextureView)
-                            .setPreviewEnabled(true)
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            new RokidCameraBuilder(this, mTextureView)
+                                .setPreviewEnabled(true)
+            ..
+            ..
 
 - `setImageFormat` interface method : Change ImageFormat to user specified output format.
 
 		lang=java
-        public class mainActivity implements RokidCameraVideoRecordingListener {
+        public class mainActivity {
 
         ...
         ...
 
-        new RokidCameraBuilder(this, mTextureView)
-                            .setImageFormat(ImageFormat.JPEG)
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            new RokidCameraBuilder(this, mTextureView)
+                                .setImageFormat(ImageFormat.JPEG)
+            ..
+            ..
 
 - `setMaximumImages` method : Set MaxImageBuffer size for ImageReader.
 
 		lang=java
-        public class mainActivity implements RokidCameraVideoRecordingListener {
+        public class mainActivity {
 
         ...
         ...
 
-        new RokidCameraBuilder(this, mTextureView)
-                            .setMaximumImages(5)
-
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            new RokidCameraBuilder(this, mTextureView)
+                                .setMaximumImages(5)
+            ..
+            ..
