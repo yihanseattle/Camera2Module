@@ -421,7 +421,7 @@ Take photo:
 
 - Implementation example inside Activity class for listening events: 
 		lang=java
-        public class mainActivity implements RokidCameraStateListener {
+        public class mainActivity implements RokidCameraVideoRecordingListener {
 
         ...
         ...
@@ -447,29 +447,82 @@ Take photo:
             mIsRecording = false;
         }
 
-- `setRokidCameraOnImageAvailableListener` interface method : Set Image retrieval mode and callback. There are three Image modes
+### RokidCameraOnImageAvailableListener & RokidCameraIOListener
 
+- `RokidCameraOnImageAvailableListener` interface: 
 		lang=java
+        /**
+         * Image callback for Image from ImageReader. RokidCamera will send the image back to user Activity.
+         */
+        public interface RokidCameraOnImageAvailableListener {
+            /**
+             * Callback when Image available to send back to Activity.
+             *
+             * @param image : Image in a Camera Frame
+             */
+            void onRokidCameraImageAvailable(Image image);
+        }
+
+- `RokidCameraIOListener` interface:
+		lang=java
+        /**
+         * Callback to user to let them know that the file saving has completed.
+         */
+
+        public interface RokidCameraIOListener {
+            /**
+             * Callback when File IO is completed.
+             */
+            void onRokidCameraFileSaved();
+        }
+
+- Implementation example inside Activity class for listening events: 
+		lang=java
+        public class mainActivity implements RokidCameraOnImageAvailableListener, RokidCameraIOListener {
+
+        ...
+        ...
+
         @Override
         public void onRokidCameraImageAvailable(Image image) {
             // handle Image object here
         }
 
+        @Override
+        public void onRokidCameraFileSaved() {
+            // UI update or other actions
+        }
+
 - `setPreviewEnabled` interface method : Change visibility of Camera Preview.
 
 		lang=java
+        public class mainActivity implements RokidCameraVideoRecordingListener {
+
+        ...
+        ...
+
         new RokidCameraBuilder(this, mTextureView)
                             .setPreviewEnabled(true)
 
 - `setImageFormat` interface method : Change ImageFormat to user specified output format.
 
 		lang=java
+        public class mainActivity implements RokidCameraVideoRecordingListener {
+
+        ...
+        ...
+
         new RokidCameraBuilder(this, mTextureView)
                             .setImageFormat(ImageFormat.JPEG)
 
 - `setMaximumImages` method : Set MaxImageBuffer size for ImageReader.
 
 		lang=java
+        public class mainActivity implements RokidCameraVideoRecordingListener {
+
+        ...
+        ...
+
         new RokidCameraBuilder(this, mTextureView)
                             .setMaximumImages(5)
 
