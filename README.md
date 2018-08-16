@@ -493,8 +493,9 @@ Take photo:
             // UI update or other actions
         }
 
-- `setPreviewEnabled` interface method : Change visibility of Camera Preview.
+### `setPreviewEnabled` method : Change visibility of Camera Preview.
 
+- Implementation example inside Activity class for listening events: 
 		lang=java
         public class mainActivity {
 
@@ -509,8 +510,9 @@ Take photo:
             ..
             ..
 
-- `setImageFormat` interface method : Change ImageFormat to user specified output format.
+### `setImageFormat` method : Change ImageFormat to user specified output format.
 
+- Implementation example inside Activity class for listening events: 
 		lang=java
         public class mainActivity {
 
@@ -525,8 +527,9 @@ Take photo:
             ..
             ..
 
-- `setMaximumImages` method : Set MaxImageBuffer size for ImageReader.
+### `setMaximumImages` method : Set MaxImageBuffer size for ImageReader.
 
+- Implementation example inside Activity class for listening events: 
 		lang=java
         public class mainActivity {
 
