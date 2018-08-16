@@ -367,20 +367,6 @@ Take photo:
 
 ## Current Available Functions:
 
-
-
-
-
-
-
-// add interface definition to Design Doc
-
-
-
-
-
-
-
 - `setRokidCameraStateListener` interface: 
 
 		lang=java
