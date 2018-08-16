@@ -98,7 +98,7 @@ public class RokidCamera {
 
 
     // preview texture
-    private TextureView mTextureView;
+    private TextureView   mTextureView;
     private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
@@ -393,9 +393,9 @@ public class RokidCamera {
 
         // TODO: look for background thread finish
         stopBackgroundThread();
-
-        mActivity = null;
     }
+
+
 
 
 
