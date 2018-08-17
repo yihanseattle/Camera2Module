@@ -181,40 +181,9 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (!touchpadIsDisabled) {
-            if (DeviceConfig.isInRokidGlass) {
-                handleGlassAction(keyCode);
-            } else {
-                handleControllerAction(keyCode);
-            }
+            handleGlassAction(keyCode);
         }
         return super.onKeyUp(keyCode, event);
-    }
-
-    private void handleControllerAction(int keyCode) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_BUTTON_A:
-                // ENTER
-                Log.i("testtest", "KeyUp ->> " + keyCode + " -- ENTER \n");
-
-                performCameraButtonAction();
-                break;
-
-            case 20:
-                // RIGHT
-                Log.i("testtest", "KeyUp ->> " + keyCode + " -- RIGHT \n");
-                performSwipeToPhoto();
-                break;
-
-            case 19:
-                // LEFT
-                Log.i("testtest", "KeyUp ->> " + keyCode + " -- LEFT \n");
-                performSwipeToVideo();
-                break;
-
-            default:
-                Log.i("testtest", "KeyUp ->> " + keyCode + " -- Not Defined!! \n");
-                break;
-        }
     }
 
     private void handleGlassAction(int keyCode) {
@@ -222,41 +191,19 @@ public class MainActivity extends AppCompatActivity implements
             case KeyEvent.KEYCODE_ENTER:
                 // ENTER
                 Log.i("testtest", "KeyUp ->> " + keyCode + " -- ENTER \n");
-
                 performCameraButtonAction();
-                break;
-
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-                // RIGHT
-                if (DeviceConfig.useKeyboardInGlassForDebuggingWithoutTouchpad) {
-                    Log.i("testtest", "KeyUp ->> " + keyCode + " -- RIGHT \n");
-                    performSwipeToPhoto();
-                }
-                break;
-
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-                // LEFT
-                if (DeviceConfig.useKeyboardInGlassForDebuggingWithoutTouchpad) {
-                    // debugging using keyboard via Vysor
-                    Log.i("testtest", "KeyUp ->> " + keyCode + " -- LEFT \n");
-                    performSwipeToVideo();
-                }
                 break;
 
             case KeyEvent.KEYCODE_DPAD_UP:
                 // RIGHT
-                if (!DeviceConfig.useKeyboardInGlassForDebuggingWithoutTouchpad) {
-                    Log.i("testtest", "KeyUp ->> " + keyCode + " -- RIGHT \n");
-                    performSwipeToPhoto();
-                }
+                Log.i("testtest", "KeyUp ->> " + keyCode + " -- RIGHT \n");
+                performSwipeToPhoto();
                 break;
 
             case KeyEvent.KEYCODE_DPAD_DOWN:
                 // LEFT
-                if (!DeviceConfig.useKeyboardInGlassForDebuggingWithoutTouchpad) {
-                    Log.i("testtest", "KeyUp ->> " + keyCode + " -- LEFT \n");
-                    performSwipeToVideo();
-                }
+                Log.i("testtest", "KeyUp ->> " + keyCode + " -- LEFT \n");
+                performSwipeToVideo();
                 break;
 
             default:

@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Matrix;
-import android.graphics.Point;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
@@ -18,7 +17,6 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
-import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaRecorder;
@@ -28,7 +26,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
@@ -41,7 +38,6 @@ import com.rokid.glass.rokidcamera.callbacks.RokidCameraOnImageAvailableListener
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraStateListener;
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraVideoRecordingListener;
 import com.rokid.glass.rokidcamera.utils.CameraDeviceUtils;
-import com.rokid.glass.rokidcamera.utils.Constants;
 import com.rokid.glass.rokidcamera.utils.FileUtils;
 
 import java.io.File;
@@ -395,10 +391,6 @@ public class RokidCamera {
         stopBackgroundThread();
     }
 
-
-
-
-
     /**
      * Start background thread
      */
@@ -440,49 +432,12 @@ public class RokidCamera {
                 if (currentCameraId == CameraCharacteristics.LENS_FACING_FRONT) {
                     continue;
                 }
-                StreamConfigurationMap map = cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
                 int deviceOrientation = mActivity.getWindowManager().getDefaultDisplay().getRotation();
                 mTotalRotation = CameraDeviceUtils.sensorToDeviceRotation(cameraCharacteristics, deviceOrientation, ORIENTATIONS);
-                boolean swapRotation = mTotalRotation == 90 || mTotalRotation == 270;
 
-                Point displaySize = new Point();
-                mActivity.getWindowManager().getDefaultDisplay().getSize(displaySize);
-                int rotatedPreviewWidth = width;
-                int rotatedPreviewHeight = height;
-                int maxPreviewWidth = displaySize.x;
-                int maxPreviewHeight = displaySize.y;
-
-                if (swapRotation) {
-                    // suppress because we could be swapping height with width
-
-                    //noinspection SuspiciousNameCombination
-                    rotatedPreviewWidth = height;
-                    //noinspection SuspiciousNameCombination
-                    rotatedPreviewHeight = width;
-                    //noinspection SuspiciousNameCombination
-                    maxPreviewWidth = displaySize.y;
-                    //noinspection SuspiciousNameCombination
-                    maxPreviewHeight = displaySize.x;
-                }
-
-                if (maxPreviewWidth > Constants.PREVIEW_SIZE.getWidth()) {
-                    maxPreviewWidth = Constants.PREVIEW_SIZE.getWidth();
-                }
-
-                if (maxPreviewHeight > Constants.PREVIEW_SIZE.getHeight()) {
-                    maxPreviewHeight = Constants.PREVIEW_SIZE.getHeight();
-                }
-
-                // Try to get the actual width and height of your phone.
-                DisplayMetrics displayMetrics = new DisplayMetrics();
-                mActivity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                int screenHeight = displayMetrics.heightPixels;
-                int screenWidth = displayMetrics.widthPixels;
-                Size largest = new Size(screenWidth, screenHeight);
-
-                mPreviewSize = CameraDeviceUtils.chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
-                mVideoSize = CameraDeviceUtils.chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
-                Size mImageSize = CameraDeviceUtils.chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth, maxPreviewHeight, largest);
+                mPreviewSize = SIZE_PREVIEW;
+                mVideoSize = SIZE_VIDEO_RECORDING;
+                Size mImageSize = SIZE_IMAGE_READER_STILL_PHOTO;
                 mImageReader = ImageReader.newInstance(mImageSize.getWidth(), mImageSize.getHeight(), mImageFormat, mMaxImages);
                 mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, mBackgroundHandler);
 

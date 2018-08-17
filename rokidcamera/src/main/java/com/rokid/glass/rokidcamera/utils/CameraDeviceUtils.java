@@ -1,10 +1,7 @@
 package com.rokid.glass.rokidcamera.utils;
 
 import android.hardware.camera2.CameraCharacteristics;
-import android.util.Size;
 import android.util.SparseIntArray;
-
-import java.util.Comparator;
 
 /**
  * Created by yihan on 7/25/18.
@@ -12,15 +9,15 @@ import java.util.Comparator;
 
 public class CameraDeviceUtils {
 
-    private static class CompareSizeByArea implements Comparator<Size> {
-
-        @Override
-        public int compare(Size lhs, Size rhs) {
-            return Long.signum((long) lhs.getWidth() * lhs.getHeight() -
-                    (long) rhs.getWidth() * rhs.getHeight());
-        }
-
-    }
+//    private static class CompareSizeByArea implements Comparator<Size> {
+//
+//        @Override
+//        public int compare(Size lhs, Size rhs) {
+//            return Long.signum((long) lhs.getWidth() * lhs.getHeight() -
+//                    (long) rhs.getWidth() * rhs.getHeight());
+//        }
+//
+//    }
 
     /**
      * Help to calculate Camera Parameters
@@ -34,25 +31,25 @@ public class CameraDeviceUtils {
         return (sensorOrientation + deviceOrientation + 270) % 360;
     }
 
-    /**
-     * Given {@code choices} of {@code Size}s supported by a camera, choose the smallest one that
-     * is at least as large as the respective texture view size, and that is at most as large as the
-     * respective max size, and whose aspect ratio matches with the specified value. If such size
-     * doesn't exist, choose the largest one that is at most as large as the respective max size,
-     * and whose aspect ratio matches with the specified value.
-     *
-     * @param choices           The list of sizes that the camera supports for the intended output
-     *                          class
-     * @param textureViewWidth  The width of the texture view relative to sensor coordinate
-     * @param textureViewHeight The height of the texture view relative to sensor coordinate
-     * @param maxWidth          The maximum width that can be chosen
-     * @param maxHeight         The maximum height that can be chosen
-     * @param aspectRatio       The aspect ratio
-     * @return The optimal {@code Size}, or an arbitrary one if none were big enough
-     */
-    public static Size chooseOptimalSize(Size[] choices, int textureViewWidth,
-                                          int textureViewHeight, int maxWidth, int maxHeight, Size aspectRatio) {
-
+//    /**
+//     * Given {@code choices} of {@code Size}s supported by a camera, choose the smallest one that
+//     * is at least as large as the respective texture view size, and that is at most as large as the
+//     * respective max size, and whose aspect ratio matches with the specified value. If such size
+//     * doesn't exist, choose the largest one that is at most as large as the respective max size,
+//     * and whose aspect ratio matches with the specified value.
+//     *
+//     * @param choices           The list of sizes that the camera supports for the intended output
+//     *                          class
+//     * @param textureViewWidth  The width of the texture view relative to sensor coordinate
+//     * @param textureViewHeight The height of the texture view relative to sensor coordinate
+//     * @param maxWidth          The maximum width that can be chosen
+//     * @param maxHeight         The maximum height that can be chosen
+//     * @param aspectRatio       The aspect ratio
+//     * @return The optimal {@code Size}, or an arbitrary one if none were big enough
+//     */
+//    public static Size chooseOptimalSize(Size[] choices, int textureViewWidth,
+//                                          int textureViewHeight, int maxWidth, int maxHeight, Size aspectRatio) {
+//
 //        // Collect the supported resolutions that are at least as big as the preview Surface
 //        List<Size> bigEnough = new ArrayList<>();
 //        // Collect the supported resolutions that are smaller than the preview Surface
@@ -93,13 +90,13 @@ public class CameraDeviceUtils {
 //                return choices[choices.length - 1];
 //            }
 //        }
-
-        // TODO: temporary fix because the preview size in xml has been set to [1dp x 1dp]
-
-//        if (isInRokidGlass) {
-            return choices[5];
-//        } else {
-//            return choices[2];
-//        }
-    }
+//
+//        // TODO: temporary fix because the preview size in xml has been set to [1dp x 1dp]
+//
+////        if (isInRokidGlass) {
+//            return choices[5];
+////        } else {
+////            return choices[2];
+////        }
+//    }
 }
