@@ -48,10 +48,6 @@ public class MainActivity extends AppCompatActivity implements
 
     public static final String TAG = "Camera2VideoImage";
 
-    // permission result ID
-//    private static final int REQUEST_CAMERA_PERMISSION_RESULT = 0;
-//    private static final int REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION_RESULT = 1;
-
     // disable button press(touch pad event) during animation
     private boolean touchpadIsDisabled;
     // animation

@@ -27,7 +27,6 @@ import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
@@ -39,6 +38,7 @@ import com.rokid.glass.rokidcamera.callbacks.RokidCameraStateListener;
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraVideoRecordingListener;
 import com.rokid.glass.rokidcamera.utils.CameraDeviceUtils;
 import com.rokid.glass.rokidcamera.utils.FileUtils;
+import com.rokid.glass.rokidcamera.utils.RokidCameraSize;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -69,6 +69,11 @@ public class RokidCamera {
     private int mMaxImages;
     private int mImageReaderCallbackMode;
 
+    // resolution size
+    private RokidCameraSize mSizePreview;
+    private RokidCameraSize mSizeVideoRecorder;
+    private RokidCameraSize mSizeImageReader;
+
     // public static variables
     /** Single photo with no callback. Will use default path (/sdcard/DCIM/Camera) for saving. */
     public static int STILL_PHOTO_MODE_SINGLE_NO_CALLBACK = 0;
@@ -76,22 +81,6 @@ public class RokidCamera {
     public static int STILL_PHOTO_MODE_SINGLE_IMAGE_CALLBACK = 1;
     /** CONTINUOUS photo with Image callback to Activity. So user can process the Image. */
     public static int STILL_PHOTO_MODE_CONTINUOUS_IMAGE_CALLBACK = 2;
-
-    /** Size for ImageReader for FaceID Algorithm */
-    public static Size SIZE_IMAGE_READER_ALGORITHM_FACEID   = new Size(1280, 720);
-    /** Size for ImageReader for SLAM Algorithm */
-    public static Size SIZE_IMAGE_READER_ALGORITHM_SLAM     = new Size(640, 480);
-    /** Size for ImageReader for Landmark Algorithm */
-    public static Size SIZE_IMAGE_READER_ALGORITHM_LANDMARK = new Size(320, 480);
-    /** Size for ImageReader for ARSDK Algorithm */
-    public static Size SIZE_IMAGE_READER_ALGORITHM_ARSDK    = new Size(640, 480);
-    /** Size for ImageReader for Still Photo */
-    public static Size SIZE_IMAGE_READER_STILL_PHOTO        = new Size(4000, 3000);
-    /** Size for ImageReader for Camera Preview */
-    public static Size SIZE_PREVIEW                         = new Size(1600, 1200);
-    /** Size for ImageReader for Video Recording */
-    public static Size SIZE_VIDEO_RECORDING                 = new Size(2592, 1944);
-
 
     // preview texture
     private TextureView   mTextureView;
@@ -198,9 +187,6 @@ public class RokidCamera {
         ORIENTATIONS.append(Surface.ROTATION_270, 180);
     }
 
-    // resolution size
-    private Size mPreviewSize;
-    private Size mVideoSize;
     private ImageReader mImageReader;
     private final ImageReader.OnImageAvailableListener mOnImageAvailableListener = new ImageReader.OnImageAvailableListener() {
         @Override
@@ -347,6 +333,9 @@ public class RokidCamera {
         this.mPreviewEnabled = rokidCameraBuilder.isPreviewEnabled();
         this.mImageFormat = rokidCameraBuilder.getImageFormat();
         this.mMaxImages = rokidCameraBuilder.getMaxImages();
+        this.mSizePreview = rokidCameraBuilder.getRokidCameraSizePreview();
+        this.mSizeImageReader = rokidCameraBuilder.getRokidCameraSizeImageReader();
+        this.mSizeVideoRecorder = rokidCameraBuilder.getRokidCameraSizeVideoRecorder();
     }
 
     /**
@@ -435,10 +424,7 @@ public class RokidCamera {
                 int deviceOrientation = mActivity.getWindowManager().getDefaultDisplay().getRotation();
                 mTotalRotation = CameraDeviceUtils.sensorToDeviceRotation(cameraCharacteristics, deviceOrientation, ORIENTATIONS);
 
-                mPreviewSize = SIZE_PREVIEW;
-                mVideoSize = SIZE_VIDEO_RECORDING;
-                Size mImageSize = SIZE_IMAGE_READER_STILL_PHOTO;
-                mImageReader = ImageReader.newInstance(mImageSize.getWidth(), mImageSize.getHeight(), mImageFormat, mMaxImages);
+                mImageReader = ImageReader.newInstance(mSizeImageReader.getSize().getWidth(), mSizeImageReader.getSize().getHeight(), mImageFormat, mMaxImages);
                 mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, mBackgroundHandler);
 
                 // Check if auto focus is supported
@@ -472,24 +458,6 @@ public class RokidCamera {
                 // TODO: add comments
                 cameraManager.openCamera(mCameraId, mCameraDevicesStateCallback, mBackgroundHandler);
             }
-
-            // old code. Since we are on Rokid Glass, below is no need.
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                // device is Marshmallow or later
-//                if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
-//                        PackageManager.PERMISSION_GRANTED) {
-//                    // connect the camera
-//                    // TODO: add comments
-//                    cameraManager.openCamera(mCameraId, mCameraDevicesStateCallback, mBackgroundHandler);
-//                } else {
-//                    if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
-//                        Toast.makeText(this, "Video app required access to camera", Toast.LENGTH_SHORT).show();
-//                    }
-//                    requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CAMERA_PERMISSION_RESULT);
-//                }
-//            } else {
-//                cameraManager.openCamera(mCameraId, mCameraDevicesStateCallback, mBackgroundHandler);
-//            }
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -501,7 +469,7 @@ public class RokidCamera {
     public void startPreview() {
         SurfaceTexture surfaceTexture = mTextureView.getSurfaceTexture();
         assert surfaceTexture != null;
-        surfaceTexture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+        surfaceTexture.setDefaultBufferSize(mSizePreview.getSize().getWidth(), mSizePreview.getSize().getHeight());
         Surface previewSurface = new Surface(surfaceTexture);
 
         try {
@@ -520,8 +488,6 @@ public class RokidCamera {
                 mCaptureRequestBuilder.addTarget(previewSurface);
             }
 
-
-            //
             mCaptureRequestBuilder.addTarget(mImageReader.getSurface());
 
             mCameraDevice.createCaptureSession(Arrays.asList(previewSurface, mImageReader.getSurface()), new CameraCaptureSession.StateCallback() {
@@ -655,7 +621,7 @@ public class RokidCamera {
         mMediaRecorder.setOutputFile(mVideoFile.getAbsolutePath());
         mMediaRecorder.setVideoEncodingBitRate(10000000);
         mMediaRecorder.setVideoFrameRate(30);
-        mMediaRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
+        mMediaRecorder.setVideoSize(mSizeVideoRecorder.getSize().getWidth(), mSizeVideoRecorder.getSize().getHeight());
         mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
         mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
         mMediaRecorder.setOrientationHint(mTotalRotation);
@@ -668,7 +634,7 @@ public class RokidCamera {
     private void sendVideoRecordingRequest() {
         SurfaceTexture surfaceTexture = mTextureView.getSurfaceTexture();
         assert surfaceTexture != null;
-        surfaceTexture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+        surfaceTexture.setDefaultBufferSize(mSizePreview.getSize().getWidth(), mSizePreview.getSize().getHeight());
         Surface previewSurface = new Surface(surfaceTexture);
 
         try {
@@ -787,21 +753,21 @@ public class RokidCamera {
      * @param viewHeight The height of `mTextureView`
      */
     private void configureTransform(int viewWidth, int viewHeight) {
-        if (null == mTextureView || null == mPreviewSize) {
+        if (null == mTextureView || null == mSizePreview.getSize()) {
             return;
         }
         int rotation = mActivity.getWindowManager().getDefaultDisplay().getRotation();
         Matrix matrix = new Matrix();
         RectF viewRect = new RectF(0, 0, viewWidth, viewHeight);
-        RectF bufferRect = new RectF(0, 0, mPreviewSize.getHeight(), mPreviewSize.getWidth());
+        RectF bufferRect = new RectF(0, 0, mSizePreview.getSize().getHeight(), mSizePreview.getSize().getWidth());
         float centerX = viewRect.centerX();
         float centerY = viewRect.centerY();
         if (Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation) {
             bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY());
             matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL);
             float scale = Math.max(
-                    (float) viewHeight / mPreviewSize.getHeight(),
-                    (float) viewWidth / mPreviewSize.getWidth());
+                    (float) viewHeight / mSizePreview.getSize().getHeight(),
+                    (float) viewWidth / mSizePreview.getSize().getWidth());
             matrix.postScale(scale, scale, centerX, centerY);
             matrix.postRotate(90 * (rotation - 2), centerX, centerY);
         } else if (Surface.ROTATION_180 == rotation) {
