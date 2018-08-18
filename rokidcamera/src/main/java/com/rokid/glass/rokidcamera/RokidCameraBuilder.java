@@ -10,6 +10,7 @@ import com.rokid.glass.rokidcamera.callbacks.RokidCameraOnImageAvailableListener
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraStateListener;
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraVideoRecordingListener;
 import com.rokid.glass.rokidcamera.rokidcamerabuilder.RokidCameraBuilderPlan;
+import com.rokid.glass.rokidcamera.utils.RokidCameraParameters;
 import com.rokid.glass.rokidcamera.utils.RokidCameraSize;
 
 /**
@@ -38,20 +39,27 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
     private RokidCameraSize mRokidCameraSizePreview;
     private RokidCameraSize mRokidCameraSizeImageReader;
     private RokidCameraSize mRokidCameraSizeVideoRecorder;
+    // camera parameters
+    private RokidCameraParameters mRokidCameraParamAEMode;
+    private RokidCameraParameters mRokidCameraParamAFMode;
+    private RokidCameraParameters mRokidCameraParamAWBMode;
 
     // initialize default configurations
     {
-        previewEnabled = false;
-        mImageFormat = ImageFormat.JPEG;
-        mMaxImages = 2;
-        mImageReaderCallbackMode = RokidCamera.STILL_PHOTO_MODE_SINGLE_NO_CALLBACK;
-        mRokidCameraStateListener = null;
-        mRokidCameraIOListener = null;
-        mRokidCameraRecordingListener = null;
-        mRokidCameraOnImageAvailableListener = null;
-        mRokidCameraSizePreview = RokidCameraSize.SIZE_PREVIEW;
-        mRokidCameraSizeImageReader = RokidCameraSize.SIZE_IMAGE_READER_STILL_PHOTO;
-        mRokidCameraSizeImageReader = RokidCameraSize.SIZE_VIDEO_RECORDING;
+        this.previewEnabled = false;
+        this.mImageFormat = ImageFormat.JPEG;
+        this.mMaxImages = 2;
+        this.mImageReaderCallbackMode = RokidCamera.STILL_PHOTO_MODE_SINGLE_NO_CALLBACK;
+        this.mRokidCameraStateListener = null;
+        this.mRokidCameraIOListener = null;
+        this.mRokidCameraRecordingListener = null;
+        this.mRokidCameraOnImageAvailableListener = null;
+        this.mRokidCameraSizePreview = RokidCameraSize.SIZE_PREVIEW;
+        this.mRokidCameraSizeImageReader = RokidCameraSize.SIZE_IMAGE_READER_STILL_PHOTO;
+        this.mRokidCameraSizeImageReader = RokidCameraSize.SIZE_VIDEO_RECORDING;
+        this.mRokidCameraParamAEMode = RokidCameraParameters.ROKID_CAMERA_PARAM_AE_MODE_ON;
+        this.mRokidCameraParamAFMode = RokidCameraParameters.ROKID_CAMERA_PARAM_AF_MODE_PICTURE;
+        this.mRokidCameraParamAWBMode = RokidCameraParameters.ROKID_CAMERA_PARAM_AWB_MODE_AUTO;
     }
 
     public RokidCameraBuilder (Activity activity, TextureView textureView) {
@@ -117,6 +125,24 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
         return this;
     }
 
+    @Override
+    public RokidCameraBuilder setRokidCameraParamAEMode(RokidCameraParameters rokidCameraParameters) {
+        this.mRokidCameraParamAEMode = rokidCameraParameters;
+        return this;
+    }
+
+    @Override
+    public RokidCameraBuilder setRokidCameraParamAFMode(RokidCameraParameters rokidCameraParameters) {
+        this.mRokidCameraParamAFMode = rokidCameraParameters;
+        return this;
+    }
+
+    @Override
+    public RokidCameraBuilder setRokidCameraParamAWBMode(RokidCameraParameters rokidCameraParameters) {
+        this.mRokidCameraParamAWBMode = rokidCameraParameters;
+        return this;
+    }
+
     int getMaxImages() {
         return mMaxImages;
     }
@@ -157,16 +183,28 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
         return mRokidCameraOnImageAvailableListener;
     }
 
-    public RokidCameraSize getRokidCameraSizePreview() {
+    RokidCameraSize getRokidCameraSizePreview() {
         return mRokidCameraSizePreview;
     }
 
-    public RokidCameraSize getRokidCameraSizeImageReader() {
+    RokidCameraSize getRokidCameraSizeImageReader() {
         return mRokidCameraSizeImageReader;
     }
 
-    public RokidCameraSize getRokidCameraSizeVideoRecorder() {
+    RokidCameraSize getRokidCameraSizeVideoRecorder() {
         return mRokidCameraSizeVideoRecorder;
+    }
+
+    RokidCameraParameters getRokidCameraParamAEMode() {
+        return mRokidCameraParamAEMode;
+    }
+
+    RokidCameraParameters getRokidCameraParamAFMode() {
+        return mRokidCameraParamAFMode;
+    }
+
+    public RokidCameraParameters getRokidCameraParamAWBMode() {
+        return mRokidCameraParamAWBMode;
     }
 
     public RokidCamera build() {

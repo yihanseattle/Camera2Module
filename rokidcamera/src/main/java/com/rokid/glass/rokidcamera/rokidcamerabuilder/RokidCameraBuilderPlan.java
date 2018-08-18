@@ -11,6 +11,7 @@ import com.rokid.glass.rokidcamera.callbacks.RokidCameraIOListener;
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraOnImageAvailableListener;
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraStateListener;
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraVideoRecordingListener;
+import com.rokid.glass.rokidcamera.utils.RokidCameraParameters;
 import com.rokid.glass.rokidcamera.utils.RokidCameraSize;
 
 /**
@@ -112,4 +113,10 @@ public interface RokidCameraBuilderPlan {
     RokidCameraBuilder setSizeImageReader(RokidCameraSize rokidCameraSize);
 
     RokidCameraBuilder setSizeVideoRecorder(RokidCameraSize rokidCameraSize);
+
+    RokidCameraBuilder setRokidCameraParamAEMode(RokidCameraParameters rokidCameraParameters);
+
+    RokidCameraBuilder setRokidCameraParamAFMode(RokidCameraParameters rokidCameraParameters);
+
+    RokidCameraBuilder setRokidCameraParamAWBMode(RokidCameraParameters rokidCameraParameters);
 }

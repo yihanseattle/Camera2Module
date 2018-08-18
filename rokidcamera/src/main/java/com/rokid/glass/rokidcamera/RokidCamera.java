@@ -38,6 +38,7 @@ import com.rokid.glass.rokidcamera.callbacks.RokidCameraStateListener;
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraVideoRecordingListener;
 import com.rokid.glass.rokidcamera.utils.CameraDeviceUtils;
 import com.rokid.glass.rokidcamera.utils.FileUtils;
+import com.rokid.glass.rokidcamera.utils.RokidCameraParameters;
 import com.rokid.glass.rokidcamera.utils.RokidCameraSize;
 
 import java.io.File;
@@ -45,6 +46,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+
+import static android.hardware.camera2.CaptureRequest.CONTROL_AE_MODE;
+import static android.hardware.camera2.CaptureRequest.CONTROL_AF_MODE;
+import static android.hardware.camera2.CaptureRequest.CONTROL_AWB_MODE;
 
 /**
  * Camera Module that can be use for projects with needs for Camera features.
@@ -73,6 +78,11 @@ public class RokidCamera {
     private RokidCameraSize mSizePreview;
     private RokidCameraSize mSizeVideoRecorder;
     private RokidCameraSize mSizeImageReader;
+
+    // camera parameters
+    private RokidCameraParameters mRokidCameraParamAEMode;
+    private RokidCameraParameters mRokidCameraParamAFMode;
+    private RokidCameraParameters mRokidCameraParamAWBMode;
 
     // public static variables
     /** Single photo with no callback. Will use default path (/sdcard/DCIM/Camera) for saving. */
@@ -115,6 +125,7 @@ public class RokidCamera {
         public void onOpened(@NonNull CameraDevice cameraDevice) {
 
             mCameraDevice = cameraDevice;
+
 
             startPreview();
 
@@ -484,6 +495,8 @@ public class RokidCamera {
              * @see #createCaptureRequest
              */
             mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            configureCameraParameters(mCaptureRequestBuilder, mRokidCameraParamAEMode, mRokidCameraParamAFMode, mRokidCameraParamAWBMode);
+
             if (mPreviewEnabled) {
                 mCaptureRequestBuilder.addTarget(previewSurface);
             }
@@ -554,6 +567,7 @@ public class RokidCamera {
              * @see #createCaptureRequest
              */
             mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+            configureCameraParameters(mCaptureRequestBuilder, mRokidCameraParamAEMode, mRokidCameraParamAFMode, mRokidCameraParamAWBMode);
             mCaptureRequestBuilder.addTarget(mImageReader.getSurface());
 
             // TODO: update diagram
@@ -653,6 +667,7 @@ public class RokidCamera {
              * @see #createCaptureRequest
              */
             mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
+            configureCameraParameters(mCaptureRequestBuilder, mRokidCameraParamAEMode, mRokidCameraParamAFMode, mRokidCameraParamAWBMode);
 
             // add Preview surface to target
             mCaptureRequestBuilder.addTarget(previewSurface);
@@ -774,5 +789,11 @@ public class RokidCamera {
             matrix.postRotate(180, centerX, centerY);
         }
         mTextureView.setTransform(matrix);
+    }
+
+    private void configureCameraParameters(CaptureRequest.Builder captureRequestBuilder, RokidCameraParameters aeMode, RokidCameraParameters afMode, RokidCameraParameters awbMode) {
+        captureRequestBuilder.set(CONTROL_AE_MODE, aeMode.getMode());
+        captureRequestBuilder.set(CONTROL_AF_MODE, afMode.getMode());
+        captureRequestBuilder.set(CONTROL_AWB_MODE, awbMode.getMode());
     }
 }

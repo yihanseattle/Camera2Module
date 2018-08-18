@@ -37,6 +37,8 @@ import com.rokid.glass.rokidcamera.callbacks.RokidCameraIOListener;
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraOnImageAvailableListener;
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraStateListener;
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraVideoRecordingListener;
+import com.rokid.glass.rokidcamera.utils.RokidCameraParameters;
+import com.rokid.glass.rokidcamera.utils.RokidCameraSize;
 
 import java.util.ArrayList;
 
@@ -84,13 +86,19 @@ public class MainActivity extends AppCompatActivity implements
         initLayoutAndUI();
 
         mRokidCamera = new RokidCameraBuilder(this, mTextureView)
-                            .setPreviewEnabled(true)
-                            .setImageFormat(ImageFormat.JPEG)
-                            .setMaximumImages(5)
-                            .setRokidCameraRecordingListener(this)
-                            .setRokidCameraStateListener(this)
-                            .setRokidCameraOnImageAvailableListener(RokidCamera.STILL_PHOTO_MODE_SINGLE_NO_CALLBACK, this, this)
-                            .build();
+                .setPreviewEnabled(true)
+                .setImageFormat(ImageFormat.JPEG)
+                .setMaximumImages(5)
+                .setRokidCameraRecordingListener(this)
+                .setRokidCameraStateListener(this)
+                .setRokidCameraOnImageAvailableListener(RokidCamera.STILL_PHOTO_MODE_SINGLE_NO_CALLBACK, this, this)
+                .setSizePreview(RokidCameraSize.SIZE_PREVIEW)
+                .setSizeImageReader(RokidCameraSize.SIZE_IMAGE_READER_STILL_PHOTO)
+                .setSizeVideoRecorder(RokidCameraSize.SIZE_VIDEO_RECORDING)
+                .setRokidCameraParamAEMode(RokidCameraParameters.ROKID_CAMERA_PARAM_AE_MODE_ON)
+                .setRokidCameraParamAFMode(RokidCameraParameters.ROKID_CAMERA_PARAM_AF_MODE_PICTURE)
+                .setRokidCameraParamAWBMode(RokidCameraParameters.ROKID_CAMERA_PARAM_AWB_MODE_AUTO)
+                .build();
 
     }
 
