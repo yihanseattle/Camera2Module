@@ -119,4 +119,6 @@ public interface RokidCameraBuilderPlan {
     RokidCameraBuilder setRokidCameraParamAFMode(RokidCameraParameters rokidCameraParameters);
 
     RokidCameraBuilder setRokidCameraParamAWBMode(RokidCameraParameters rokidCameraParameters);
+
+    RokidCameraBuilder setRokidCameraParamCameraID(RokidCameraParameters rokidCameraParameters);
 }

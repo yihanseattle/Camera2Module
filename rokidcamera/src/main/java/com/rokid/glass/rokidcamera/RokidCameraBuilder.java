@@ -43,6 +43,8 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
     private RokidCameraParameters mRokidCameraParamAEMode;
     private RokidCameraParameters mRokidCameraParamAFMode;
     private RokidCameraParameters mRokidCameraParamAWBMode;
+    // camera id
+    private RokidCameraParameters mRokidCameraParamCameraId;
 
     // initialize default configurations
     {
@@ -60,6 +62,7 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
         this.mRokidCameraParamAEMode = RokidCameraParameters.ROKID_CAMERA_PARAM_AE_MODE_ON;
         this.mRokidCameraParamAFMode = RokidCameraParameters.ROKID_CAMERA_PARAM_AF_MODE_PICTURE;
         this.mRokidCameraParamAWBMode = RokidCameraParameters.ROKID_CAMERA_PARAM_AWB_MODE_AUTO;
+        this.mRokidCameraParamCameraId = RokidCameraParameters.ROKID_CAMERA_PARAM_CAMERA_ID_ROKID_GLASS;
     }
 
     public RokidCameraBuilder (Activity activity, TextureView textureView) {
@@ -143,6 +146,12 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
         return this;
     }
 
+    @Override
+    public RokidCameraBuilder setRokidCameraParamCameraID(RokidCameraParameters rokidCameraParameters) {
+        this.mRokidCameraParamCameraId = rokidCameraParameters;
+        return this;
+    }
+
     int getMaxImages() {
         return mMaxImages;
     }
@@ -205,6 +214,10 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
 
     public RokidCameraParameters getRokidCameraParamAWBMode() {
         return mRokidCameraParamAWBMode;
+    }
+
+    public RokidCameraParameters getRokidCameraParamCameraId() {
+        return mRokidCameraParamCameraId;
     }
 
     public RokidCamera build() {

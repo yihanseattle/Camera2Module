@@ -74,6 +74,7 @@ public class RokidCamera {
     private int mMaxImages;
     private int mImageReaderCallbackMode;
 
+
     // resolution size
     private RokidCameraSize mSizePreview;
     private RokidCameraSize mSizeVideoRecorder;
@@ -83,6 +84,8 @@ public class RokidCamera {
     private RokidCameraParameters mRokidCameraParamAEMode;
     private RokidCameraParameters mRokidCameraParamAFMode;
     private RokidCameraParameters mRokidCameraParamAWBMode;
+    // camera id
+    private RokidCameraParameters mRokidCameraParamCameraId;
 
     // public static variables
     /** Single photo with no callback. Will use default path (/sdcard/DCIM/Camera) for saving. */
@@ -206,7 +209,13 @@ public class RokidCamera {
             if (mImageReaderCallbackMode == STILL_PHOTO_MODE_CONTINUOUS_IMAGE_CALLBACK) {
                 // use case: algorithm
                 // use `acquireNextImage()` here because we need continuous image for algorithm
+
+
+
+                long startTime = System.nanoTime();
                 Image image = imageReader.acquireNextImage();
+                long estimatedTime = System.nanoTime() - startTime;
+                Log.i("testtest", "acquireLatestImage time in nano: " + estimatedTime);
                 if (image != null) {
                     mBackgroundHandler.post(new ImageCallback(image));
                 }
@@ -347,6 +356,10 @@ public class RokidCamera {
         this.mSizePreview = rokidCameraBuilder.getRokidCameraSizePreview();
         this.mSizeImageReader = rokidCameraBuilder.getRokidCameraSizeImageReader();
         this.mSizeVideoRecorder = rokidCameraBuilder.getRokidCameraSizeVideoRecorder();
+        this.mRokidCameraParamAFMode = rokidCameraBuilder.getRokidCameraParamAFMode();
+        this.mRokidCameraParamAEMode = rokidCameraBuilder.getRokidCameraParamAEMode();
+        this.mRokidCameraParamAWBMode = rokidCameraBuilder.getRokidCameraParamAWBMode();
+        this.mRokidCameraParamCameraId = rokidCameraBuilder.getRokidCameraParamCameraId();
     }
 
     /**
@@ -429,7 +442,8 @@ public class RokidCamera {
                     // The return value of that key could be null if the field is not set.
                     return;
                 }
-                if (currentCameraId == CameraCharacteristics.LENS_FACING_FRONT) {
+                if (currentCameraId != mRokidCameraParamCameraId.getParam()) {
+                    // if not desired Camera ID, skip
                     continue;
                 }
                 int deviceOrientation = mActivity.getWindowManager().getDefaultDisplay().getRotation();
@@ -454,6 +468,22 @@ public class RokidCamera {
             }
         } catch (CameraAccessException e) {
             e.printStackTrace();
+        }
+    }
+
+    public int getSensorOrientation() {
+        CameraCharacteristics cameraCharacteristics = null;
+        try {
+            CameraManager cameraManager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
+            cameraCharacteristics = cameraManager.getCameraCharacteristics(mCameraId);
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+
+        if (cameraCharacteristics == null) {
+            return -1;
+        } else {
+            return cameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
         }
     }
 
@@ -792,8 +822,8 @@ public class RokidCamera {
     }
 
     private void configureCameraParameters(CaptureRequest.Builder captureRequestBuilder, RokidCameraParameters aeMode, RokidCameraParameters afMode, RokidCameraParameters awbMode) {
-        captureRequestBuilder.set(CONTROL_AE_MODE, aeMode.getMode());
-        captureRequestBuilder.set(CONTROL_AF_MODE, afMode.getMode());
-        captureRequestBuilder.set(CONTROL_AWB_MODE, awbMode.getMode());
+        captureRequestBuilder.set(CONTROL_AE_MODE, aeMode.getParam());
+        captureRequestBuilder.set(CONTROL_AF_MODE, afMode.getParam());
+        captureRequestBuilder.set(CONTROL_AWB_MODE, awbMode.getParam());
     }
 }
