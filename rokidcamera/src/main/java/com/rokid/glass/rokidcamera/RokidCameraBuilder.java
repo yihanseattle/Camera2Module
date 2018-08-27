@@ -10,6 +10,7 @@ import com.rokid.glass.rokidcamera.callbacks.RokidCameraOnImageAvailableListener
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraStateListener;
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraVideoRecordingListener;
 import com.rokid.glass.rokidcamera.rokidcamerabuilder.RokidCameraBuilderPlan;
+import com.rokid.glass.rokidcamera.utils.RokidCameraBuilderValidator;
 import com.rokid.glass.rokidcamera.utils.RokidCameraParameters;
 import com.rokid.glass.rokidcamera.utils.RokidCameraSize;
 
@@ -58,7 +59,7 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
         this.mRokidCameraOnImageAvailableListener = null;
         this.mRokidCameraSizePreview = RokidCameraSize.SIZE_PREVIEW;
         this.mRokidCameraSizeImageReader = RokidCameraSize.SIZE_IMAGE_READER_STILL_PHOTO;
-        this.mRokidCameraSizeImageReader = RokidCameraSize.SIZE_VIDEO_RECORDING;
+        this.mRokidCameraSizeVideoRecorder = RokidCameraSize.SIZE_VIDEO_RECORDING;
         this.mRokidCameraParamAEMode = RokidCameraParameters.ROKID_CAMERA_PARAM_AE_MODE_ON;
         this.mRokidCameraParamAFMode = RokidCameraParameters.ROKID_CAMERA_PARAM_AF_MODE_PICTURE;
         this.mRokidCameraParamAWBMode = RokidCameraParameters.ROKID_CAMERA_PARAM_AWB_MODE_AUTO;
@@ -152,63 +153,63 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
         return this;
     }
 
-    int getMaxImages() {
+    public int getMaxImages() {
         return mMaxImages;
     }
 
-    int getImageFormat() {
+    public int getImageFormat() {
         return mImageFormat;
     }
 
-    boolean isPreviewEnabled() {
+    public boolean isPreviewEnabled() {
         return previewEnabled;
     }
 
-    int getImageReaderCallbackMode() {
+    public int getImageReaderCallbackMode() {
         return mImageReaderCallbackMode;
     }
 
-    Activity getActivity() {
+    public Activity getActivity() {
         return mActivity;
     }
 
-    TextureView getTextureView() {
+    public TextureView getTextureView() {
         return mTextureView;
     }
 
-    RokidCameraStateListener getRokidCameraStateListener() {
+    public RokidCameraStateListener getRokidCameraStateListener() {
         return mRokidCameraStateListener;
     }
 
-    RokidCameraIOListener getRokidCameraIOListener() {
+    public RokidCameraIOListener getRokidCameraIOListener() {
         return mRokidCameraIOListener;
     }
 
-    RokidCameraVideoRecordingListener getRokidCameraRecordingListener() {
+    public RokidCameraVideoRecordingListener getRokidCameraRecordingListener() {
         return mRokidCameraRecordingListener;
     }
 
-    RokidCameraOnImageAvailableListener getRokidCameraOnImageAvailableListener() {
+    public RokidCameraOnImageAvailableListener getRokidCameraOnImageAvailableListener() {
         return mRokidCameraOnImageAvailableListener;
     }
 
-    RokidCameraSize getRokidCameraSizePreview() {
+    public RokidCameraSize getRokidCameraSizePreview() {
         return mRokidCameraSizePreview;
     }
 
-    RokidCameraSize getRokidCameraSizeImageReader() {
+    public RokidCameraSize getRokidCameraSizeImageReader() {
         return mRokidCameraSizeImageReader;
     }
 
-    RokidCameraSize getRokidCameraSizeVideoRecorder() {
+    public RokidCameraSize getRokidCameraSizeVideoRecorder() {
         return mRokidCameraSizeVideoRecorder;
     }
 
-    RokidCameraParameters getRokidCameraParamAEMode() {
+    public RokidCameraParameters getRokidCameraParamAEMode() {
         return mRokidCameraParamAEMode;
     }
 
-    RokidCameraParameters getRokidCameraParamAFMode() {
+    public RokidCameraParameters getRokidCameraParamAFMode() {
         return mRokidCameraParamAFMode;
     }
 
@@ -221,6 +222,20 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
     }
 
     public RokidCamera build() {
+        validateBuilder(this);
         return new RokidCamera(this);
+    }
+
+    private void validateBuilder(RokidCameraBuilder rokidCameraBuilder) {
+        RokidCameraBuilderValidator.validateImageFormat(this);
+        RokidCameraBuilderValidator.validateMaxImageBuffer(this);
+        RokidCameraBuilderValidator.validateImageReaderCallbackMode(this);
+        RokidCameraBuilderValidator.validateSizePreview(this);
+        RokidCameraBuilderValidator.validateSizeImageReader(this);
+        RokidCameraBuilderValidator.validateSizeVideoRecorder(this);
+        RokidCameraBuilderValidator.validateParamAEMode(this);
+        RokidCameraBuilderValidator.validateParamAFMode(this);
+        RokidCameraBuilderValidator.validateParamAWBMode(this);
+        RokidCameraBuilderValidator.validateParamCameraId(this);
     }
 }

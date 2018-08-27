@@ -98,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements
                 .setRokidCameraParamAEMode(RokidCameraParameters.ROKID_CAMERA_PARAM_AE_MODE_ON)
                 .setRokidCameraParamAFMode(RokidCameraParameters.ROKID_CAMERA_PARAM_AF_MODE_PICTURE)
                 .setRokidCameraParamAWBMode(RokidCameraParameters.ROKID_CAMERA_PARAM_AWB_MODE_AUTO)
+                .setRokidCameraParamCameraID(RokidCameraParameters.ROKID_CAMERA_PARAM_CAMERA_ID_ROKID_GLASS)
                 .build();
 
     }
@@ -468,10 +469,10 @@ public class MainActivity extends AppCompatActivity implements
     public void onRokidCameraRocordingFinished() {
         // UI update
         mChronometer.stop();
+        mCameraMode = CameraMode.VIDEO_STOPPED;
         updateButtonText(mCameraMode);
         disableProgressTextView();
 
-        mCameraMode = CameraMode.VIDEO_STOPPED;
         // app state and UI
         mIsRecording = false;
     }
