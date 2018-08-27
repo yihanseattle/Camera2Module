@@ -17,7 +17,7 @@ CameraDevice
 	1. used for auto-focus in `Preview` 
 	
 		lang=java
-        private CameraCaptureSession.CaptureCallback mPreviewCaptureCallback = ne  CameraCaptureSession.CaptureCallback()   
+        private CameraCaptureSession.CaptureCallback mPreviewCaptureCallback = new CameraCaptureSession.CaptureCallback()   
             private void process(CaptureResult captureResult) {
               switch (mCaptureState) {
                   case STATE_PREVIEW:
@@ -389,7 +389,7 @@ Take photo:
 - Implementation example inside Activity class for listening events: 
 
 		lang=java
-        public class mainActivity implements RokidCameraStateListener {
+        public class MainActivity implements RokidCameraStateListener {
 
         ...
         ...
@@ -421,7 +421,7 @@ Take photo:
 
 - Implementation example inside Activity class for listening events: 
 		lang=java
-        public class mainActivity implements RokidCameraVideoRecordingListener {
+        public class MainActivity implements RokidCameraVideoRecordingListener {
 
         ...
         ...
@@ -478,7 +478,7 @@ Take photo:
 
 - Implementation example inside Activity class for listening events: 
 		lang=java
-        public class mainActivity implements RokidCameraOnImageAvailableListener, RokidCameraIOListener {
+        public class MainActivity implements RokidCameraOnImageAvailableListener, RokidCameraIOListener {
 
         ...
         ...
@@ -497,7 +497,7 @@ Take photo:
 
 - Implementation example inside Activity class for listening events: 
 		lang=java
-        public class mainActivity {
+        public class MainActivity {
 
         ...
         ...
@@ -514,7 +514,7 @@ Take photo:
 
 - Implementation example inside Activity class for listening events: 
 		lang=java
-        public class mainActivity {
+        public class MainActivity {
 
         ...
         ...
@@ -531,7 +531,7 @@ Take photo:
 
 - Implementation example inside Activity class for listening events: 
 		lang=java
-        public class mainActivity {
+        public class MainActivity {
 
         ...
         ...
