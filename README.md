@@ -1,6 +1,6 @@
 # Rokid Camera
 
-The camera app for Rokid Glass can take pictures and videos. Recently, the app has integrated with Rokid Camera Module. The Camera app use much less code to use camera components with Camera Module. The doc will introduce the followings:
+The camera app for Rokid Glass can take pictures and videos. Recently, the app has integrated with Rokid Camera Module. The Camera app use much less code to use camera components with Camera Module. The Camera Module will increase the productivity of Rokid Glass app developers that uses camera components. For example, the camera app without Camera Module has 2500 lines of code in MainActivity class. However, now the MainActivity only has 800 lines of code using Camera Module. The Camera Module will also prevent any illegal configurations when setting up Camera instance. Also the Camera Module should support all apps that will be installed on Rokid Glass. This doc will introduce the followings:
 
     - Features of this app
     - The file path that photos and videos will be stored
@@ -17,6 +17,8 @@ To use this project, simply git clone and run under Android Studio 3.
 
 ## Goal 
 The goal of this app is to provide Camera app with glass-friendly UI so that the users can have the best user experience when using Rokid Glass. User should be able to successfully take still photos and record video. The project only contain the most basic features and doesn't provide manual camera configurations (Apature, ISO, shutter speed, etc.).
+
+The goal of Camera Module is to create a general camera interface for apps run on Rokid Glass. Camera is one of the most commonly used components on Rokid Glass. After using this module, app developers should have more confidents when writing a camera featured app. Apps use Camera Module should be more stable as well since the Camera Module is throughly tested. 
 
 
 ## Basic App Features:
