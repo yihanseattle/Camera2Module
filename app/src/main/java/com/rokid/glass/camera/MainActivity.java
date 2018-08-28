@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements
         initLayoutAndUI();
 
         mRokidCamera = new RokidCameraBuilder(this, mTextureView)
-                .setPreviewEnabled(true)
+                .setPreviewEnabled(false)
                 .setImageFormat(ImageFormat.JPEG)
                 .setMaximumImages(5)
                 .setRokidCameraRecordingListener(this)

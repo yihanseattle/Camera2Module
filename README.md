@@ -2,6 +2,21 @@ Rokid Camera
 
 The camera app for Rokid Glass can take pictures and videos. Saves the file to `sdcard\DCIM\` folder. The user can swipe between picture and video mode by swiping on the touch bar.
 
+## Basic App Features:
+
+1. Take photo
+- Click shutter button to take single photo
+{F2188, layout=left, size=full, alt="a duckling"}
+
+2. Record video 
+- Click shutter button to start recording. It should be time duration at the shutter button when recording is in progress. Click again to stop recording. 
+{F2189, layout=left, size=full, alt="a duckling"}
+{F2190, layout=left, size=full, alt="a duckling"}
+
+## Default File Path
+
+`sdcard\DCIM\`
+
 ---
 ## Android API:
 

@@ -699,8 +699,10 @@ public class RokidCamera {
             mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
             configureCameraParameters(mCaptureRequestBuilder, mRokidCameraParamAEMode, mRokidCameraParamAFMode, mRokidCameraParamAWBMode);
 
-            // add Preview surface to target
-            mCaptureRequestBuilder.addTarget(previewSurface);
+            if (mPreviewEnabled) {
+                // add Preview surface to target
+                mCaptureRequestBuilder.addTarget(previewSurface);
+            }
 
             // add Record surface to target
             Surface recordSurface = mMediaRecorder.getSurface();
