@@ -14,7 +14,7 @@ The camera app for Rokid Glass can take pictures and videos. Saves the file to `
 {F2189, layout=left, size=full, alt="a duckling"}
 {F2190, layout=left, size=full, alt="a duckling"}
 
-## Default File Path
+## Default File Path for Photo and Video
 
 `sdcard\DCIM\`
 
