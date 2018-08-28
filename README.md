@@ -5,12 +5,12 @@ The camera app for Rokid Glass can take pictures and videos. Recently, the app h
     - Features of this app
     - The file path that photos and videos will be stored
     - Default resolutions (Can be configured to different resolution in Camera Module)
-    - Android Camera API overview       (Integrated with Camera Module)
-    - App Initialization Workflow       (Integrated with Camera Module)
-    - Start Preview                     (Integrated with Camera Module)
-    - Taking still photo                (Integrated with Camera Module)
-    - Start and stop video recording    (Integrated with Camera Module)
-    - Resource Release                  (Integrated with Camera Module)
+    - Integrated with Camera Module: Android Camera API overview
+    - Integrated with Camera Module: App Initialization Workflow
+    - Integrated with Camera Module: Start Preview
+    - Integrated with Camera Module: Taking still photo
+    - Integrated with Camera Module: Start and stop video recording
+    - Integrated with Camera Module: Resource Release
     - Camera Module Introduction
 
 To use this project, simply git clone and run under Android Studio 3. 
