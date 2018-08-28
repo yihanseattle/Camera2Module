@@ -10,10 +10,11 @@ The camera app for Rokid Glass can take pictures and videos. Saves the file to `
 
 2. Record video 
 
-### Click shutter button to start recording. It should be time duration at the shutter button when recording is in progress. Click again to stop recording. 
+- Click shutter button to start recording. It should be time duration at the shutter button when recording is in progress. Click again to stop recording. 
 {F2189, layout=left, size=full, alt="a duckling"}
 {F2190, layout=left, size=full, alt="a duckling"}
 
+---
 ## Default File Path for Photo and Video
 
 `sdcard\DCIM\`
