@@ -5,6 +5,7 @@ The camera app for Rokid Glass can take pictures and videos. Saves the file to `
 ## Basic App Features:
 
 1. Take photo
+
 - Click shutter button to take single photo
 {F2188, layout=left, size=full, alt="a duckling"}
 
