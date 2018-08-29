@@ -55,6 +55,28 @@ Video: (Format : MP4)
 ```
 
 ---
+## All Supported Configurations:
+
+Below are all supported configurations from Camera Module. App developer can choose to configure based on their use case (Refer to API Doc for more detailed information)
+
+### Camera Configurations:
+- Enable or disable camera preview
+- Set image format
+- Set maximum image buffer size
+- Set preview size
+- Set ImageReader size
+- Set Video Recorder size
+- Set AE Mode
+- Set AF Mode
+- Set AWB Mode
+- Set Camera ID
+
+### Callback Listeners:
+- Set camera state listener
+- Set video recorder state listener
+- Set ImageReader callback listener and ImageReader mode
+
+---
 ## Android Camera API:
 
 Photo:
