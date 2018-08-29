@@ -18,7 +18,7 @@ To use this project, simply git clone and run under Android Studio 3.
 ## Goal 
 The goal of this app is to provide Camera app with glass-friendly UI so that the users can have the best user experience when using Rokid Glass. User should be able to successfully take still photos and record video. The project only contain the most basic features and doesn't provide manual camera configurations (Apature, ISO, shutter speed, etc.).
 
-The goal of Camera Module is to create a general camera interface for apps run on Rokid Glass. Camera is one of the most commonly used components on Rokid Glass. After using this module, app developers should have more confidents when writing a camera featured app. Apps use Camera Module should be more stable as well since the Camera Module is throughly tested. 
+The goal of Camera Module is to create a general camera interface for apps run on Rokid Glass. Camera is one of the most commonly used components on Rokid Glass. The Camera Module can provide necessary features like still photo taking, video recording, or camera Byte data reading for algorithm use. After using this module, app developers should have more confidents when writing a camera featured app. Apps use Camera Module should be more stable as well since the Camera Module is throughly tested. 
 
 
 ## Basic App Features:
