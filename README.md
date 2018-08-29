@@ -1,4 +1,4 @@
-# Rokid Camera
+# Rokid Camera App and Rokid Camera Module
 
 The camera app for Rokid Glass can take pictures and videos. Recently, the app has integrated with Rokid Camera Module. The Camera app use much less code to use camera components with Camera Module. The Camera Module will increase the productivity of Rokid Glass app developers that uses camera components. For example, the camera app without Camera Module has 2500 lines of code in MainActivity class. However, now the MainActivity only has 800 lines of code using Camera Module. The Camera Module will also prevent any illegal configurations when setting up Camera instance. Also the Camera Module should support all apps that will be installed on Rokid Glass. This doc will introduce the followings:
 
