@@ -285,8 +285,6 @@ public class RokidCamera {
                     fileOutputStream = new FileOutputStream(mImageFile.getAbsoluteFile());
                     fileOutputStream.write(bytes);
                     Log.i("testtest", "thread finished ");
-                    // reset to null for the next incoming Image
-                    mImageFile = null;
 
                     // callback to user
                     if (mRokidCameraIOListener != null) {
@@ -297,7 +295,7 @@ public class RokidCamera {
                     // send global notification for new photo taken
                     // so that the gallery app can view new photo
                     final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                    final Uri contentUri = Uri.fromFile(mImageFile.getAbsoluteFile());
+                    final Uri contentUri = Uri.fromFile(mImageFolder.getAbsoluteFile());
                     scanIntent.setData(contentUri);
                     mActivity.sendBroadcast(scanIntent);
 
@@ -308,10 +306,13 @@ public class RokidCamera {
                             new MediaScannerConnection.OnScanCompletedListener() {
                                 @Override
                                 public void onScanCompleted(String path, Uri uri) {
-//                                    Log.v("testtest",
-//                                            "file " + path + " was scanned seccessfully: " + uri);
+                                    Log.v("testtest",
+                                            "file " + path + " was scanned seccessfully: " + uri);
                                 }
                             });
+
+                    // reset to null for the next incoming Image
+                    mImageFile = null;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
