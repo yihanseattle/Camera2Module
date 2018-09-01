@@ -22,6 +22,7 @@ import android.media.ImageReader;
 import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
@@ -37,7 +38,6 @@ import com.rokid.glass.rokidcamera.callbacks.RokidCameraOnImageAvailableListener
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraStateListener;
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraVideoRecordingListener;
 import com.rokid.glass.rokidcamera.utils.CameraDeviceUtils;
-import com.rokid.glass.rokidcamera.utils.FileUtils;
 import com.rokid.glass.rokidcamera.utils.RokidCameraParameters;
 import com.rokid.glass.rokidcamera.utils.RokidCameraSize;
 
@@ -45,7 +45,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 
 import static android.hardware.camera2.CaptureRequest.CONTROL_AE_MODE;
 import static android.hardware.camera2.CaptureRequest.CONTROL_AF_MODE;
@@ -277,14 +279,17 @@ public class RokidCamera {
             FileOutputStream fileOutputStream = null;
             try {
                 // use File to save
-                if (mImageFile != null) {
+                if (mImageFileName != null) {
                     ByteBuffer byteBuffer = mImage.getPlanes()[0].getBuffer();
                     byte[] bytes = new byte[byteBuffer.remaining()];
                     byteBuffer.get(bytes);
 
-                    fileOutputStream = new FileOutputStream(mImageFile.getAbsoluteFile());
+                    fileOutputStream = new FileOutputStream(mImageFileName);
                     fileOutputStream.write(bytes);
                     Log.i("testtest", "thread finished ");
+
+                    // reset to null for the next incoming Image
+                    mImageFileName = null;
 
                     // callback to user
                     if (mRokidCameraIOListener != null) {
@@ -295,7 +300,7 @@ public class RokidCamera {
                     // send global notification for new photo taken
                     // so that the gallery app can view new photo
                     final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                    final Uri contentUri = Uri.fromFile(mImageFolder.getAbsoluteFile());
+                    final Uri contentUri = Uri.fromFile(mImageFileTest.getAbsoluteFile());
                     scanIntent.setData(contentUri);
                     mActivity.sendBroadcast(scanIntent);
 
@@ -311,8 +316,7 @@ public class RokidCamera {
                                 }
                             });
 
-                    // reset to null for the next incoming Image
-                    mImageFile = null;
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -334,10 +338,13 @@ public class RokidCamera {
     private Handler mBackgroundHandler;
 
     // destination folder
-    private File mImageFolder;
-    private File mImageFile;
     private File mVideoFolder;
-    private File mVideoFile;
+    private String mVideoFileName;
+    private File mVideoFileTest;
+
+    private File mImageFolder;
+    private String mImageFileName;
+    private File mImageFileTest;
 
     /**
      * User RokidCameraBuilder to create an instance of RokidCamera
@@ -380,8 +387,8 @@ public class RokidCamera {
      */
     public void onStart() {
 
-        mVideoFolder = FileUtils.createVideoFolder();
-        mImageFolder = FileUtils.createImageFolder();
+        mVideoFolder = createVideoFolder();
+        mImageFolder = createImageFolder();
         mMediaRecorder = new MediaRecorder();
 
         startBackgroundThread();
@@ -613,7 +620,7 @@ public class RokidCamera {
                     super.onCaptureStarted(session, request, timestamp, frameNumber);
                     // create image when it's in focus
                     try {
-                        mImageFile = FileUtils.createImageFile(mImageFolder);
+                        mImageFileTest = createImageFile(mImageFolder);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -631,7 +638,7 @@ public class RokidCamera {
     public void startVideoRecording() {
 
         try {
-            mVideoFile = FileUtils.createVideoFile(mVideoFolder);
+            mVideoFileTest = createVideoFile(mVideoFolder);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -663,7 +670,7 @@ public class RokidCamera {
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
         mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-        mMediaRecorder.setOutputFile(mVideoFile.getAbsolutePath());
+        mMediaRecorder.setOutputFile(mVideoFileName);
         mMediaRecorder.setVideoEncodingBitRate(10000000);
         mMediaRecorder.setVideoFrameRate(30);
         mMediaRecorder.setVideoSize(mSizeVideoRecorder.getSize().getWidth(), mSizeVideoRecorder.getSize().getHeight());
@@ -751,7 +758,7 @@ public class RokidCamera {
         }
 
         final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        final Uri contentUri = Uri.fromFile(mVideoFile.getAbsoluteFile());
+        final Uri contentUri = Uri.fromFile(mVideoFileTest.getAbsoluteFile());
         scanIntent.setData(contentUri);
         mActivity.sendBroadcast(scanIntent);
 
@@ -828,5 +835,53 @@ public class RokidCamera {
         captureRequestBuilder.set(CONTROL_AE_MODE, aeMode.getParam());
         captureRequestBuilder.set(CONTROL_AF_MODE, afMode.getParam());
         captureRequestBuilder.set(CONTROL_AWB_MODE, awbMode.getParam());
+    }
+
+    // TODO: put to a Util class
+    public File createVideoFolder() {
+//        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+//                Environment.DIRECTORY_MOVIES + File.separator), "RokidCameraVideo");
+//        mVideoFolder = mediaStorageDir;
+
+        File movieFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+        File mVideoFolder = new File(movieFile, "Camera");
+
+        if (!mVideoFolder.exists()) {
+            mVideoFolder.mkdirs();
+        }
+
+        return mVideoFolder;
+    }
+
+    public File createVideoFile(File mVideoFolder) throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyHHdd_HHmmss").format(new Date());
+        String prepend = "ROKIDVIDEO_" + timeStamp;
+        File videoFile = File.createTempFile(prepend, ".mp4", mVideoFolder);
+        mVideoFileName = videoFile.getAbsolutePath();
+        return videoFile;
+    }
+
+    public File createImageFolder() {
+//        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+//                Environment.DIRECTORY_PICTURES + File.separator), "RokidCameraCamera");
+//        mImageFolder = mediaStorageDir;
+
+        File imageFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+        File mImageFolder = new File(imageFile, "Camera");
+
+        if (!mImageFolder.exists()) {
+            mImageFolder.mkdirs();
+        }
+
+        return mImageFolder;
+    }
+
+    public File createImageFile(File mImageFolder) throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyHHdd_HHmmss").format(new Date());
+        String prepend = "ROKIDIMAGE_" + timeStamp;
+//        File imageFile = File.createTempFile("ROKIDTEST", ".jpg", mImageFolder);
+        File imageFile = new File(mImageFolder, prepend + ".jpg");
+        mImageFileName = imageFile.getAbsolutePath();
+        return imageFile;
     }
 }
