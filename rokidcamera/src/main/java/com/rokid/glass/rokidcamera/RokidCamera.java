@@ -212,12 +212,14 @@ public class RokidCamera {
                 // use case: algorithm
                 // use `acquireNextImage()` here because we need continuous image for algorithm
 
+                // TODO: don't use this for now. Use acquireLatestImage() instead.
+//                Image image = imageReader.acquireNextImage();
 
 
-                long startTime = System.nanoTime();
-                Image image = imageReader.acquireNextImage();
-                long estimatedTime = System.nanoTime() - startTime;
-                Log.i("testtest", "acquireLatestImage time in nano: " + estimatedTime);
+//                long startTime = System.nanoTime();
+                Image image = imageReader.acquireLatestImage();
+//                long estimatedTime = System.nanoTime() - startTime;
+//                Log.i("testtest", "acquireLatestImage time in nano: " + estimatedTime);
                 if (image != null) {
                     mBackgroundHandler.post(new ImageCallback(image));
                 }
