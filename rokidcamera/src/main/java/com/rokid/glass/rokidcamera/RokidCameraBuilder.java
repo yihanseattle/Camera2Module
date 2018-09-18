@@ -90,8 +90,8 @@ public class RokidCameraBuilder implements RokidCameraBuilderPlan {
 
     @Override
     public RokidCameraBuilder setRokidCameraOnImageAvailableListener(int imageReaderCallbackMode,
-                                                                     @NonNull RokidCameraOnImageAvailableListener rokidCameraOnImageAvailableListener,
-                                                                     @NonNull RokidCameraIOListener rokidCameraIOListener) {
+                                                                     RokidCameraOnImageAvailableListener rokidCameraOnImageAvailableListener,
+                                                                     RokidCameraIOListener rokidCameraIOListener) {
         this.mImageReaderCallbackMode = imageReaderCallbackMode;
         this.mRokidCameraOnImageAvailableListener = rokidCameraOnImageAvailableListener;
         this.mRokidCameraIOListener = rokidCameraIOListener;
