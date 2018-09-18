@@ -24,7 +24,7 @@ public class RokidCameraBuilderValidator {
 
     public static void validateMaxImageBuffer(RokidCameraBuilder rokidCameraBuilder) {
         int imageBufferSize = rokidCameraBuilder.getMaxImages();
-        if (imageBufferSize > 2 && imageBufferSize < 20) {
+        if (imageBufferSize >= 2 && imageBufferSize <= 20) {
             return;
         }
 

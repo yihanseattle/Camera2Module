@@ -76,7 +76,6 @@ public class RokidCamera {
     private int mMaxImages;
     private int mImageReaderCallbackMode;
 
-
     // resolution size
     private RokidCameraSize mSizePreview;
     private RokidCameraSize mSizeVideoRecorder;
@@ -885,5 +884,65 @@ public class RokidCamera {
         File imageFile = new File(mImageFolder, prepend + ".jpg");
         mImageFileName = imageFile.getAbsolutePath();
         return imageFile;
+    }
+
+    public RokidCameraStateListener getRokidCameraStateListener() {
+        return mRokidCameraStateListener;
+    }
+
+    public RokidCameraIOListener getRokidCameraIOListener() {
+        return mRokidCameraIOListener;
+    }
+
+    public RokidCameraVideoRecordingListener getRokidCameraRecordingListener() {
+        return mRokidCameraRecordingListener;
+    }
+
+    public RokidCameraOnImageAvailableListener getRokidCameraOnImageAvailableListener() {
+        return mRokidCameraOnImageAvailableListener;
+    }
+
+    public boolean isPreviewEnabled() {
+        return mPreviewEnabled;
+    }
+
+    public int getImageFormat() {
+        return mImageFormat;
+    }
+
+    public int getMaxImages() {
+        return mMaxImages;
+    }
+
+    public int getImageReaderCallbackMode() {
+        return mImageReaderCallbackMode;
+    }
+
+    public RokidCameraSize getSizePreview() {
+        return mSizePreview;
+    }
+
+    public RokidCameraSize getSizeVideoRecorder() {
+        return mSizeVideoRecorder;
+    }
+
+    public RokidCameraSize getSizeImageReader() {
+        return mSizeImageReader;
+    }
+
+    public RokidCameraParameters getRokidCameraParamAEMode() {
+        return mRokidCameraParamAEMode;
+    }
+
+    public RokidCameraParameters getRokidCameraParamAFMode() {
+        return mRokidCameraParamAFMode;
+    }
+
+    public RokidCameraParameters getRokidCameraParamAWBMode() {
+        return mRokidCameraParamAWBMode;
+    }
+
+    public RokidCameraParameters getRokidCameraParamCameraId() {
+        return mRokidCameraParamCameraId;
     }
 }
