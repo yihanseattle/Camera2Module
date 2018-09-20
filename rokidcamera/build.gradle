@@ -37,6 +37,10 @@ android {
                 optimizeCode false
                 proguardFile 'proguard-rules.pro'
             }
+            testCoverageEnabled false
+        }
+        debug {
+            testCoverageEnabled true
         }
     }
 

@@ -31,6 +31,7 @@ import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraIOListener;
@@ -517,6 +518,20 @@ public class RokidCamera {
      * Start preview
      */
     public void startPreview() {
+
+        // disable preview if necessary
+        if (!mPreviewEnabled) {
+            final ViewGroup.LayoutParams layoutParams = mTextureView.getLayoutParams();
+            layoutParams.height = 1;
+            layoutParams.width = 1;
+            mActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mTextureView.setLayoutParams(layoutParams);
+                }
+            });
+        }
+
         SurfaceTexture surfaceTexture = mTextureView.getSurfaceTexture();
         assert surfaceTexture != null;
         surfaceTexture.setDefaultBufferSize(mSizePreview.getSize().getWidth(), mSizePreview.getSize().getHeight());
@@ -540,7 +555,11 @@ public class RokidCamera {
                 mCaptureRequestBuilder.addTarget(previewSurface);
             }
 
-            mCaptureRequestBuilder.addTarget(mImageReader.getSurface());
+            // only add ImageReader when the mode is STILL_PHOTO_MODE_CONTINUOUS_IMAGE_CALLBACK
+            // in other words, only add ImageReader when the app is used by algorithm alike
+            if (mImageReaderCallbackMode == STILL_PHOTO_MODE_CONTINUOUS_IMAGE_CALLBACK) {
+                mCaptureRequestBuilder.addTarget(mImageReader.getSurface());
+            }
 
             mCameraDevice.createCaptureSession(Arrays.asList(previewSurface, mImageReader.getSurface()), new CameraCaptureSession.StateCallback() {
                 @Override
