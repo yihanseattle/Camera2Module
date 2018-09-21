@@ -551,9 +551,9 @@ public class RokidCamera {
             mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             configureCameraParameters(mCaptureRequestBuilder, mRokidCameraParamAEMode, mRokidCameraParamAFMode, mRokidCameraParamAWBMode);
 
-            if (mPreviewEnabled) {
+//            if (mPreviewEnabled) {
                 mCaptureRequestBuilder.addTarget(previewSurface);
-            }
+//            }
 
             // only add ImageReader when the mode is STILL_PHOTO_MODE_CONTINUOUS_IMAGE_CALLBACK
             // in other words, only add ImageReader when the app is used by algorithm alike
