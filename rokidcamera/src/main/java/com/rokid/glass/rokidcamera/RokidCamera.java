@@ -168,7 +168,7 @@ public class RokidCamera {
                     if (afState != null && (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED ||
                             afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED)) {
                         if (mActivity != null) {
-                            Toast.makeText(mActivity, "AF Locked!", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(mActivity, "AF Locked!", Toast.LENGTH_SHORT).show();
                         }
                         sendStillCaptureRequest();
                     }
