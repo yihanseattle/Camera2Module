@@ -603,3 +603,14 @@ Take photo:
                                 .setMaximumImages(5)
             ..
             ..
+
+## Branch Description:
+
+yi_zhiyu_special_edition:
+1. 开preview
+2. 在2000 ms之后自动capture photo
+3. 图片分辨率是4000 x 3000
+4. 图片保存目录是："/storage/self/primary/DCIM/Camera"，文件名是："ROKIDIMAGE_test.jpg"。完整路径是：”/storage/self/primary/DCIM/Camera/ROKIDIMAGE_test.jpg"。如果DCIM下面没有Camera这个文件夹，app会创建一个。但是这个文件夹应该有的吧，这是默认camera app保存的目录。
+5. 在File I/O保存结束后，自动close app
+
+
