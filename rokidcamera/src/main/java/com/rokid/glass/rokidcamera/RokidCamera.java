@@ -767,9 +767,26 @@ public class RokidCamera {
 
         try {
             mMediaRecorder.stop();
+
+            final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            final Uri contentUri = Uri.fromFile(mVideoFileTest.getAbsoluteFile());
+            scanIntent.setData(contentUri);
+            mActivity.sendBroadcast(scanIntent);
+
+            MediaScannerConnection.scanFile(
+                    mActivity,
+                    new String[]{mVideoFolder.getAbsolutePath()},
+                    null,
+                    new MediaScannerConnection.OnScanCompletedListener() {
+                        @Override
+                        public void onScanCompleted(String path, Uri uri) {
+                            Log.v("testtest",
+                                    "file " + path + " was scanned seccessfully: " + uri);
+                        }
+                    });
         } catch(RuntimeException e) {
-            // TODO: delete file if recording failed to prevent 0KB file (error file)
-//                mFile.delete();
+            mVideoFileTest.delete();
+//            e.printStackTrace();
         } finally {
             mMediaRecorder.reset();
 
@@ -777,22 +794,7 @@ public class RokidCamera {
 //                mRecorder = null;
         }
 
-        final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        final Uri contentUri = Uri.fromFile(mVideoFileTest.getAbsoluteFile());
-        scanIntent.setData(contentUri);
-        mActivity.sendBroadcast(scanIntent);
 
-        MediaScannerConnection.scanFile(
-                mActivity,
-                new String[]{mVideoFolder.getAbsolutePath()},
-                null,
-                new MediaScannerConnection.OnScanCompletedListener() {
-                    @Override
-                    public void onScanCompleted(String path, Uri uri) {
-                        Log.v("testtest",
-                                "file " + path + " was scanned seccessfully: " + uri);
-                    }
-                });
     }
 
     /**
