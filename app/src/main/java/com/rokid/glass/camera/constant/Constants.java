@@ -10,8 +10,8 @@ package com.rokid.glass.camera.constant;
 public class Constants {
 
     public static final int VIDEO_PROGRESS_TIMER_RATE = 1000;
-    public static final float CAMERA_MODE_TEXT_SIZE_SELECTED = 22;
-    public static final float CAMERA_MODE_TEXT_SIZE_DESELECTED = 20;
+    public static final float CAMERA_MODE_TEXT_SIZE_SELECTED = 34;
+    public static final float CAMERA_MODE_TEXT_SIZE_DESELECTED = 29;
     public static final String CAMERA_MODE_TEXT_COLOR_SELECTED = "#D8D8D8";
     public static final String CAMERA_MODE_TEXT_COLOR_DESELECTED = "#A5A5A5";
     public static final int CAMERA_MODE_TEXT_PADDING_TOP = 3;

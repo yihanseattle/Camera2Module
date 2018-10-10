@@ -31,7 +31,7 @@
             android:visibility="gone"
             android:layout_gravity="center"
             android:orientation="horizontal"
-            android:layout_marginBottom="3dp"
+            android:layout_marginBottom="19dp"
             >
 
             <ImageView
@@ -48,7 +48,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#FFFFFF"
-                android:textSize="25sp"
+                android:textSize="34sp"
                 />
             <View
                 android:layout_width="15dp"
@@ -58,12 +58,13 @@
         </LinearLayout>
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerView"
-            android:layout_width="180dp"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_gravity="center"
             android:clickable="false"
             android:focusableInTouchMode="false"
+            android:layout_marginBottom="19dp"
             >
         </android.support.v7.widget.RecyclerView>
         <ImageView
@@ -72,7 +73,7 @@
             android:layout_height="80dp"
             android:src="@drawable/shutterinactive"
             android:layout_gravity="center"
-            android:layout_marginBottom="22dp"
+            android:layout_marginBottom="49dp"
             />
     </LinearLayout>
 </RelativeLayout>
