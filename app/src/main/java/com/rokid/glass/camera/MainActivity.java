@@ -5,7 +5,10 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Typeface;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.Image;
+import android.media.SoundPool;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -51,6 +54,20 @@ public class MainActivity extends AppCompatActivity implements
 
     public static final String TAG = "Camera2VideoImage";
 
+    // sound related
+    private SoundPool soundPool;
+    private AudioManager audioManager;
+    // Maximumn sound stream.
+    private static final int MAX_STREAMS = 5;
+    // Stream type.
+    private static final int streamType = AudioManager.STREAM_MUSIC;
+    private boolean loaded;
+    private int soundIdPhoto;
+    private int soundIdVideoStart;
+    private int soundIdVideoStop;
+    private float volume;
+
+
     // disable button press(touch pad event) during animation
     private boolean touchpadIsDisabled;
     // animation
@@ -85,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_camera2_video_image);
 
         initLayoutAndUI();
+        initSound();
 
         mRokidCamera = new RokidCameraBuilder(this, mTextureView)
                 .setPreviewEnabled(false)
@@ -106,6 +124,53 @@ public class MainActivity extends AppCompatActivity implements
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                     View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         }
+    }
+
+    private void initSound() {
+        // AudioManager audio settings for adjusting the volume
+        audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+
+        // Current volumn Index of particular stream type.
+        float currentVolumeIndex = (float) audioManager.getStreamVolume(streamType);
+
+        // Get the maximum volume index for a particular stream type.
+        float maxVolumeIndex  = (float) audioManager.getStreamMaxVolume(streamType);
+
+        // Volumn (0 --> 1)
+        this.volume = currentVolumeIndex / maxVolumeIndex;
+
+        // Suggests an audio stream whose volume should be changed by
+        // the hardware volume controls.
+        this.setVolumeControlStream(streamType);
+
+        // For Android SDK >= 21
+        if (Build.VERSION.SDK_INT >= 21 ) {
+
+            AudioAttributes audioAttrib = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_GAME)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build();
+
+            SoundPool.Builder builder= new SoundPool.Builder();
+            builder.setAudioAttributes(audioAttrib).setMaxStreams(MAX_STREAMS);
+
+            this.soundPool = builder.build();
+        }
+
+        // When Sound Pool load complete.
+        this.soundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+            @Override
+            public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+                loaded = true;
+            }
+        });
+
+        // Load sound file (photo.wav) into SoundPool.
+        this.soundIdPhoto = this.soundPool.load(this, R.raw.photo,1);
+        // Load sound file (video_start.wav) into SoundPool.
+        this.soundIdVideoStart = this.soundPool.load(this, R.raw.video_start,1);
+        // Load sound file (video_stop.wav) into SoundPool.
+        this.soundIdVideoStop = this.soundPool.load(this, R.raw.video_stop,1);
     }
 
     private void initLayoutAndUI() {
@@ -394,6 +459,8 @@ public class MainActivity extends AppCompatActivity implements
             // get an image from the camera
             handleStillPictureButton();
             updateButtonText(mCameraMode);
+            // sound
+            playSoundPhoto();
         } else {
             handleVideoButton();
         }
@@ -407,12 +474,16 @@ public class MainActivity extends AppCompatActivity implements
             mRokidCamera.stopRecording();
             // restart preview
             mRokidCamera.startPreview();
+            // sound
+            playSoundVideoStop();
         } else {
             mIsRecording = true;
             mCameraMode = CameraMode.VIDEO_RECORDING;
             updateButtonText(mCameraMode);
             enableProgressTextView();
             mRokidCamera.startVideoRecording();
+            // sound
+            playSoundVideoStart();
         }
     }
 
@@ -491,4 +562,33 @@ public class MainActivity extends AppCompatActivity implements
     public void onRokidCameraImageAvailable(Image image) {
         // handle Image object here
     }
+
+    public void playSoundPhoto()  {
+        if(loaded)  {
+            float leftVolumn = volume;
+            float rightVolumn = volume;
+            // Play sound of gunfire. Returns the ID of the new stream.
+            int streamId = this.soundPool.play(this.soundIdPhoto,leftVolumn, rightVolumn, 1, 0, 1f);
+        }
+    }
+
+    public void playSoundVideoStart()  {
+        if(loaded)  {
+            float leftVolumn = volume;
+            float rightVolumn = volume;
+            // Play sound of gunfire. Returns the ID of the new stream.
+            int streamId = this.soundPool.play(this.soundIdVideoStart,leftVolumn, rightVolumn, 1, 0, 1f);
+        }
+    }
+
+    public void playSoundVideoStop()  {
+        if(loaded)  {
+            float leftVolumn = volume;
+            float rightVolumn = volume;
+            // Play sound of gunfire. Returns the ID of the new stream.
+            int streamId = this.soundPool.play(this.soundIdVideoStop,leftVolumn, rightVolumn, 1, 0, 1f);
+        }
+    }
+
+
 }
