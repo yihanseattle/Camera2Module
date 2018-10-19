@@ -293,10 +293,10 @@ public class MainActivity extends AppCompatActivity implements
     private void initRecyclerView() {
         Log.d(TAG, "initRecyclerView: init recyclerview");
         ArrayList<String> mCameraModes = new ArrayList<>();
-        mCameraModes.add("                         ");
+        mCameraModes.add("                 ");
         mCameraModes.add(getResources().getString(R.string.CAMERAMODE_PHOTO));
         mCameraModes.add(getResources().getString(R.string.CAMERAMODE_VIDEO));
-        mCameraModes.add("                        ");
+        mCameraModes.add("                 ");
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         mRecyclerView = findViewById(R.id.recyclerView);
