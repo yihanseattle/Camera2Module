@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">RokidCamera</string>
-    <string name="CAMERAMODE_PHOTO">Photo</string>
-    <string name="CAMERAMODE_VIDEO">Video</string>
+    <string name="CAMERAMODE_PHOTO">拍照</string>
+    <string name="CAMERAMODE_VIDEO">摄像</string>
 </resources>

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#000000"
+    android:background="@color/color_app_background_black"
     android:keepScreenOn="true"
     tools:context="com.rokid.glass.camera.MainActivity">
 
@@ -36,44 +36,44 @@
 
             <ImageView
                 android:id="@+id/ivVideoRecordingRedDot"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
+                android:layout_width="@dimen/width_imageview_recording_dot"
+                android:layout_height="@dimen/height_imageview_recording_dot"
                 android:src="@drawable/oval"
                 android:layout_gravity="center"
                 android:layout_margin="3dp"
-                android:paddingRight="5dp"
+                android:paddingEnd="5dp"
                 />
             <Chronometer
                 android:id="@+id/chronometer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
-                android:textSize="34sp"
+                android:textColor="@color/color_font_chronometer"
+                android:textSize="@dimen/font_size_chronometer"
                 />
             <View
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:layout_marginLeft="5dp"
+                android:layout_width="@dimen/width_chronometer_placeholder"
+                android:layout_height="@dimen/height_chronometer_placeholder"
+                android:layout_marginStart="@dimen/margin_start_chronometer_placeholder"
                 />
         </LinearLayout>
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerView"
-            android:layout_width="250dp"
+            android:layout_width="@dimen/width_recyclerview"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_gravity="center"
             android:clickable="false"
             android:focusableInTouchMode="false"
-            android:layout_marginBottom="19dp"
+            android:layout_marginBottom="@dimen/margin_recyclerview_bottom"
             >
         </android.support.v7.widget.RecyclerView>
         <ImageView
             android:id="@+id/ivCameraButton"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="@dimen/width_shutter_button_side"
+            android:layout_height="@dimen/height_shutter_button_side"
             android:src="@drawable/shutterinactive"
             android:layout_gravity="center"
-            android:layout_marginBottom="49dp"
+            android:layout_marginBottom="@dimen/margin_shutter_button_bottom"
             />
     </LinearLayout>
 </RelativeLayout>

@@ -4,10 +4,11 @@ android {
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.rokid.glass.camera"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 27
         versionCode 7
         versionName "1.0.6"
+        setProperty("archivesBaseName", "GalleryApp" + "-v" + versionCode + "(" + versionName + ")")
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

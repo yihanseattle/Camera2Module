@@ -2,7 +2,6 @@ package com.rokid.glass.camera;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Typeface;
 import android.media.AudioAttributes;
@@ -265,24 +264,20 @@ public class MainActivity extends AppCompatActivity implements
         switch (keyCode) {
             case KeyEvent.KEYCODE_ENTER:
                 // ENTER
-                Log.i("testtest", "KeyUp ->> " + keyCode + " -- ENTER \n");
                 performCameraButtonAction();
                 break;
 
             case KeyEvent.KEYCODE_DPAD_UP:
                 // RIGHT
-                Log.i("testtest", "KeyUp ->> " + keyCode + " -- RIGHT \n");
                 performSwipeToPhoto();
                 break;
 
             case KeyEvent.KEYCODE_DPAD_DOWN:
                 // LEFT
-                Log.i("testtest", "KeyUp ->> " + keyCode + " -- LEFT \n");
                 performSwipeToVideo();
                 break;
 
             default:
-                Log.i("testtest", "KeyUp ->> " + keyCode + " -- Not Defined!! \n");
                 break;
         }
     }
@@ -293,10 +288,10 @@ public class MainActivity extends AppCompatActivity implements
     private void initRecyclerView() {
         Log.d(TAG, "initRecyclerView: init recyclerview");
         ArrayList<String> mCameraModes = new ArrayList<>();
-        mCameraModes.add("                 ");
+        mCameraModes.add("               ");
         mCameraModes.add(getResources().getString(R.string.CAMERAMODE_PHOTO));
         mCameraModes.add(getResources().getString(R.string.CAMERAMODE_VIDEO));
-        mCameraModes.add("                 ");
+        mCameraModes.add("              ");
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         mRecyclerView = findViewById(R.id.recyclerView);
@@ -335,27 +330,33 @@ public class MainActivity extends AppCompatActivity implements
      * Switch to photo button
      */
     private void initCameraModeForPhoto() {
+
         View view;
         TextView textView;
+        Typeface typeface;
         view = mRecyclerView.findViewHolderForAdapterPosition(1).itemView;
         textView = view.findViewById(R.id.tvCameraMode);
-        textView.setTextSize(Constants.CAMERA_MODE_TEXT_SIZE_SELECTED);
-        textView.setTextColor(Color.parseColor(Constants.CAMERA_MODE_TEXT_COLOR_SELECTED));
+        textView.setTextSize(getResources().getDimension(R.dimen.font_size_text_highlighted));
+        textView.setTextColor(getColor(R.color.color_text_highlight));
         textView.setPadding(
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_LEFT),
                 0,
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
                 0);
+//        typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_medium);
+//        textView.setTypeface(typeface);
         textView.setTypeface(null, Typeface.BOLD);
         view = mRecyclerView.findViewHolderForAdapterPosition(2).itemView;
         textView = view.findViewById(R.id.tvCameraMode);
-        textView.setTextSize(Constants.CAMERA_MODE_TEXT_SIZE_DESELECTED);
-        textView.setTextColor(Color.parseColor(Constants.CAMERA_MODE_TEXT_COLOR_DESELECTED));
+        textView.setTextSize(getResources().getDimension(R.dimen.font_size_text_default));
+        textView.setTextColor(getColor(R.color.color_text_default));
         textView.setPadding(
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_LEFT),
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_TOP),
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
                 0);
+//        typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_regular);
+//        textView.setTypeface(typeface);
         textView.setTypeface(null, Typeface.NORMAL);
     }
 
@@ -365,25 +366,30 @@ public class MainActivity extends AppCompatActivity implements
     private void initCameraModeForVideo() {
         View view;
         TextView textView;
+        Typeface typeface;
         view = mRecyclerView.findViewHolderForAdapterPosition(1).itemView;
         textView = view.findViewById(R.id.tvCameraMode);
-        textView.setTextSize(Constants.CAMERA_MODE_TEXT_SIZE_DESELECTED);
-        textView.setTextColor(Color.parseColor(Constants.CAMERA_MODE_TEXT_COLOR_DESELECTED));
+        textView.setTextSize(getResources().getDimension(R.dimen.font_size_text_default));
+        textView.setTextColor(getColor(R.color.color_text_default));
         textView.setPadding(
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_LEFT),
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_TOP),
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
                 0);
+//        typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_regular);
+//        textView.setTypeface(typeface);
         textView.setTypeface(null, Typeface.NORMAL);
         view = mRecyclerView.findViewHolderForAdapterPosition(2).itemView;
         textView = view.findViewById(R.id.tvCameraMode);
-        textView.setTextSize(Constants.CAMERA_MODE_TEXT_SIZE_SELECTED);
-        textView.setTextColor(Color.parseColor(Constants.CAMERA_MODE_TEXT_COLOR_SELECTED));
+        textView.setTextSize(getResources().getDimension(R.dimen.font_size_text_highlighted));
+        textView.setTextColor(getColor(R.color.color_text_highlight));
         textView.setPadding(
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_LEFT),
                 0,
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
                 0);
+//        typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_medium);
+//        textView.setTypeface(typeface);
         textView.setTypeface(null, Typeface.BOLD);
     }
 
