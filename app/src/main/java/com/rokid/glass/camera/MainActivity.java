@@ -15,6 +15,7 @@ import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -343,9 +344,10 @@ public class MainActivity extends AppCompatActivity implements
                 0,
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
                 0);
-//        typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_medium);
-//        textView.setTypeface(typeface);
-        textView.setTypeface(null, Typeface.BOLD);
+        typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_medium);
+        textView.setTypeface(typeface);
+        textView.setIncludeFontPadding(false);
+//        textView.setTypeface(null, Typeface.BOLD);
         view = mRecyclerView.findViewHolderForAdapterPosition(2).itemView;
         textView = view.findViewById(R.id.tvCameraMode);
         textView.setTextSize(getResources().getDimension(R.dimen.font_size_text_default));
@@ -355,9 +357,10 @@ public class MainActivity extends AppCompatActivity implements
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_TOP),
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
                 0);
-//        typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_regular);
-//        textView.setTypeface(typeface);
-        textView.setTypeface(null, Typeface.NORMAL);
+        typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_regular);
+        textView.setTypeface(typeface);
+        textView.setIncludeFontPadding(false);
+//        textView.setTypeface(null, Typeface.NORMAL);
     }
 
     /**
@@ -376,9 +379,10 @@ public class MainActivity extends AppCompatActivity implements
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_TOP),
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
                 0);
-//        typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_regular);
-//        textView.setTypeface(typeface);
-        textView.setTypeface(null, Typeface.NORMAL);
+        typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_regular);
+        textView.setTypeface(typeface);
+        textView.setIncludeFontPadding(false);
+//        textView.setTypeface(null, Typeface.NORMAL);
         view = mRecyclerView.findViewHolderForAdapterPosition(2).itemView;
         textView = view.findViewById(R.id.tvCameraMode);
         textView.setTextSize(getResources().getDimension(R.dimen.font_size_text_highlighted));
@@ -388,9 +392,10 @@ public class MainActivity extends AppCompatActivity implements
                 0,
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
                 0);
-//        typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_medium);
-//        textView.setTypeface(typeface);
-        textView.setTypeface(null, Typeface.BOLD);
+        typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_medium);
+        textView.setTypeface(typeface);
+        textView.setIncludeFontPadding(false);
+//        textView.setTypeface(null, Typeface.BOLD);
     }
 
     /**
