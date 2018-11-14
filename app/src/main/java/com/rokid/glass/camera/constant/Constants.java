@@ -20,4 +20,5 @@ public class Constants {
     public static final int STATE_WAIT_LOCK = 1;
     public static int mCaptureState = STATE_PREVIEW;
 
+    
 }
