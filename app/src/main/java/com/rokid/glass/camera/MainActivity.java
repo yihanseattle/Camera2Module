@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements
         initSound();
 
         mRokidCamera = new RokidCameraBuilder(this, mTextureView)
-                .setPreviewEnabled(true)
+                .setPreviewEnabled(false)
                 .setImageFormat(ImageFormat.JPEG)
                 .setMaximumImages(5)
                 .setRokidCameraRecordingListener(this)

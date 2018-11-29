@@ -229,7 +229,6 @@ public class RokidCamera {
 //                    break;
                 case STATE_WAIT_LOCK: {
                     Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
-                    Toast.makeText(mActivity, "afState = " + afState, Toast.LENGTH_SHORT).show();
                     if (afState == null) {
                         captureStillPicture();
                     } else if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState ||
@@ -396,8 +395,6 @@ public class RokidCamera {
                             new MediaScannerConnection.OnScanCompletedListener() {
                                 @Override
                                 public void onScanCompleted(String path, Uri uri) {
-                                    Log.v("testtest",
-                                            "file " + path + " was scanned seccessfully: " + uri);
                                 }
                             });
 
@@ -819,8 +816,6 @@ public class RokidCamera {
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session,
                                                @NonNull CaptureRequest request,
                                                @NonNull TotalCaptureResult result) {
-                    showToast("Saved: " + mImageFileTest);
-                    Log.d("testtest", mImageFileTest.toString());
                     unlockFocus();
                 }
             };
