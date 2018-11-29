@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements
         initSound();
 
         mRokidCamera = new RokidCameraBuilder(this, mTextureView)
-                .setPreviewEnabled(false)
+                .setPreviewEnabled(true)
                 .setImageFormat(ImageFormat.JPEG)
                 .setMaximumImages(5)
                 .setRokidCameraRecordingListener(this)
@@ -484,7 +484,7 @@ public class MainActivity extends AppCompatActivity implements
         if (mIsRecording) {
             mRokidCamera.stopRecording();
             // restart preview
-            mRokidCamera.startPreview();
+            mRokidCamera.createCameraPreviewSession();
             // sound
             playSoundVideoStop();
         } else {

@@ -49,6 +49,7 @@ import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.concurrent.Semaphore;
 
 import static android.hardware.camera2.CaptureRequest.CONTROL_AE_MODE;
 import static android.hardware.camera2.CaptureRequest.CONTROL_AF_MODE;
@@ -97,113 +98,76 @@ public class RokidCamera {
     /** CONTINUOUS photo with Image callback to Activity. So user can process the Image. */
     public static int STILL_PHOTO_MODE_CONTINUOUS_IMAGE_CALLBACK = 2;
 
+    /**
+     * A {@link Semaphore} to prevent the app from exiting before closing the camera.
+     */
+    private Semaphore mCameraOpenCloseLock = new Semaphore(1);
+
     // preview texture
     private TextureView   mTextureView;
-    private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
+    /**
+     * {@link TextureView.SurfaceTextureListener} handles several lifecycle events on a
+     * {@link TextureView}.
+     */
+    private final TextureView.SurfaceTextureListener mSurfaceTextureListener
+            = new TextureView.SurfaceTextureListener() {
+
         @Override
-        public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
-            setupCamera(width, height);
-            connectCamera();
+        public void onSurfaceTextureAvailable(SurfaceTexture texture, int width, int height) {
+            openCamera(width, height);
+        }
+
+        @Override
+        public void onSurfaceTextureSizeChanged(SurfaceTexture texture, int width, int height) {
             configureTransform(width, height);
         }
 
         @Override
-        public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int width, int height) {
-            configureTransform(width, height);
+        public boolean onSurfaceTextureDestroyed(SurfaceTexture texture) {
+            return true;
         }
 
         @Override
-        public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
-            return false;
+        public void onSurfaceTextureUpdated(SurfaceTexture texture) {
         }
 
-        @Override
-        public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
-
-        }
     };
 
     // main components
     private CameraDevice mCameraDevice;
-    private CameraDevice.StateCallback mCameraDevicesStateCallback = new CameraDevice.StateCallback() {
+    /**
+     * {@link CameraDevice.StateCallback} is called when {@link CameraDevice} changes its state.
+     */
+    private final CameraDevice.StateCallback mStateCallback = new CameraDevice.StateCallback() {
+
         @Override
         public void onOpened(@NonNull CameraDevice cameraDevice) {
-
+            // This method is called when the camera is opened.  We start camera preview here.
+            mCameraOpenCloseLock.release();
             mCameraDevice = cameraDevice;
-
-
-            startPreview();
-
-            // callbacks to user
-            if (mRokidCameraStateListener != null) {
-                mRokidCameraStateListener.onRokidCameraOpened();
-            }
+            createCameraPreviewSession();
         }
 
         @Override
         public void onDisconnected(@NonNull CameraDevice cameraDevice) {
+            mCameraOpenCloseLock.release();
             cameraDevice.close();
             mCameraDevice = null;
         }
 
         @Override
-        public void onError(@NonNull CameraDevice cameraDevice, int i) {
+        public void onError(@NonNull CameraDevice cameraDevice, int error) {
+            mCameraOpenCloseLock.release();
             cameraDevice.close();
             mCameraDevice = null;
-        }
-    };
-
-    // preview callback
-    private CameraCaptureSession mPreviewCaptureSession;
-    private CameraCaptureSession.CaptureCallback mPreviewCaptureCallback = new CameraCaptureSession.CaptureCallback() {
-
-        private void process(CaptureResult captureResult) {
-            switch (mCaptureState) {
-                case STATE_PREVIEW:
-                    // do nothing
-                    break;
-                case STATE_WAIT_LOCK:
-                    mCaptureState = STATE_PREVIEW;
-                    Integer afState = captureResult.get(CaptureResult.CONTROL_AF_STATE);
-                    if (afState != null && (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED ||
-                            afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED)) {
-                        if (mActivity != null) {
-//                            Toast.makeText(mActivity, "AF Locked!", Toast.LENGTH_SHORT).show();
-                        }
-                        sendStillCaptureRequest();
-                    }
-                    break;
+            Activity activity = mActivity;
+            if (null != activity) {
+                activity.finish();
             }
         }
 
-        @Override
-        public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
-            super.onCaptureCompleted(session, request, result);
-
-            process(result);
-        }
     };
 
-    // camera parameter
-    private String mCameraId;
-    private int mTotalRotation;
-
-    // auto-focus lock
-    private static final int STATE_PREVIEW = 0;
-    private static final int STATE_WAIT_LOCK = 1;
-    private int mCaptureState = STATE_PREVIEW;
-    private boolean mAutoFocusSupported;
-
-    // orientation calculate
-    private static SparseIntArray ORIENTATIONS = new SparseIntArray();
-    static {
-        ORIENTATIONS.append(Surface.ROTATION_0, 90);
-        ORIENTATIONS.append(Surface.ROTATION_90, 0);
-        ORIENTATIONS.append(Surface.ROTATION_180, 270);
-        ORIENTATIONS.append(Surface.ROTATION_270, 180);
-    }
-
-    private ImageReader mImageReader;
     private final ImageReader.OnImageAvailableListener mOnImageAvailableListener = new ImageReader.OnImageAvailableListener() {
         @Override
         public void onImageAvailable(ImageReader imageReader) {
@@ -243,8 +207,127 @@ public class RokidCamera {
         }
     };
 
+    // preview callback
+    private CameraCaptureSession mPreviewCaptureSession;
+    private CameraCaptureSession.CaptureCallback mPreviewCaptureCallback = new CameraCaptureSession.CaptureCallback() {
+
+        private void process(CaptureResult result) {
+            switch (mCaptureState) {
+                case STATE_PREVIEW:
+                    // do nothing
+                    break;
+//                case STATE_WAIT_LOCK:
+//                    mCaptureState = STATE_PREVIEW;
+//                    Integer afState = captureResult.get(CaptureResult.CONTROL_AF_STATE);
+//                    if (afState != null && (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED ||
+//                            afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED)) {
+//                        if (mActivity != null) {
+////                            Toast.makeText(mActivity, "AF Locked!", Toast.LENGTH_SHORT).show();
+//                        }
+//                        sendStillCaptureRequest();
+//                    }
+//                    break;
+                case STATE_WAIT_LOCK: {
+                    Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
+                    Toast.makeText(mActivity, "afState = " + afState, Toast.LENGTH_SHORT).show();
+                    if (afState == null) {
+                        captureStillPicture();
+                    } else if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState ||
+                            CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState) {
+                        // CONTROL_AE_STATE can be null on some devices
+                        Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+                        if (aeState == null ||
+                                aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
+                            mCaptureState = STATE_PICTURE_TAKEN;
+                            captureStillPicture();
+                        }
+                    }
+                    break;
+                }
+                case STATE_WAITING_PRECAPTURE: {
+                    // CONTROL_AE_STATE can be null on some devices
+                    Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+                    if (aeState == null ||
+                            aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE ||
+                            aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED) {
+                        mCaptureState = STATE_WAITING_NON_PRECAPTURE;
+                    }
+                    break;
+                }
+                case STATE_WAITING_NON_PRECAPTURE: {
+                    // CONTROL_AE_STATE can be null on some devices
+                    Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+                    if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
+                        mCaptureState = STATE_PICTURE_TAKEN;
+                        captureStillPicture();
+                    }
+                    break;
+                }
+            }
+        }
+
+        @Override
+        public void onCaptureProgressed(@NonNull CameraCaptureSession session,
+                                        @NonNull CaptureRequest request,
+                                        @NonNull CaptureResult partialResult) {
+            process(partialResult);
+        }
+
+        @Override
+        public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
+            super.onCaptureCompleted(session, request, result);
+
+            process(result);
+        }
+    };
+
+    // camera parameter
+    private String mCameraId;
+    private int mTotalRotation;
+
+    // auto-focus lock
+    /**
+     * Camera state: Showing camera preview.
+     */
+    private static final int STATE_PREVIEW = 0;
+    /**
+     * Camera state: Waiting for the focus to be locked.
+     */
+    private static final int STATE_WAIT_LOCK = 1;
+    /**
+     * Camera state: Picture was taken.
+     */
+    private static final int STATE_PICTURE_TAKEN = 4;
+    /**
+     * Camera state: Waiting for the exposure to be precapture state.
+     */
+    private static final int STATE_WAITING_PRECAPTURE = 2;
+
+    /**
+     * Camera state: Waiting for the exposure state to be something other than precapture.
+     */
+    private static final int STATE_WAITING_NON_PRECAPTURE = 3;
+    private int mCaptureState = STATE_PREVIEW;
+    private boolean mAutoFocusSupported;
+
+    // orientation calculate
+    private static SparseIntArray ORIENTATIONS = new SparseIntArray();
+    static {
+        ORIENTATIONS.append(Surface.ROTATION_0, 90);
+        ORIENTATIONS.append(Surface.ROTATION_90, 0);
+        ORIENTATIONS.append(Surface.ROTATION_180, 270);
+        ORIENTATIONS.append(Surface.ROTATION_270, 180);
+    }
+
+    private ImageReader mImageReader;
+
+
     // request builder for still photo and video
     private CaptureRequest.Builder mCaptureRequestBuilder;
+    /**
+     * {@link CaptureRequest} generated by {@link #mCaptureRequestBuilder}
+     */
+    private CaptureRequest mPreviewRequest;
     // media recorder for video recorder
     private MediaRecorder mMediaRecorder;
 
@@ -398,8 +481,7 @@ public class RokidCamera {
         if (mTextureView.isAvailable()) {
             // TODO: see Google Example add comments
             // pause and resume
-            setupCamera(mTextureView.getWidth(), mTextureView.getHeight());
-            connectCamera();
+            openCamera(mTextureView.getWidth(), mTextureView.getHeight());
 
         } else {
             // first time
@@ -412,15 +494,6 @@ public class RokidCamera {
 
         // TODO: look for background thread finish
         stopBackgroundThread();
-    }
-
-    /**
-     * Start background thread
-     */
-    private void startBackgroundThread() {
-        mBackgroundHandlerThread = new HandlerThread("Camera2VideoImage");
-        mBackgroundHandlerThread.start();
-        mBackgroundHandler = new Handler(mBackgroundHandlerThread.getLooper());
     }
 
     /**
@@ -481,6 +554,60 @@ public class RokidCamera {
         }
     }
 
+    /**
+     * Opening Camera via CameraManager
+     */
+    private void openCamera(int width, int height) {
+        setupCamera(width, height);
+        configureTransform(width, height);
+        Activity activity = mActivity;
+        CameraManager cameraManager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
+        try {
+            if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.CAMERA) ==
+                    PackageManager.PERMISSION_GRANTED) {
+                // connect the camera
+                // TODO: add comments
+                cameraManager.openCamera(mCameraId, mStateCallback, mBackgroundHandler);
+            }
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Close Camera resource
+     */
+    private void closeCamera() {
+        try {
+            mCameraOpenCloseLock.acquire();
+            if (null != mPreviewCaptureSession) {
+                mPreviewCaptureSession.close();
+                mPreviewCaptureSession = null;
+            }
+            if (null != mCameraDevice) {
+                mCameraDevice.close();
+                mCameraDevice = null;
+            }
+            if (null != mImageReader) {
+                mImageReader.close();
+                mImageReader = null;
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Interrupted while trying to lock camera closing.", e);
+        } finally {
+            mCameraOpenCloseLock.release();
+        }
+    }
+
+    /**
+     * Start background thread
+     */
+    private void startBackgroundThread() {
+        mBackgroundHandlerThread = new HandlerThread("Camera2VideoImage");
+        mBackgroundHandlerThread.start();
+        mBackgroundHandler = new Handler(mBackgroundHandlerThread.getLooper());
+    }
+
     public int getSensorOrientation() {
         CameraCharacteristics cameraCharacteristics = null;
         try {
@@ -498,26 +625,9 @@ public class RokidCamera {
     }
 
     /**
-     * Opening Camera via CameraManager
-     */
-    private void connectCamera() {
-        CameraManager cameraManager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
-        try {
-            if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.CAMERA) ==
-                    PackageManager.PERMISSION_GRANTED) {
-                // connect the camera
-                // TODO: add comments
-                cameraManager.openCamera(mCameraId, mCameraDevicesStateCallback, mBackgroundHandler);
-            }
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * Start preview
      */
-    public void startPreview() {
+    public void createCameraPreviewSession() {
 
         // disable preview if necessary
         if (!mPreviewEnabled) {
@@ -564,7 +674,16 @@ public class RokidCamera {
             mCameraDevice.createCaptureSession(Arrays.asList(previewSurface, mImageReader.getSurface()), new CameraCaptureSession.StateCallback() {
                 @Override
                 public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
+                    // The camera is already closed
+                    if (null == mCameraDevice) {
+                        return;
+                    }
+                    // Auto focus should be continuous for camera preview.
+                    mCaptureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,
+                            CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 
+                    // Finally, we start displaying the camera preview.
+                    mPreviewRequest = mCaptureRequestBuilder.build();
                     mPreviewCaptureSession = cameraCaptureSession;
 
                     // preview is a video, so we set a repeating request
@@ -586,55 +705,105 @@ public class RokidCamera {
     }
 
     public void takeStillPicture() {
-        if (mAutoFocusSupported) {
+//        if (mAutoFocusSupported) {
             // try to auto focus
             lockFocus();
-        } else {
-            // capture right now if auto-focus not supported
-            sendStillCaptureRequest();
-        }
+//        } else {
+//            // capture right now if auto-focus not supported
+//            sendStillCaptureRequest();
+//        }
     }
 
     /**
      * Auto-focus lock
      */
     private void lockFocus() {
-        mCaptureState = STATE_WAIT_LOCK;
         try {
+            // This is how to tell the camera to lock focus.
             mCaptureRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_START);
+            // Tell #mCaptureCallback to wait for the lock.
+            mCaptureState = STATE_WAIT_LOCK;
             mPreviewCaptureSession.capture(mCaptureRequestBuilder.build(), mPreviewCaptureCallback, mBackgroundHandler);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
     }
+//    /**
+//     * Capture still photo
+//     */
+//    private void sendStillCaptureRequest() {
+//        try {
+//            // create request for STILL PICTURE type
+//            /**
+//             * Create a request suitable for still image capture. Specifically, this
+//             * means prioritizing image quality over frame rate. These requests would
+//             * commonly be used with the {@link CameraCaptureSession#capture} method.
+//             * This template is guaranteed to be supported on all camera devices except
+//             * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT DEPTH_OUTPUT} devices
+//             * that are not {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE
+//             * BACKWARD_COMPATIBLE}.
+//             * @see #createCaptureRequest
+//             */
+//            mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+//            configureCameraParameters(mCaptureRequestBuilder, mRokidCameraParamAEMode, mRokidCameraParamAFMode, mRokidCameraParamAWBMode);
+//            mCaptureRequestBuilder.addTarget(mImageReader.getSurface());
+//
+//            // TODO: update diagram
+//
+//            // not sure why we need to add 180 rotation here
+//            // the original image was 180 degree off
+//            mCaptureRequestBuilder.set(CaptureRequest.JPEG_ORIENTATION, mTotalRotation);
+//
+//            CameraCaptureSession.CaptureCallback stillCaptureCallback = new CameraCaptureSession.CaptureCallback() {
+//                @Override
+//                public void onCaptureStarted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, long timestamp, long frameNumber) {
+//                    super.onCaptureStarted(session, request, timestamp, frameNumber);
+//                    // create image when it's in focus
+//                    try {
+//                        mImageFileTest = createImageFile(mImageFolder);
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            };
+//            mPreviewCaptureSession.capture(mCaptureRequestBuilder.build(), stillCaptureCallback, null);
+//        } catch (CameraAccessException e) {
+//            e.printStackTrace();
+//        }
+
+
+//    }
+
+
+
+
+
 
     /**
-     * Capture still photo
+     * Capture a still picture. This method should be called when we get a response in
+     * {@link #mPreviewCaptureCallback} from both {@link #lockFocus()}.
      */
-    private void sendStillCaptureRequest() {
+    private void captureStillPicture() {
         try {
-            // create request for STILL PICTURE type
-            /**
-             * Create a request suitable for still image capture. Specifically, this
-             * means prioritizing image quality over frame rate. These requests would
-             * commonly be used with the {@link CameraCaptureSession#capture} method.
-             * This template is guaranteed to be supported on all camera devices except
-             * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT DEPTH_OUTPUT} devices
-             * that are not {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE
-             * BACKWARD_COMPATIBLE}.
-             * @see #createCaptureRequest
-             */
-            mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
-            configureCameraParameters(mCaptureRequestBuilder, mRokidCameraParamAEMode, mRokidCameraParamAFMode, mRokidCameraParamAWBMode);
-            mCaptureRequestBuilder.addTarget(mImageReader.getSurface());
+            final Activity activity = mActivity;
+            if (null == activity || null == mCameraDevice) {
+                return;
+            }
+            // This is the CaptureRequest.Builder that we use to take a picture.
+            final CaptureRequest.Builder captureBuilder =
+                    mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+            captureBuilder.addTarget(mImageReader.getSurface());
 
-            // TODO: update diagram
+            // Use the same AE and AF modes as the preview.
+            captureBuilder.set(CaptureRequest.CONTROL_AF_MODE,
+                    CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 
-            // not sure why we need to add 180 rotation here
-            // the original image was 180 degree off
-            mCaptureRequestBuilder.set(CaptureRequest.JPEG_ORIENTATION, mTotalRotation);
+            // Orientation
+//            int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+            captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, mTotalRotation);
 
-            CameraCaptureSession.CaptureCallback stillCaptureCallback = new CameraCaptureSession.CaptureCallback() {
+            CameraCaptureSession.CaptureCallback CaptureCallback
+                    = new CameraCaptureSession.CaptureCallback() {
                 @Override
                 public void onCaptureStarted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, long timestamp, long frameNumber) {
                     super.onCaptureStarted(session, request, timestamp, frameNumber);
@@ -645,8 +814,20 @@ public class RokidCamera {
                         e.printStackTrace();
                     }
                 }
+
+                @Override
+                public void onCaptureCompleted(@NonNull CameraCaptureSession session,
+                                               @NonNull CaptureRequest request,
+                                               @NonNull TotalCaptureResult result) {
+                    showToast("Saved: " + mImageFileTest);
+                    Log.d("testtest", mImageFileTest.toString());
+                    unlockFocus();
+                }
             };
-            mPreviewCaptureSession.capture(mCaptureRequestBuilder.build(), stillCaptureCallback, null);
+
+            mPreviewCaptureSession.stopRepeating();
+            mPreviewCaptureSession.abortCaptures();
+            mPreviewCaptureSession.capture(captureBuilder.build(), CaptureCallback, null);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -810,16 +991,26 @@ public class RokidCamera {
             e.printStackTrace();
         }
     }
-
     /**
-     * Close Camera resource
+     * Unlock the focus. This method should be called when still image capture sequence is
+     * finished.
      */
-    private void closeCamera() {
-        if (mCameraDevice != null) {
-            mCameraDevice.close();
-            mCameraDevice = null;
+    private void unlockFocus() {
+        try {
+            // Reset the auto-focus trigger
+            mCaptureRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
+                    CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
+            mPreviewCaptureSession.capture(mCaptureRequestBuilder.build(), mPreviewCaptureCallback,
+                    mBackgroundHandler);
+            // After this, the camera will go back to the normal state of preview.
+            mCaptureState = STATE_PREVIEW;
+            mPreviewCaptureSession.setRepeatingRequest(mCaptureRequestBuilder.build(), mPreviewCaptureCallback,
+                    mBackgroundHandler);
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
         }
     }
+
 
     /**
      * Configures the necessary {@link android.graphics.Matrix} transformation to `mTextureView`.
@@ -906,6 +1097,24 @@ public class RokidCamera {
         mImageFileName = imageFile.getAbsolutePath();
         return imageFile;
     }
+    /**
+     * Shows a {@link Toast} on the UI thread.
+     *
+     * @param text The message to show
+     */
+    private void showToast(final String text) {
+        final Activity activity = mActivity;
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(activity, text, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+
 
     public RokidCameraStateListener getRokidCameraStateListener() {
         return mRokidCameraStateListener;
