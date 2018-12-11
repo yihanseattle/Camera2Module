@@ -1,4 +1,4 @@
-# Rokid Camera App and Rokid Camera Module
+# Rokid Camera App and Camera Module
 
 The camera app for Rokid Glass can take pictures and videos. Recently, the app has integrated with Rokid Camera Module. The Camera app use much less code to use camera components with Camera Module. The Camera Module will increase the productivity of Rokid Glass app developers that uses camera components. For example, the camera app without Camera Module has 2500 lines of code in MainActivity class. However, now the MainActivity only has 800 lines of code using Camera Module. The Camera Module will also prevent any illegal configurations when setting up Camera instance. Also the Camera Module should support all apps that will be installed on Rokid Glass. This doc will introduce the followings:
 
@@ -15,11 +15,15 @@ The camera app for Rokid Glass can take pictures and videos. Recently, the app h
 
 To use this project, simply git clone and run under Android Studio 3. 
 
-## 1. Goal 
+## Goal 
 The goal of this app is to provide Camera app with glass-friendly UI so that the users can have the best user experience when using Rokid Glass. User should be able to successfully take still photos and record video. The project only contain the most basic features and doesn't provide manual camera configurations (Apature, ISO, shutter speed, etc.).
 
 The goal of Camera Module is to create a general camera interface for apps run on Rokid Glass. Camera is one of the most commonly used components on Rokid Glass. The Camera Module can provide necessary features like still photo taking, video recording, or camera Byte data reading for algorithm use. After using this module, app developers should have more confidents when writing a camera featured app. Apps use Camera Module should be more stable as well since the Camera Module is throughly tested. 
 
+# Rokid Camera App
+
+## 1. Introduction
+// TODO:
 
 ## 2. Features:
 
@@ -59,7 +63,7 @@ Video: (Format : MP4)
 
 Below are all supported configurations from Camera Module. App developer can choose to configure based on their use case (Refer to API Doc for more detailed information)
 
-### 5.1 Camera Configurations:
+5.1 Camera Configurations:
 - Enable or disable camera preview
 - Set image format
 - Set maximum image buffer size
@@ -71,15 +75,14 @@ Below are all supported configurations from Camera Module. App developer can cho
 - Set AWB Mode
 - Set Camera ID
 
-### 5.2 Callback Listeners:
+5.2 Callback Listeners:
 - Set camera state listener
 - Set video recorder state listener
 - Set ImageReader callback listener and ImageReader mode
 
-### 5.3 [Camera2 API Description](http://gitus.rokid-inc.com/diffusion/SDKOOOCAMERAMODULE/browse/master/Camera2APIInfo.md)
-
 ---
-# RokidCamera Module Introduction
+
+# Rokid Camera Module
 
 - [Camera2 Maven Remote URL](https://jitpack.io/#yihanseattle/Camera2Module/0.2.0)
 
@@ -324,7 +327,7 @@ Take photo:
             ..
             ..
 
-## 7. Additional Infomation (Branch Description):
+# Additional Infomation (Branch Description):
 
 yi_zhiyu_special_edition:
 1. 开preview
@@ -334,3 +337,8 @@ yi_zhiyu_special_edition:
 5. 在File I/O保存结束后，自动close app
 
 
+# Android Camera2 API Description
+
+//TODO:
+
+[Camera2 API Description](http://gitus.rokid-inc.com/diffusion/SDKOOOCAMERAMODULE/browse/master/Camera2APIInfo.md)
