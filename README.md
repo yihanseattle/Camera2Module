@@ -15,13 +15,13 @@ The camera app for Rokid Glass can take pictures and videos. Recently, the app h
 
 To use this project, simply git clone and run under Android Studio 3. 
 
-## Goal 
+## 1. Goal 
 The goal of this app is to provide Camera app with glass-friendly UI so that the users can have the best user experience when using Rokid Glass. User should be able to successfully take still photos and record video. The project only contain the most basic features and doesn't provide manual camera configurations (Apature, ISO, shutter speed, etc.).
 
 The goal of Camera Module is to create a general camera interface for apps run on Rokid Glass. Camera is one of the most commonly used components on Rokid Glass. The Camera Module can provide necessary features like still photo taking, video recording, or camera Byte data reading for algorithm use. After using this module, app developers should have more confidents when writing a camera featured app. Apps use Camera Module should be more stable as well since the Camera Module is throughly tested. 
 
 
-## Basic App Features:
+## 2. Features:
 
 1. Take photo
 
@@ -35,12 +35,12 @@ The goal of Camera Module is to create a general camera interface for apps run o
 {F2190, layout=left, size=full, alt="a duckling"}
 
 ---
-## Default File Path for Photo and Video
+## 3. Default File Path for Photo and Video
 
 `sdcard\DCIM\`
 
 ---
-## Output Resolution:
+## 4. Output Resolution:
 
 Photo: (Format : JPEG)
 
@@ -55,7 +55,7 @@ Video: (Format : MP4)
 ```
 
 ---
-## All Supported Configurations:
+## 5. All Supported Configurations:
 
 Below are all supported configurations from Camera Module. App developer can choose to configure based on their use case (Refer to API Doc for more detailed information)
 
@@ -85,7 +85,7 @@ Below are all supported configurations from Camera Module. App developer can cho
 
 The RokidCamera module manage the Camera2 API cycle and automatically set up Camera class. Developers can use RokidCamera module to set Camera parameters, callbacks, format, etc. Example Camera setup using RokidCamera module:
 
-## How to use Rokid Camera
+## 6. Usage
 
 ### Use builder to create an instance of RokidCamera (recommend to create inside of onCreate() method)
 
@@ -93,11 +93,6 @@ The RokidCamera module manage the Camera2 API cycle and automatically set up Cam
         mRokidCamera = new RokidCameraBuilder(this, mTextureView)
                 .setPreviewEnabled(true)
                 .setImageFormat(ImageFormat.JPEG)
-
-                // rename the method
-
-
-
                 .setMaximumImages(5)
                 .setRokidCameraRecordingListener(this)
                 .setRokidCameraStateListener(this)
@@ -149,8 +144,6 @@ Take photo:
 
 		lang=java
         mRokidCamera.takeStillPicture();
-
-## Current Available Functions:
 
 ### RokidCameraStateListener: 
 
@@ -329,7 +322,7 @@ Take photo:
             ..
             ..
 
-## Additional Infomation (Branch Description):
+## 7. Additional Infomation (Branch Description):
 
 yi_zhiyu_special_edition:
 1. 开preview
