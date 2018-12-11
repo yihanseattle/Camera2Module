@@ -76,7 +76,7 @@ Below are all supported configurations from Camera Module. App developer can cho
 - Set video recorder state listener
 - Set ImageReader callback listener and ImageReader mode
 
-### [Camera2 API Description]()
+### [Camera2 API Description](http://gitus.rokid-inc.com/diffusion/SDKOOOCAMERAMODULE/browse/master/Camera2APIInfo.md)
 
 ---
 # RokidCamera Module Introduction
