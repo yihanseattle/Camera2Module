@@ -168,6 +168,8 @@ public class RokidCamera {
 
     };
 
+    static int time;
+
     private final ImageReader.OnImageAvailableListener mOnImageAvailableListener = new ImageReader.OnImageAvailableListener() {
         @Override
         public void onImageAvailable(ImageReader imageReader) {
