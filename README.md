@@ -23,12 +23,12 @@ The goal of Camera Module is to create a general camera interface for apps run o
 
 ## 2. Features:
 
-1. Take photo
+### 2.1 Take photo
 
 - Click shutter button to take single photo
 {F2188, layout=left, size=full, alt="a duckling"}
 
-2. Record video 
+### 2.2 Record video 
 
 - Click shutter button to start recording. It should be time duration at the shutter button when recording is in progress. Click again to stop recording. 
 {F2189, layout=left, size=full, alt="a duckling"}
@@ -59,7 +59,7 @@ Video: (Format : MP4)
 
 Below are all supported configurations from Camera Module. App developer can choose to configure based on their use case (Refer to API Doc for more detailed information)
 
-### Camera Configurations:
+### 5.1 Camera Configurations:
 - Enable or disable camera preview
 - Set image format
 - Set maximum image buffer size
@@ -71,12 +71,12 @@ Below are all supported configurations from Camera Module. App developer can cho
 - Set AWB Mode
 - Set Camera ID
 
-### Callback Listeners:
+### 5.2 Callback Listeners:
 - Set camera state listener
 - Set video recorder state listener
 - Set ImageReader callback listener and ImageReader mode
 
-### [Camera2 API Description](http://gitus.rokid-inc.com/diffusion/SDKOOOCAMERAMODULE/browse/master/Camera2APIInfo.md)
+### 5.3 [Camera2 API Description](http://gitus.rokid-inc.com/diffusion/SDKOOOCAMERAMODULE/browse/master/Camera2APIInfo.md)
 
 ---
 # RokidCamera Module Introduction
@@ -87,7 +87,7 @@ The RokidCamera module manage the Camera2 API cycle and automatically set up Cam
 
 ## 6. Usage
 
-### Use builder to create an instance of RokidCamera (recommend to create inside of onCreate() method)
+### 6.1 Use builder to create an instance of RokidCamera (recommend to create inside of onCreate() method)
 
 		lang=java
         mRokidCamera = new RokidCameraBuilder(this, mTextureView)
@@ -99,7 +99,7 @@ The RokidCamera module manage the Camera2 API cycle and automatically set up Cam
                 .setRokidCameraOnImageAvailableListener(RokidCamera.STILL_PHOTO_MODE_SINGLE_NO_CALLBACK, this, this)
                 .build();
 
-### Sync RokidCamera with Activity lifecycle
+### 6.2 Sync RokidCamera with Activity lifecycle
 
 Activity onStart() method:
 
@@ -124,7 +124,7 @@ Acitivity onStop() method:
             mRokidCamera.onStop();
         }
 
-### Support Actions
+### 6.3 Support Actions
 
 Start Camera Preview:
 		lang=java
@@ -145,7 +145,9 @@ Take photo:
 		lang=java
         mRokidCamera.takeStillPicture();
 
-### RokidCameraStateListener: 
+### 6.4 Callbacks: 
+
+#### 6.4.1 RokidCameraStateListener: 
 
 - `RokidCameraStateListener` interface: 
 
@@ -177,7 +179,7 @@ Take photo:
                 // UI update or other actions
             }
 
-### RokidCameraRocordingListener
+#### 6.4.2 RokidCameraRocordingListener
 
 - `RokidCameraRocordingListener` interface: 
 		lang=java
@@ -225,7 +227,7 @@ Take photo:
             mIsRecording = false;
         }
 
-### RokidCameraOnImageAvailableListener & RokidCameraIOListener
+#### 6.4.3 RokidCameraOnImageAvailableListener & RokidCameraIOListener
 
 - `RokidCameraOnImageAvailableListener` interface: 
 		lang=java
@@ -271,7 +273,7 @@ Take photo:
             // UI update or other actions
         }
 
-### `setPreviewEnabled` method : Change visibility of Camera Preview.
+### 6.5 `setPreviewEnabled` method : Change visibility of Camera Preview.
 
 - Implementation example inside Activity class for listening events: 
 		lang=java
@@ -288,7 +290,7 @@ Take photo:
             ..
             ..
 
-### `setImageFormat` method : Change ImageFormat to user specified output format.
+### 6.6 `setImageFormat` method : Change ImageFormat to user specified output format.
 
 - Implementation example inside Activity class for listening events: 
 		lang=java
@@ -305,7 +307,7 @@ Take photo:
             ..
             ..
 
-### `setMaximumImages` method : Set MaxImageBuffer size for ImageReader.
+### 6.7 `setMaximumImages` method : Set MaxImageBuffer size for ImageReader.
 
 - Implementation example inside Activity class for listening events: 
 		lang=java
