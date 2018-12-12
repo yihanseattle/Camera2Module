@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +16,7 @@ import com.rokid.glass.camera.utils.Utils;
 import java.util.ArrayList;
 
 /**
- * Created by yihan on 5/17/18.
+ * Adapter for bottom modes including "拍照" and "摄像".
  */
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
@@ -36,20 +35,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Log.d(TAG, "onCreateViewHolder: called");
-
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_listitem, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Log.d(TAG, "onBindViewHolder: called.");
         holder.tvCameraMode.setText(mCameraModes.get(position));
         if (position == 1) {
+            // 拍照
             holder.tvCameraMode.setTextSize(mContext.getResources().getDimension(R.dimen.font_size_text_highlighted));
             holder.tvCameraMode.setTextColor(mContext.getColor(R.color.color_text_highlight));
-//            holder.tvCameraMode.setTypeface(ResourcesCompat.getFont(mContext, R.font.notosanscjk_medium));
             holder.tvCameraMode.setTypeface(null, Typeface.BOLD);
             holder.tvCameraMode.setPadding(
                     Utils.getDPFromPx(mContext, Constants.CAMERA_MODE_TEXT_PADDING_LEFT),
@@ -58,6 +54,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     0);
 
         } else if (position == 2) {
+            // 摄像
             holder.tvCameraMode.setTextSize(mContext.getResources().getDimension(R.dimen.font_size_text_default));
             holder.tvCameraMode.setPadding(
                     Utils.getDPFromPx(mContext, Constants.CAMERA_MODE_TEXT_PADDING_LEFT),
@@ -65,7 +62,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     Utils.getDPFromPx(mContext, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
                     0);
             holder.tvCameraMode.setTextColor(mContext.getColor(R.color.color_text_highlight));
-//            holder.tvCameraMode.setTypeface(ResourcesCompat.getFont(mContext, R.font.notosanscjk_regular));
             holder.tvCameraMode.setTypeface(null, Typeface.NORMAL);
         }
     }
@@ -75,10 +71,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         return mCameraModes.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    /**
+     * View holder only has TextView for storing "拍照" and "摄像"
+     */
+    class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvCameraMode;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
             tvCameraMode = itemView.findViewById(R.id.tvCameraMode);
         }

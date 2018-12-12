@@ -58,10 +58,8 @@ import static android.hardware.camera2.CaptureRequest.CONTROL_AWB_MODE;
 /**
  * Camera Module that can be use for projects with needs for Camera features.
  *
- * This class can initialize, set up, and connect to CameraDevice. Set different parameters according to specific applications for Rokid Glass.
- *
- *
- * Created by yihan on 7/23/18.
+ * This class can initialize, set up, and connect to CameraDevice.
+ * Set different parameters according to specific applications for Rokid Glass.
  */
 
 public class RokidCamera {
@@ -168,24 +166,17 @@ public class RokidCamera {
 
     };
 
-    static int time;
-
     private final ImageReader.OnImageAvailableListener mOnImageAvailableListener = new ImageReader.OnImageAvailableListener() {
         @Override
         public void onImageAvailable(ImageReader imageReader) {
 
             if (mImageReaderCallbackMode == STILL_PHOTO_MODE_CONTINUOUS_IMAGE_CALLBACK) {
                 // use case: algorithm
-                // use `acquireNextImage()` here because we need continuous image for algorithm
 
-                // TODO: don't use this for now. Use acquireLatestImage() instead.
-//                Image image = imageReader.acquireNextImage();
+                // don't use this. Use acquireLatestImage() instead.
+                // Image image = imageReader.acquireNextImage();
 
-
-//                long startTime = System.nanoTime();
                 Image image = imageReader.acquireLatestImage();
-//                long estimatedTime = System.nanoTime() - startTime;
-//                Log.i("testtest", "acquireLatestImage time in nano: " + estimatedTime);
                 if (image != null) {
                     mBackgroundHandler.post(new ImageCallback(image));
                 }
@@ -372,7 +363,6 @@ public class RokidCamera {
 
                     fileOutputStream = new FileOutputStream(mImageFileName);
                     fileOutputStream.write(bytes);
-                    Log.i("testtest", "thread finished ");
 
                     // reset to null for the next incoming Image
                     mImageFileName = null;
@@ -382,7 +372,6 @@ public class RokidCamera {
                         mRokidCameraIOListener.onRokidCameraFileSaved();
                     }
 
-
                     // send global notification for new photo taken
                     // so that the gallery app can view new photo
                     final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
@@ -391,16 +380,14 @@ public class RokidCamera {
                     mActivity.sendBroadcast(scanIntent);
 
                     MediaScannerConnection.scanFile(
-                            mActivity,
-                            new String[]{mImageFolder.getAbsolutePath()},
-                            null,
-                            new MediaScannerConnection.OnScanCompletedListener() {
-                                @Override
-                                public void onScanCompleted(String path, Uri uri) {
-                                }
-                            });
-
-
+                        mActivity,
+                        new String[]{mImageFolder.getAbsolutePath()},
+                        null,
+                        new MediaScannerConnection.OnScanCompletedListener() {
+                            @Override
+                            public void onScanCompleted(String path, Uri uri) {
+                            }
+                        });
                 }
             } catch (Exception e) {
                 e.printStackTrace();
