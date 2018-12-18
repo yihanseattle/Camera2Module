@@ -14,6 +14,6 @@
     <dimen name="height_imageview_recording_dot">10dp</dimen>
     
     <!-- Dynamic values -->
-    <dimen name="font_size_text_highlighted">23sp</dimen>
-    <dimen name="font_size_text_default">16sp</dimen>
+    <dimen name="font_size_text_highlighted">15sp</dimen>
+    <dimen name="font_size_text_default">10sp</dimen>
 </resources>

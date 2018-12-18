@@ -2,6 +2,7 @@ package com.rokid.glass.camera;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.ImageFormat;
 import android.graphics.Typeface;
 import android.media.AudioAttributes;
@@ -43,6 +44,7 @@ import com.rokid.glass.rokidcamera.utils.RokidCameraParameters;
 import com.rokid.glass.rokidcamera.utils.RokidCameraSize;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements
         RokidCameraIOListener,
@@ -237,11 +239,25 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void initRecyclerView() {
         ArrayList<String> mCameraModes = new ArrayList<>();
-        // placeholder at first and last position
-        mCameraModes.add("               ");
-        mCameraModes.add(getResources().getString(R.string.CAMERAMODE_PHOTO));
-        mCameraModes.add(getResources().getString(R.string.CAMERAMODE_VIDEO));
-        mCameraModes.add("              ");
+
+        Locale chineseLang = new Locale(Locale.CHINESE.getLanguage());
+        Locale englishLang = new Locale(Locale.ENGLISH.getLanguage());
+        if (Resources.getSystem().getConfiguration().locale.getLanguage().equals(englishLang.getLanguage())) {
+            // placeholder at first and last position
+            mCameraModes.add("                 ");
+            mCameraModes.add(getResources().getString(R.string.CAMERAMODE_PHOTO));
+            mCameraModes.add(getResources().getString(R.string.CAMERAMODE_VIDEO));
+            mCameraModes.add("                 ");
+        } else if (Resources.getSystem().getConfiguration().locale.getLanguage().equals(chineseLang.getLanguage())) {
+            // system language is Chinese
+            // placeholder at first and last position
+            mCameraModes.add("                         ");
+            mCameraModes.add(getResources().getString(R.string.CAMERAMODE_PHOTO));
+            mCameraModes.add(getResources().getString(R.string.CAMERAMODE_VIDEO));
+            mCameraModes.add("                        ");
+        }
+
+
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         mRecyclerView = findViewById(R.id.recyclerView);
