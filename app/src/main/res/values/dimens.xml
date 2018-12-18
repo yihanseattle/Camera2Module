@@ -5,7 +5,8 @@
     <dimen name="height_shutter_button_side">76dp</dimen>
     <dimen name="margin_shutter_button_bottom">49dp</dimen>
     <dimen name="margin_recyclerview_bottom">14dp</dimen>
-    <dimen name="width_recyclerview">180dp</dimen>
+    <!-- RecyclerView length-->
+    <dimen name="width_recyclerview">210dp</dimen>
     <dimen name="font_size_chronometer">26sp</dimen>
     <dimen name="width_chronometer_placeholder">15dp</dimen>
     <dimen name="height_chronometer_placeholder">15dp</dimen>
@@ -14,6 +15,6 @@
     <dimen name="height_imageview_recording_dot">10dp</dimen>
     
     <!-- Dynamic values -->
-    <dimen name="font_size_text_highlighted">23sp</dimen>
-    <dimen name="font_size_text_default">16sp</dimen>
+    <dimen name="font_size_text_highlighted">12sp</dimen>
+    <dimen name="font_size_text_default">10sp</dimen>
 </resources>

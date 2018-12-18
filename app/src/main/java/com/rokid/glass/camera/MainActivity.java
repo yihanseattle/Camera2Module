@@ -244,17 +244,17 @@ public class MainActivity extends AppCompatActivity implements
         Locale englishLang = new Locale(Locale.ENGLISH.getLanguage());
         if (Resources.getSystem().getConfiguration().locale.getLanguage().equals(englishLang.getLanguage())) {
             // placeholder at first and last position
-            mCameraModes.add("                 ");
+            mCameraModes.add("                  ");
             mCameraModes.add(getResources().getString(R.string.CAMERAMODE_PHOTO));
             mCameraModes.add(getResources().getString(R.string.CAMERAMODE_VIDEO));
-            mCameraModes.add("                 ");
+            mCameraModes.add("                  ");
         } else if (Resources.getSystem().getConfiguration().locale.getLanguage().equals(chineseLang.getLanguage())) {
             // system language is Chinese
             // placeholder at first and last position
-            mCameraModes.add("                         ");
+            mCameraModes.add("               ");
             mCameraModes.add(getResources().getString(R.string.CAMERAMODE_PHOTO));
             mCameraModes.add(getResources().getString(R.string.CAMERAMODE_VIDEO));
-            mCameraModes.add("                        ");
+            mCameraModes.add("              ");
         }
 
 
