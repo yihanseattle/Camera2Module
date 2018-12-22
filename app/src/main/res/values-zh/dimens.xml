@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- static xml values -->
-    <dimen name="width_shutter_button_side">76dp</dimen>
-    <dimen name="height_shutter_button_side">76dp</dimen>
+    <dimen name="width_shutter_button_side">20dp</dimen>
+    <dimen name="height_shutter_button_side">20dp</dimen>
     <dimen name="margin_shutter_button_bottom">49dp</dimen>
-    <dimen name="margin_recyclerview_bottom">14dp</dimen>
+    <dimen name="margin_recyclerview_bottom">6dp</dimen>
     <dimen name="width_recyclerview">180dp</dimen>
-    <dimen name="font_size_chronometer">26sp</dimen>
+    <dimen name="font_size_chronometer">23sp</dimen>
     <dimen name="width_chronometer_placeholder">15dp</dimen>
     <dimen name="height_chronometer_placeholder">15dp</dimen>
     <dimen name="margin_start_chronometer_placeholder">5dp</dimen>
-    <dimen name="width_imageview_recording_dot">10dp</dimen>
-    <dimen name="height_imageview_recording_dot">10dp</dimen>
+    <dimen name="width_imageview_recording_dot">15dp</dimen>
+    <dimen name="height_imageview_recording_dot">15dp</dimen>
     
     <!-- Dynamic values -->
-    <dimen name="font_size_text_highlighted">15sp</dimen>
+    <dimen name="font_size_text_highlighted">10sp</dimen>
     <dimen name="font_size_text_default">10sp</dimen>
 </resources>

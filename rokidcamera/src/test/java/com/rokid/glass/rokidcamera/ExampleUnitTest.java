@@ -27,6 +27,7 @@ import static org.mockito.Mockito.mock;
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 public class ExampleUnitTest {
+
     @Test
     public void default_rokidCameraBuilder() throws Exception {
         Activity activity = mock(Activity.class);

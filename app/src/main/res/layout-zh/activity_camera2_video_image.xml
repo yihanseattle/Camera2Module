@@ -9,6 +9,45 @@
     android:keepScreenOn="true"
     tools:context="com.rokid.glass.camera.MainActivity">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/frame"
+        android:padding="30dp"
+        />
+    <LinearLayout
+        android:id="@+id/linearlayoutVideoProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:visibility="gone"
+        android:orientation="horizontal"
+        android:layout_marginTop="55dp"
+        android:layout_marginStart="53dp"
+        >
+
+        <ImageView
+            android:id="@+id/ivVideoRecordingRedDot"
+            android:layout_width="@dimen/width_imageview_recording_dot"
+            android:layout_height="@dimen/height_imageview_recording_dot"
+            android:src="@drawable/oval"
+            android:layout_gravity="center"
+            android:paddingEnd="5dp"
+            />
+        <Chronometer
+            android:id="@+id/chronometer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/color_font_chronometer"
+            android:textSize="@dimen/font_size_chronometer"
+            />
+        <View
+            android:layout_width="@dimen/width_chronometer_placeholder"
+            android:layout_height="@dimen/height_chronometer_placeholder"
+            android:layout_marginStart="@dimen/margin_start_chronometer_placeholder"
+            />
+    </LinearLayout>
+
     <com.rokid.glass.camera.preview.AutoFitTextureView
         android:id="@+id/textureView"
         android:layout_width="match_parent"
@@ -21,41 +60,9 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:layout_alignParentBottom="true"
-        android:gravity="bottom"
+        android:gravity="top"
         android:alpha="1.0"
         >
-        <LinearLayout
-            android:id="@+id/linearlayoutVideoProgress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:layout_gravity="center"
-            android:orientation="horizontal"
-            android:layout_marginBottom="19dp"
-            >
-
-            <ImageView
-                android:id="@+id/ivVideoRecordingRedDot"
-                android:layout_width="@dimen/width_imageview_recording_dot"
-                android:layout_height="@dimen/height_imageview_recording_dot"
-                android:src="@drawable/oval"
-                android:layout_gravity="center"
-                android:layout_margin="3dp"
-                android:paddingEnd="5dp"
-                />
-            <Chronometer
-                android:id="@+id/chronometer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/color_font_chronometer"
-                android:textSize="@dimen/font_size_chronometer"
-                />
-            <View
-                android:layout_width="@dimen/width_chronometer_placeholder"
-                android:layout_height="@dimen/height_chronometer_placeholder"
-                android:layout_marginStart="@dimen/margin_start_chronometer_placeholder"
-                />
-        </LinearLayout>
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="@dimen/width_recyclerview"

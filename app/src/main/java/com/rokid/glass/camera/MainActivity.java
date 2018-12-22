@@ -1,7 +1,5 @@
 package com.rokid.glass.camera;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.ImageFormat;
 import android.graphics.Typeface;
@@ -13,8 +11,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -33,6 +29,7 @@ import android.widget.Toast;
 
 import com.rokid.glass.camera.constant.Constants;
 import com.rokid.glass.camera.recyclerviews.RecyclerViewAdapter;
+import com.rokid.glass.camera.utils.PermissionHelper;
 import com.rokid.glass.camera.utils.Utils;
 import com.rokid.glass.rokidcamera.RokidCamera;
 import com.rokid.glass.rokidcamera.RokidCameraBuilder;
@@ -53,6 +50,13 @@ public class MainActivity extends AppCompatActivity implements
         RokidCameraOnImageAvailableListener {
 
     public static final String TAG = "Camera2VideoImage";
+
+    public void setPermissionHelper(PermissionHelper permissionHelper) {
+        mPermissionHelper = permissionHelper;
+    }
+
+    // permission helper to check and request permission
+    private PermissionHelper mPermissionHelper;
 
     // sound related
     private SoundPool mSoundPool;
@@ -100,6 +104,8 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera2_video_image);
 
+        mPermissionHelper = new PermissionHelper(this);
+
         initLayoutAndUI();
         initSound();
 
@@ -123,10 +129,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onStart() {
         super.onStart();
-        if (arePermissionsGranted()) {
+        if (mPermissionHelper.arePermissionsGranted()) {
             initApp();
         } else {
-            requestAllPermissions();
+            mPermissionHelper.requestAllPermissions();
         }
     }
 
@@ -251,10 +257,10 @@ public class MainActivity extends AppCompatActivity implements
         } else if (Resources.getSystem().getConfiguration().locale.getLanguage().equals(chineseLang.getLanguage())) {
             // system language is Chinese
             // placeholder at first and last position
-            mCameraModes.add("               ");
+            mCameraModes.add("                 ");
             mCameraModes.add(getResources().getString(R.string.CAMERAMODE_PHOTO));
             mCameraModes.add(getResources().getString(R.string.CAMERAMODE_VIDEO));
-            mCameraModes.add("              ");
+            mCameraModes.add("                 ");
         }
 
 
@@ -281,12 +287,12 @@ public class MainActivity extends AppCompatActivity implements
                 performCameraButtonAction();
                 break;
 
-            case KeyEvent.KEYCODE_DPAD_UP:
+            case KeyEvent.KEYCODE_DPAD_DOWN:
                 // RIGHT
                 performSwipeToPhoto();
                 break;
 
-            case KeyEvent.KEYCODE_DPAD_DOWN:
+            case KeyEvent.KEYCODE_DPAD_UP:
                 // LEFT
                 performSwipeToVideo();
                 break;
@@ -415,7 +421,7 @@ public class MainActivity extends AppCompatActivity implements
      * Video recording progress UI
      */
     private void disableProgressTextView() {
-        mRecyclerView.setVisibility(View.VISIBLE);
+//        mRecyclerView.setVisibility(View.VISIBLE);
         mLinearLayoutVideoProgress.setVisibility(View.GONE);
     }
 
@@ -423,7 +429,7 @@ public class MainActivity extends AppCompatActivity implements
      * Video recording progress UI
      */
     private void enableProgressTextView() {
-        mRecyclerView.setVisibility(View.GONE);
+//        mRecyclerView.setVisibility(View.GONE);
         mLinearLayoutVideoProgress.setVisibility(View.VISIBLE);
 
     }
@@ -554,30 +560,12 @@ public class MainActivity extends AppCompatActivity implements
         // handle Image object here
     }
 
-    private boolean arePermissionsGranted() {
-        return (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
-    }
 
-    private void requestAllPermissions() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[] {
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.RECORD_AUDIO,
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE }, 8);
-        }
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (arePermissionsGranted()) {
+        if (mPermissionHelper.arePermissionsGranted()) {
             initApp();
         } else {
             Toast.makeText(this, "Please grant all permission so the app will work properly.", Toast.LENGTH_SHORT).show();
@@ -601,7 +589,7 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * Play sound for taking a photo.
      */
-    public void playSoundPhoto()  {
+    private void playSoundPhoto()  {
         if(mLoaded)  {
             float leftVolumn = mVolume;
             float rightVolumn = mVolume;
@@ -612,7 +600,7 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * Play a sound when video recording starts.
      */
-    public void playSoundVideoStart()  {
+    private void playSoundVideoStart()  {
         if(mLoaded)  {
             float leftVolumn = mVolume;
             float rightVolumn = mVolume;
@@ -623,7 +611,7 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * Play a sound when video recording stops.
      */
-    public void playSoundVideoStop()  {
+    private void playSoundVideoStop()  {
         if(mLoaded)  {
             float leftVolumn = mVolume;
             float rightVolumn = mVolume;
@@ -631,5 +619,40 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    public PermissionHelper getPermissionHelper() {
+        return mPermissionHelper;
+    }
+
+    public Chronometer getChronometer() {
+        return mChronometer;
+    }
+
+    public void setChronometer(Chronometer chronometer) {
+        mChronometer = chronometer;
+    }
+
+    public ImageView getIVCameraButton() {
+        return mIVCameraButton;
+    }
+
+    public void setIVCameraButton(ImageView IVCameraButton) {
+        mIVCameraButton = IVCameraButton;
+    }
+
+    public ImageView getIVRecordingRedDot() {
+        return mIVRecordingRedDot;
+    }
+
+    public void setIVRecordingRedDot(ImageView IVRecordingRedDot) {
+        mIVRecordingRedDot = IVRecordingRedDot;
+    }
+
+    public RecyclerView getRecyclerView() {
+        return mRecyclerView;
+    }
+
+    public void setRecyclerView(RecyclerView recyclerView) {
+        mRecyclerView = recyclerView;
+    }
 
 }
