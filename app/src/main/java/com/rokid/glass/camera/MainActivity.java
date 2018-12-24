@@ -1,5 +1,6 @@
 package com.rokid.glass.camera;
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.ImageFormat;
 import android.graphics.Typeface;
@@ -10,6 +11,7 @@ import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -124,6 +126,29 @@ public class MainActivity extends AppCompatActivity implements
                 .setRokidCameraParamAWBMode(RokidCameraParameters.ROKID_CAMERA_PARAM_AWB_MODE_AUTO)
                 .setRokidCameraParamCameraID(RokidCameraParameters.ROKID_CAMERA_PARAM_CAMERA_ID_ROKID_GLASS)
                 .build();
+    }
+
+    private boolean mIsWakeupAlways = false;
+    private boolean mNeedToContinueOnPause = false;
+    private final static String DB_WAKEUP_KEY = "rokid_wakeup_setting";
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        int wakeup = Settings.Global.getInt(
+                MainActivity.this.getContentResolver(),
+                DB_WAKEUP_KEY, 0);
+        mIsWakeupAlways = wakeup != 0 ? true : false;
+        mNeedToContinueOnPause = mIsWakeupAlways;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mNeedToContinueOnPause) {
+            // 退出录像，继续语音播放
+            sendContinueServer();
+        }
     }
 
     @Override
@@ -452,15 +477,57 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
+     * 发布停止语音录音命令
+     */
+    private void sendPauseServer() {
+        Intent intent = new Intent();
+        intent.setAction("com.rokid.glass.audio.layer.command");
+        intent.putExtra("LAYER_ITENT_COMMAND", "PAUSE_AUDIO_SERVER");
+        intent.putExtra("PACKAGE_NAME", this.getPackageName());
+        intent.putExtra("ACTIVITY_NAME", this.getComponentName().getClassName());
+        intent.addCategory(Intent.CATEGORY_INFO);
+        this.sendBroadcast(intent);
+    }
+
+    /**
+     * 发布继续语音录音命令
+     */
+    private void sendContinueServer() {
+        Intent intent = new Intent();
+        intent.setAction("com.rokid.glass.audio.layer.command");
+        intent.putExtra("LAYER_ITENT_COMMAND", "CONTINUE_AUDIO_SERVER");
+        intent.putExtra("PACKAGE_NAME", this.getPackageName());
+        intent.putExtra("ACTIVITY_NAME", this.getComponentName().getClassName());
+        intent.addCategory(Intent.CATEGORY_INFO);
+        this.sendBroadcast(intent);
+    }
+
+    /**
      * Key Event action : swipe
      */
     private void performSwipeToVideo() {
         // only can swipe to video if not currently recording
         if (mCameraMode != CameraMode.VIDEO_RECORDING) {
-            mCameraMode = CameraMode.VIDEO_STOPPED;
-            updateButtonText(mCameraMode);
-            mRecyclerView.smoothScrollToPosition(3);
-            initCameraModeForVideo();
+
+            // 进入录像，停止语音播放
+            if (mIsWakeupAlways) {
+                sendPauseServer();
+                new Handler(getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCameraMode = CameraMode.VIDEO_STOPPED;
+                        updateButtonText(mCameraMode);
+                        mRecyclerView.smoothScrollToPosition(3);
+                        initCameraModeForVideo();
+                    }
+                }, 200);
+            }
+            else {
+                mCameraMode = CameraMode.VIDEO_STOPPED;
+                updateButtonText(mCameraMode);
+                mRecyclerView.smoothScrollToPosition(3);
+                initCameraModeForVideo();
+            }
         }
     }
 
@@ -475,6 +542,12 @@ public class MainActivity extends AppCompatActivity implements
             mRecyclerView.smoothScrollToPosition(0);
             initCameraModeForPhoto();
             initPreview();
+
+            if (mIsWakeupAlways) {
+                // 退出录像，继续语音播放
+                sendContinueServer();
+                mNeedToContinueOnPause = false;
+            }
         }
     }
 
