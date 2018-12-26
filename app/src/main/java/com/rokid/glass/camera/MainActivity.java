@@ -22,7 +22,10 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.BounceInterpolator;
 import android.view.animation.LinearInterpolator;
+import android.view.animation.ScaleAnimation;
 import android.widget.Chronometer;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -87,7 +90,8 @@ public class MainActivity extends AppCompatActivity implements
     private ImageView mIVRecordingRedDot;
     private RecyclerView mRecyclerView;
     private TextureView mTextureView;
-
+    private ImageView mFrameImage;
+    
     // new RokidCamera SDK
     RokidCamera mRokidCamera;
     private boolean mIsRecording = false;
@@ -263,7 +267,51 @@ public class MainActivity extends AppCompatActivity implements
                     }
                 }
         );
+
+
+        mFrameImage = findViewById(R.id.img_frame);
     }
+
+    /**
+     * 播放拍照动画
+     */
+    private void startShutterAnimation() {
+        if (mFrameImage != null){
+            AnimationSet set = new AnimationSet(false);
+
+            AlphaAnimation alphaAnimation = new AlphaAnimation(1.0f, 0.0f);
+            alphaAnimation.setDuration(200);
+
+            ScaleAnimation scaleAnimation=new ScaleAnimation(1,0.8f,1,0.8f,
+                    Animation.RELATIVE_TO_SELF,0.5f,
+                    Animation.RELATIVE_TO_SELF,0.5f);
+            scaleAnimation.setInterpolator(new BounceInterpolator());
+            scaleAnimation.setDuration(200);
+
+            set.addAnimation(alphaAnimation);
+            set.addAnimation(scaleAnimation);
+
+            alphaAnimation.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    //mFlashView.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    //mFlashView.setVisibility(View.GONE);
+                }
+
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {}
+            });
+
+
+            mFrameImage.startAnimation(set);
+        }
+    }
+
 
     /**
      * Button UI
@@ -464,6 +512,8 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void performCameraButtonAction() {
         if (mCameraMode == CameraMode.PHOTO_STOPPED) {
+            startShutterAnimation();
+
             mCameraMode = CameraMode.PHOTO_TAKING;
             mTouchpadIsDisabled = true;
             // get an image from the camera
