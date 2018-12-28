@@ -133,7 +133,6 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private boolean mIsWakeupAlways = false;
-    private boolean mNeedToContinueOnPause = false;
     private final static String DB_WAKEUP_KEY = "rokid_wakeup_setting";
 
     @Override
@@ -143,13 +142,15 @@ public class MainActivity extends AppCompatActivity implements
                 MainActivity.this.getContentResolver(),
                 DB_WAKEUP_KEY, 0);
         mIsWakeupAlways = wakeup != 0 ? true : false;
-        mNeedToContinueOnPause = mIsWakeupAlways;
+        if (mIsWakeupAlways) {
+            sendPauseServer();
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (mNeedToContinueOnPause) {
+        if (mIsWakeupAlways) {
             // 退出录像，继续语音播放
             sendContinueServer();
         }
@@ -558,26 +559,10 @@ public class MainActivity extends AppCompatActivity implements
     private void performSwipeToVideo() {
         // only can swipe to video if not currently recording
         if (mCameraMode != CameraMode.VIDEO_RECORDING) {
-
-            // 进入录像，停止语音播放
-            if (mIsWakeupAlways) {
-                sendPauseServer();
-                new Handler(getMainLooper()).postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mCameraMode = CameraMode.VIDEO_STOPPED;
-                        updateButtonText(mCameraMode);
-                        mRecyclerView.smoothScrollToPosition(3);
-                        initCameraModeForVideo();
-                    }
-                }, 200);
-            }
-            else {
-                mCameraMode = CameraMode.VIDEO_STOPPED;
-                updateButtonText(mCameraMode);
-                mRecyclerView.smoothScrollToPosition(3);
-                initCameraModeForVideo();
-            }
+            mCameraMode = CameraMode.VIDEO_STOPPED;
+            updateButtonText(mCameraMode);
+            mRecyclerView.smoothScrollToPosition(3);
+            initCameraModeForVideo();
         }
     }
 
@@ -592,12 +577,6 @@ public class MainActivity extends AppCompatActivity implements
             mRecyclerView.smoothScrollToPosition(0);
             initCameraModeForPhoto();
             initPreview();
-
-            if (mIsWakeupAlways) {
-                // 退出录像，继续语音播放
-                sendContinueServer();
-                mNeedToContinueOnPause = false;
-            }
         }
     }
 
