@@ -136,30 +136,18 @@ public class MainActivity extends AppCompatActivity implements
     private final static String DB_WAKEUP_KEY = "rokid_wakeup_setting";
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        int wakeup = Settings.Global.getInt(
-                MainActivity.this.getContentResolver(),
-                DB_WAKEUP_KEY, 0);
-        mIsWakeupAlways = wakeup != 0 ? true : false;
-        if (mIsWakeupAlways) {
-            sendPauseServer();
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (mIsWakeupAlways) {
-            // 退出录像，继续语音播放
-            sendContinueServer();
-        }
-    }
-
-    @Override
     protected void onStart() {
         super.onStart();
         if (mPermissionHelper.arePermissionsGranted()) {
+            // 进入相机，退出语音
+            int wakeup = Settings.Global.getInt(
+                    MainActivity.this.getContentResolver(),
+                    DB_WAKEUP_KEY, 0);
+            mIsWakeupAlways = wakeup != 0 ? true : false;
+            if (mIsWakeupAlways) {
+                sendPauseServer();
+            }
+
             initApp();
         } else {
             mPermissionHelper.requestAllPermissions();
@@ -173,6 +161,11 @@ public class MainActivity extends AppCompatActivity implements
             mRokidCamera.stopRecording();
         }
         mRokidCamera.onStop();
+
+        if (mIsWakeupAlways) {
+            // 退出录像，继续语音播放
+            sendContinueServer();
+        }
     }
 
     private void initApp() {
