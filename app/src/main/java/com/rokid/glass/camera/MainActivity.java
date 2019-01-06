@@ -17,6 +17,7 @@ import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.TextureView;
 import android.view.View;
@@ -524,6 +525,7 @@ public class MainActivity extends AppCompatActivity implements
      * 发布停止语音录音命令
      */
     private void sendPauseServer() {
+        Log.i(TAG, "sendPauseServer()");
         Intent intent = new Intent();
         intent.setAction("com.rokid.glass.audio.layer.command");
         intent.putExtra("LAYER_ITENT_COMMAND", "PAUSE_AUDIO_SERVER");
@@ -537,6 +539,7 @@ public class MainActivity extends AppCompatActivity implements
      * 发布继续语音录音命令
      */
     private void sendContinueServer() {
+        Log.i(TAG, "sendContinueServer()");
         Intent intent = new Intent();
         intent.setAction("com.rokid.glass.audio.layer.command");
         intent.putExtra("LAYER_ITENT_COMMAND", "CONTINUE_AUDIO_SERVER");

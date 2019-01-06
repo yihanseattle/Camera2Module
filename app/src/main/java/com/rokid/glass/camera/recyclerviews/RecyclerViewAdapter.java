@@ -61,7 +61,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     Utils.getDPFromPx(mContext, Constants.CAMERA_MODE_TEXT_PADDING_TOP),
                     Utils.getDPFromPx(mContext, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
                     0);
-            holder.tvCameraMode.setTextColor(mContext.getColor(R.color.color_text_highlight));
+            holder.tvCameraMode.setTextColor(mContext.getColor(R.color.color_text_default));
             holder.tvCameraMode.setTypeface(null, Typeface.NORMAL);
         }
     }
