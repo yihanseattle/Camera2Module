@@ -413,8 +413,8 @@ public class MainActivity extends AppCompatActivity implements
                 0,
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
                 0);
-        typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_medium);
-        textView.setTypeface(typeface);
+        //typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_medium);
+        textView.setTypeface(null, Typeface.BOLD);
         textView.setIncludeFontPadding(false);
         // 摄像
         view = mRecyclerView.findViewHolderForAdapterPosition(2).itemView;
@@ -426,8 +426,8 @@ public class MainActivity extends AppCompatActivity implements
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_TOP),
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
                 0);
-        typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_regular);
-        textView.setTypeface(typeface);
+        //typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_regular);
+        textView.setTypeface(null, Typeface.NORMAL);
         textView.setIncludeFontPadding(false);
     }
 
@@ -449,8 +449,8 @@ public class MainActivity extends AppCompatActivity implements
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_TOP),
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
                 0);
-        typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_regular);
-        textView.setTypeface(typeface);
+        //typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_regular);
+        textView.setTypeface(null, Typeface.NORMAL);
         textView.setIncludeFontPadding(false);
         // 摄像
         view = mRecyclerView.findViewHolderForAdapterPosition(2).itemView;
@@ -462,8 +462,8 @@ public class MainActivity extends AppCompatActivity implements
                 0,
                 Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
                 0);
-        typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_medium);
-        textView.setTypeface(typeface);
+        //typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_medium);
+        textView.setTypeface(null, Typeface.BOLD);
         textView.setIncludeFontPadding(false);
     }
 
