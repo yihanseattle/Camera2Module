@@ -139,16 +139,12 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onStart() {
         super.onStart();
-        if (mPermissionHelper.arePermissionsGranted()) {
-            // 进入相机，退出语音
-            int wakeup = Settings.Global.getInt(
-                    MainActivity.this.getContentResolver(),
-                    DB_WAKEUP_KEY, 0);
-            mIsWakeupAlways = wakeup != 0 ? true : false;
-            if (mIsWakeupAlways) {
-                sendPauseServer();
-            }
+        int wakeup = Settings.Global.getInt(
+                MainActivity.this.getContentResolver(),
+                DB_WAKEUP_KEY, 0);
+        mIsWakeupAlways = wakeup != 0 ? true : false;
 
+        if (mPermissionHelper.arePermissionsGranted()) {
             initApp();
         } else {
             mPermissionHelper.requestAllPermissions();
@@ -586,14 +582,29 @@ public class MainActivity extends AppCompatActivity implements
             mRokidCamera.createCameraPreviewSession();
             // sound
             playSoundVideoStop();
+
+            if (mIsWakeupAlways) {
+                sendContinueServer();
+            }
         } else {
-            mIsRecording = true;
-            mCameraMode = CameraMode.VIDEO_RECORDING;
-            updateButtonText(mCameraMode);
-            enableProgressTextView();
-            mRokidCamera.startVideoRecording();
-            // sound
-            playSoundVideoStart();
+            // 停止语音
+            if (mIsWakeupAlways) {
+                sendPauseServer();
+            }
+
+            // 延时开始录像
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mIsRecording = true;
+                    mCameraMode = CameraMode.VIDEO_RECORDING;
+                    updateButtonText(mCameraMode);
+                    enableProgressTextView();
+                    mRokidCamera.startVideoRecording();
+                    // sound
+                    playSoundVideoStart();
+                }
+            }, 150);
         }
     }
 

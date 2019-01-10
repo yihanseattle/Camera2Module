@@ -20,11 +20,9 @@
         android:id="@+id/linearlayoutVideoProgress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="left"
+        android:layout_centerInParent="true"
         android:visibility="gone"
         android:orientation="horizontal"
-        android:layout_marginTop="55dp"
-        android:layout_marginStart="53dp"
         >
 
         <ImageView

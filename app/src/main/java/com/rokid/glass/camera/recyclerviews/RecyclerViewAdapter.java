@@ -52,7 +52,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     0,
                     Utils.getDPFromPx(mContext, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
                     0);
-
         } else if (position == 2) {
             // 摄像
             holder.tvCameraMode.setTextSize(mContext.getResources().getDimension(R.dimen.font_size_text_default));
