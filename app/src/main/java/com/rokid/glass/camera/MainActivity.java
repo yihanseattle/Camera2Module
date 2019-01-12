@@ -13,10 +13,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.TextureView;
@@ -33,10 +30,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.rokid.glass.camera.constant.Constants;
-import com.rokid.glass.camera.recyclerviews.RecyclerViewAdapter;
 import com.rokid.glass.camera.utils.PermissionHelper;
-import com.rokid.glass.camera.utils.Utils;
+import com.rokid.glass.camera.view.IndicatorLayout;
 import com.rokid.glass.rokidcamera.RokidCamera;
 import com.rokid.glass.rokidcamera.RokidCameraBuilder;
 import com.rokid.glass.rokidcamera.callbacks.RokidCameraIOListener;
@@ -86,13 +81,15 @@ public class MainActivity extends AppCompatActivity implements
     private Chronometer mChronometer;
 
     // camera 1
-    private ImageView mIVCameraButton;
     private LinearLayout mLinearLayoutVideoProgress;
     private ImageView mIVRecordingRedDot;
-    private RecyclerView mRecyclerView;
     private TextureView mTextureView;
     private ImageView mFrameImage;
-    
+
+    private IndicatorLayout mIndicatorLayout;
+    private TextView mCameraTextView;
+    private TextView mVideoTextView;
+
     // new RokidCamera SDK
     RokidCamera mRokidCamera;
     private boolean mIsRecording = false;
@@ -248,19 +245,12 @@ public class MainActivity extends AppCompatActivity implements
         mAnimation.setRepeatMode(Animation.REVERSE);
         mIVRecordingRedDot.startAnimation(mAnimation);
 
-        // Add a listener to the Capture button
-        mIVCameraButton = findViewById(R.id.ivCameraButton);
-        mIVCameraButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        performCameraButtonAction();
-                    }
-                }
-        );
-
-
         mFrameImage = findViewById(R.id.img_frame);
+
+        mIndicatorLayout = findViewById(R.id.layout_indicator);
+        mIndicatorLayout.initIndicatorView();
+        mCameraTextView = findViewById(R.id.tx_camera);
+        mVideoTextView = findViewById(R.id.tx_video);
     }
 
     /**
@@ -326,14 +316,6 @@ public class MainActivity extends AppCompatActivity implements
             mCameraModes.add(getResources().getString(R.string.CAMERAMODE_VIDEO));
             mCameraModes.add("                 ");
         }
-
-
-
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        mRecyclerView = findViewById(R.id.recyclerView);
-        mRecyclerView.setLayoutManager(layoutManager);
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(this, mCameraModes);
-        mRecyclerView.setAdapter(adapter);
     }
 
     @Override
@@ -373,21 +355,16 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void updateButtonText(final CameraMode cameraMode) {
         if (cameraMode == CameraMode.PHOTO_STOPPED) {
-            mIVCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.shutterinactive));
         } else if (cameraMode == CameraMode.PHOTO_TAKING) {
-            mIVCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.shutteractive));
             new Handler(getMainLooper()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    mIVCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.shutterinactive));
                     mTouchpadIsDisabled = false;
                 }
             }, mTouchpadAnimationInterval);
             this.mCameraMode = CameraMode.PHOTO_STOPPED;
         } else if (cameraMode == CameraMode.VIDEO_STOPPED) {
-            mIVCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.videoinactive));
         } else if (cameraMode == CameraMode.VIDEO_RECORDING) {
-            mIVCameraButton.setImageDrawable(getResources().getDrawable(R.drawable.videoactive));
         }
     }
 
@@ -396,35 +373,15 @@ public class MainActivity extends AppCompatActivity implements
      * RecyclerView has placeholder at position 0 and 3.
      */
     private void initCameraModeForPhoto() {
-        View view;
-        TextView textView;
-        Typeface typeface;
         // 拍照
-        view = mRecyclerView.findViewHolderForAdapterPosition(1).itemView;
-        textView = view.findViewById(R.id.tvCameraMode);
-        textView.setTextSize(getResources().getDimension(R.dimen.font_size_text_highlighted));
-        textView.setTextColor(getColor(R.color.color_text_highlight));
-        textView.setPadding(
-                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_LEFT),
-                0,
-                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
-                0);
-        //typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_medium);
-        textView.setTypeface(null, Typeface.BOLD);
-        textView.setIncludeFontPadding(false);
+        mCameraTextView.setTextColor(getColor(R.color.color_text_highlight));
+        mCameraTextView.setTypeface(null, Typeface.BOLD);
+        mCameraTextView.setIncludeFontPadding(false);
+
         // 摄像
-        view = mRecyclerView.findViewHolderForAdapterPosition(2).itemView;
-        textView = view.findViewById(R.id.tvCameraMode);
-        textView.setTextSize(getResources().getDimension(R.dimen.font_size_text_default));
-        textView.setTextColor(getColor(R.color.color_text_default));
-        textView.setPadding(
-                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_LEFT),
-                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_TOP),
-                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
-                0);
-        //typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_regular);
-        textView.setTypeface(null, Typeface.NORMAL);
-        textView.setIncludeFontPadding(false);
+        mVideoTextView.setTextColor(getColor(R.color.color_text_default));
+        mVideoTextView.setTypeface(null, Typeface.NORMAL);
+        mVideoTextView.setIncludeFontPadding(false);
     }
 
     /**
@@ -432,35 +389,15 @@ public class MainActivity extends AppCompatActivity implements
      * RecyclerView has placeholder at position 0 and 3.
      */
     private void initCameraModeForVideo() {
-        View view;
-        TextView textView;
-        Typeface typeface;
         // 拍照
-        view = mRecyclerView.findViewHolderForAdapterPosition(1).itemView;
-        textView = view.findViewById(R.id.tvCameraMode);
-        textView.setTextSize(getResources().getDimension(R.dimen.font_size_text_default));
-        textView.setTextColor(getColor(R.color.color_text_default));
-        textView.setPadding(
-                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_LEFT),
-                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_TOP),
-                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
-                0);
-        //typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_regular);
-        textView.setTypeface(null, Typeface.NORMAL);
-        textView.setIncludeFontPadding(false);
+        mCameraTextView.setTextColor(getColor(R.color.color_text_default));
+        mCameraTextView.setTypeface(null, Typeface.NORMAL);
+        mCameraTextView.setIncludeFontPadding(false);
+
         // 摄像
-        view = mRecyclerView.findViewHolderForAdapterPosition(2).itemView;
-        textView = view.findViewById(R.id.tvCameraMode);
-        textView.setTextSize(getResources().getDimension(R.dimen.font_size_text_highlighted));
-        textView.setTextColor(getColor(R.color.color_text_highlight));
-        textView.setPadding(
-                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_LEFT),
-                0,
-                Utils.getDPFromPx(this, Constants.CAMERA_MODE_TEXT_PADDING_RIGHT),
-                0);
-        //typeface = ResourcesCompat.getFont(this, R.font.notosanscjk_medium);
-        textView.setTypeface(null, Typeface.BOLD);
-        textView.setIncludeFontPadding(false);
+        mVideoTextView.setTextColor(getColor(R.color.color_text_highlight));
+        mVideoTextView.setTypeface(null, Typeface.BOLD);
+        mVideoTextView.setIncludeFontPadding(false);
     }
 
     /**
@@ -553,7 +490,9 @@ public class MainActivity extends AppCompatActivity implements
         if (mCameraMode != CameraMode.VIDEO_RECORDING) {
             mCameraMode = CameraMode.VIDEO_STOPPED;
             updateButtonText(mCameraMode);
-            mRecyclerView.smoothScrollToPosition(3);
+            if (mIndicatorLayout != null) {
+                mIndicatorLayout.switchMode(false);
+            }
             initCameraModeForVideo();
         }
     }
@@ -566,7 +505,9 @@ public class MainActivity extends AppCompatActivity implements
         if (mCameraMode != CameraMode.VIDEO_RECORDING) {
             mCameraMode = CameraMode.PHOTO_STOPPED;
             updateButtonText(mCameraMode);
-            mRecyclerView.smoothScrollToPosition(0);
+            if (mIndicatorLayout != null) {
+                mIndicatorLayout.switchMode(true);
+            }
             initCameraModeForPhoto();
             initPreview();
         }
@@ -670,7 +611,6 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -740,28 +680,12 @@ public class MainActivity extends AppCompatActivity implements
         mChronometer = chronometer;
     }
 
-    public ImageView getIVCameraButton() {
-        return mIVCameraButton;
-    }
-
-    public void setIVCameraButton(ImageView IVCameraButton) {
-        mIVCameraButton = IVCameraButton;
-    }
-
     public ImageView getIVRecordingRedDot() {
         return mIVRecordingRedDot;
     }
 
     public void setIVRecordingRedDot(ImageView IVRecordingRedDot) {
         mIVRecordingRedDot = IVRecordingRedDot;
-    }
-
-    public RecyclerView getRecyclerView() {
-        return mRecyclerView;
-    }
-
-    public void setRecyclerView(RecyclerView recyclerView) {
-        mRecyclerView = recyclerView;
     }
 
 }

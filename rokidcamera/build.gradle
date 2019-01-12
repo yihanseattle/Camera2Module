@@ -12,8 +12,6 @@ android {
                 setGroupId(groupId)
                 setArtifactId(artifactId)
                 version android.defaultConfig.versionName
-
-                artifact(bundleRelease)
             }
         }
     }
