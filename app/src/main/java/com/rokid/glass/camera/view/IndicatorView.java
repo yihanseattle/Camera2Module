@@ -60,14 +60,16 @@ public class IndicatorView extends View {
         float x4 = footPoint.getX() + footOffsetX;
         float y4 = footPoint.getY() - footOffsetY;
 
-        float anchorX = (footPoint.getX() + headPoint.getX()) / 2;
-        float anchorY = (footPoint.getY() + headPoint.getY()) / 2;
+        //float anchorX = (footPoint.getX() + headPoint.getX()) / 2;
+        //float anchorY = (footPoint.getY() + headPoint.getY()) / 2;
 
         path.reset();
         path.moveTo(x1, y1);
-        path.quadTo(anchorX, anchorY, x3, y3);
+        path.lineTo(x2, y2);
+        //path.quadTo(anchorX, anchorY, x3, y3);
         path.lineTo(x4, y4);
-        path.quadTo(anchorX, anchorY, x2, y2);
+        path.lineTo(x3, y3);
+        //path.quadTo(anchorX, anchorY, x2, y2);
         path.lineTo(x1, y1);
     }
 
@@ -94,5 +96,9 @@ public class IndicatorView extends View {
 
     public int getIndicatorColor(){
         return paint.getColor();
+    }
+
+    public void setColor(int color) {
+        paint.setColor(color);
     }
 }

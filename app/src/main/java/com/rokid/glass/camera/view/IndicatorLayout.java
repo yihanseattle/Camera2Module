@@ -69,7 +69,7 @@ public class IndicatorLayout extends FrameLayout {
         mCurrentInCamera = isCamera;
 
         ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
-        anim.setDuration(500);
+        anim.setDuration(200);
         anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -128,4 +128,10 @@ public class IndicatorLayout extends FrameLayout {
         mIndicatorView.postInvalidate();
     }
 
+    public void setButtonColor(int color) {
+        if (mIndicatorView != null) {
+            mIndicatorView.setColor(color);
+            mIndicatorView.postInvalidate();
+        }
+    }
 }

@@ -2,6 +2,7 @@ package com.rokid.glass.camera;
 
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Typeface;
 import android.media.AudioAttributes;
@@ -22,7 +23,6 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.BounceInterpolator;
-import android.view.animation.LinearInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.widget.Chronometer;
 import android.widget.ImageView;
@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements
 
     // camera 1
     private LinearLayout mLinearLayoutVideoProgress;
-    private ImageView mIVRecordingRedDot;
+    //private ImageView mIVRecordingRedDot;
     private TextureView mTextureView;
     private ImageView mFrameImage;
 
@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements
         int wakeup = Settings.Global.getInt(
                 MainActivity.this.getContentResolver(),
                 DB_WAKEUP_KEY, 0);
-        mIsWakeupAlways = wakeup != 0 ? true : false;
+        mIsWakeupAlways = wakeup != 0;
 
         if (mPermissionHelper.arePermissionsGranted()) {
             initApp();
@@ -237,13 +237,13 @@ public class MainActivity extends AppCompatActivity implements
         });
         mTextureView = findViewById(R.id.textureView);
         mLinearLayoutVideoProgress = findViewById(R.id.linearlayoutVideoProgress);
-        mIVRecordingRedDot = findViewById(R.id.ivVideoRecordingRedDot);
-        Animation mAnimation = new AlphaAnimation(1, 0);
-        mAnimation.setDuration(700);
-        mAnimation.setInterpolator(new LinearInterpolator());
-        mAnimation.setRepeatCount(Animation.INFINITE);
-        mAnimation.setRepeatMode(Animation.REVERSE);
-        mIVRecordingRedDot.startAnimation(mAnimation);
+//        mIVRecordingRedDot = findViewById(R.id.ivVideoRecordingRedDot);
+//        Animation mAnimation = new AlphaAnimation(1, 0);
+//        mAnimation.setDuration(700);
+//        mAnimation.setInterpolator(new LinearInterpolator());
+//        mAnimation.setRepeatCount(Animation.INFINITE);
+//        mAnimation.setRepeatMode(Animation.REVERSE);
+//        mIVRecordingRedDot.startAnimation(mAnimation);
 
         mFrameImage = findViewById(R.id.img_frame);
 
@@ -354,8 +354,7 @@ public class MainActivity extends AppCompatActivity implements
      * @param cameraMode : update UI depends on the mode
      */
     private void updateButtonText(final CameraMode cameraMode) {
-        if (cameraMode == CameraMode.PHOTO_STOPPED) {
-        } else if (cameraMode == CameraMode.PHOTO_TAKING) {
+        if (cameraMode == CameraMode.PHOTO_TAKING) {
             new Handler(getMainLooper()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -363,9 +362,19 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }, mTouchpadAnimationInterval);
             this.mCameraMode = CameraMode.PHOTO_STOPPED;
-        } else if (cameraMode == CameraMode.VIDEO_STOPPED) {
-        } else if (cameraMode == CameraMode.VIDEO_RECORDING) {
         }
+//        if (cameraMode == CameraMode.PHOTO_STOPPED) {
+//        } else if (cameraMode == CameraMode.PHOTO_TAKING) {
+//            new Handler(getMainLooper()).postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    mTouchpadIsDisabled = false;
+//                }
+//            }, mTouchpadAnimationInterval);
+//            this.mCameraMode = CameraMode.PHOTO_STOPPED;
+//        } else if (cameraMode == CameraMode.VIDEO_STOPPED) {
+//        } else if (cameraMode == CameraMode.VIDEO_RECORDING) {
+//        }
     }
 
     /**
@@ -518,6 +527,10 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void handleVideoButton() {
         if (mIsRecording) {
+
+            // 设置按钮颜色
+            mIndicatorLayout.setButtonColor(Color.WHITE);
+
             mRokidCamera.stopRecording();
             // restart preview
             mRokidCamera.createCameraPreviewSession();
@@ -532,6 +545,9 @@ public class MainActivity extends AppCompatActivity implements
             if (mIsWakeupAlways) {
                 sendPauseServer();
             }
+
+            // 设置按钮颜色
+            mIndicatorLayout.setButtonColor(Color.RED);
 
             // 延时开始录像
             new Handler().postDelayed(new Runnable() {
@@ -680,12 +696,12 @@ public class MainActivity extends AppCompatActivity implements
         mChronometer = chronometer;
     }
 
-    public ImageView getIVRecordingRedDot() {
-        return mIVRecordingRedDot;
-    }
-
-    public void setIVRecordingRedDot(ImageView IVRecordingRedDot) {
-        mIVRecordingRedDot = IVRecordingRedDot;
-    }
+//    public ImageView getIVRecordingRedDot() {
+//        return mIVRecordingRedDot;
+//    }
+//
+//    public void setIVRecordingRedDot(ImageView IVRecordingRedDot) {
+//        mIVRecordingRedDot = IVRecordingRedDot;
+//    }
 
 }

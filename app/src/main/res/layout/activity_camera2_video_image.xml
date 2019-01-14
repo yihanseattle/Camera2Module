@@ -71,26 +71,28 @@
         android:orientation="horizontal"
         >
 
-        <ImageView
-            android:id="@+id/ivVideoRecordingRedDot"
-            android:layout_width="@dimen/width_imageview_recording_dot"
-            android:layout_height="@dimen/height_imageview_recording_dot"
-            android:src="@drawable/oval"
-            android:layout_gravity="center"
-            android:paddingEnd="5dp"
-            />
+        <!--<ImageView-->
+            <!--android:id="@+id/ivVideoRecordingRedDot"-->
+            <!--android:layout_width="@dimen/width_imageview_recording_dot"-->
+            <!--android:layout_height="@dimen/height_imageview_recording_dot"-->
+            <!--android:src="@drawable/oval"-->
+            <!--android:layout_gravity="center"-->
+            <!--android:paddingEnd="5dp"-->
+            <!--android:visibility="gone"-->
+            <!--/>-->
         <Chronometer
             android:id="@+id/chronometer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/color_font_chronometer"
             android:textSize="@dimen/font_size_chronometer"
+            android:textStyle="bold"
             />
-        <View
-            android:layout_width="@dimen/width_chronometer_placeholder"
-            android:layout_height="@dimen/height_chronometer_placeholder"
-            android:layout_marginStart="@dimen/margin_start_chronometer_placeholder"
-            />
+        <!--<View-->
+            <!--android:layout_width="@dimen/width_chronometer_placeholder"-->
+            <!--android:layout_height="@dimen/height_chronometer_placeholder"-->
+            <!--android:layout_marginStart="@dimen/margin_start_chronometer_placeholder"-->
+            <!--/>-->
     </LinearLayout>
 
 </RelativeLayout>
