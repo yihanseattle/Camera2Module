@@ -14,8 +14,8 @@
     <dimen name="height_imageview_recording_dot">15dp</dimen>
 
     <!-- Dynamic values -->
-    <dimen name="font_size_text">25dp</dimen>
-
+    <dimen name="font_size_text_highlight">25dp</dimen>
+    <dimen name="font_size_text_normal">23dp</dimen>
 
     <dimen name="indicator_radius_max">8dp</dimen>
     <dimen name="indicator_radius_min">5dp</dimen>

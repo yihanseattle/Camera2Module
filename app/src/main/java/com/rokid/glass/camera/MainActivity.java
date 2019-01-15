@@ -16,6 +16,7 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.TextureView;
 import android.view.View;
@@ -221,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private void initLayoutAndUI() {
         mChronometer = findViewById(R.id.chronometer);
+        mChronometer.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.font_size_text_highlight));
         mChronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             @Override
             public void onChronometerTick(Chronometer chronometer) {
@@ -385,11 +387,13 @@ public class MainActivity extends AppCompatActivity implements
         // 拍照
         mCameraTextView.setTextColor(getColor(R.color.color_text_highlight));
         mCameraTextView.setTypeface(null, Typeface.BOLD);
+        mCameraTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.font_size_text_highlight));
         mCameraTextView.setIncludeFontPadding(false);
 
         // 摄像
         mVideoTextView.setTextColor(getColor(R.color.color_text_default));
         mVideoTextView.setTypeface(null, Typeface.NORMAL);
+        mVideoTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.font_size_text_normal));
         mVideoTextView.setIncludeFontPadding(false);
     }
 
@@ -401,11 +405,13 @@ public class MainActivity extends AppCompatActivity implements
         // 拍照
         mCameraTextView.setTextColor(getColor(R.color.color_text_default));
         mCameraTextView.setTypeface(null, Typeface.NORMAL);
+        mCameraTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.font_size_text_normal));
         mCameraTextView.setIncludeFontPadding(false);
 
         // 摄像
         mVideoTextView.setTextColor(getColor(R.color.color_text_highlight));
         mVideoTextView.setTypeface(null, Typeface.BOLD);
+        mVideoTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.font_size_text_highlight));
         mVideoTextView.setIncludeFontPadding(false);
     }
 
@@ -546,13 +552,12 @@ public class MainActivity extends AppCompatActivity implements
                 sendPauseServer();
             }
 
-            // 设置按钮颜色
-            mIndicatorLayout.setButtonColor(Color.RED);
-
             // 延时开始录像
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    // 设置按钮颜色
+                    mIndicatorLayout.setButtonColor(Color.RED);
                     mIsRecording = true;
                     mCameraMode = CameraMode.VIDEO_RECORDING;
                     updateButtonText(mCameraMode);
