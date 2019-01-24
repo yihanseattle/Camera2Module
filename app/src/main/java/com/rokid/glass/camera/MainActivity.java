@@ -504,6 +504,11 @@ public class MainActivity extends AppCompatActivity implements
         // only can swipe to video if not currently recording
         if (mCameraMode != CameraMode.VIDEO_RECORDING) {
             mCameraMode = CameraMode.VIDEO_STOPPED;
+            // 停止语音
+            if (mIsWakeupAlways) {
+                sendPauseServer();
+            }
+
             updateButtonText(mCameraMode);
             if (mIndicatorLayout != null) {
                 mIndicatorLayout.switchMode(false);
@@ -519,6 +524,11 @@ public class MainActivity extends AppCompatActivity implements
         // only can swipe to photo if not currently recording
         if (mCameraMode != CameraMode.VIDEO_RECORDING) {
             mCameraMode = CameraMode.PHOTO_STOPPED;
+            // 继续语音
+            if (mIsWakeupAlways) {
+                sendContinueServer();
+            }
+
             updateButtonText(mCameraMode);
             if (mIndicatorLayout != null) {
                 mIndicatorLayout.switchMode(true);
@@ -533,8 +543,6 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void handleVideoButton() {
         if (mIsRecording) {
-
-            // 设置按钮颜色
             mIndicatorLayout.setButtonColor(Color.WHITE);
 
             mRokidCamera.stopRecording();
@@ -542,21 +550,12 @@ public class MainActivity extends AppCompatActivity implements
             mRokidCamera.createCameraPreviewSession();
             // sound
             playSoundVideoStop();
-
-            if (mIsWakeupAlways) {
-                sendContinueServer();
-            }
         } else {
-            // 停止语音
-            if (mIsWakeupAlways) {
-                sendPauseServer();
-            }
-
             // 延时开始录像
-            new Handler().postDelayed(new Runnable() {
+            long delay = mIsWakeupAlways ? 150 : 0;
+            new Handler(getMainLooper()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    // 设置按钮颜色
                     mIndicatorLayout.setButtonColor(Color.RED);
                     mIsRecording = true;
                     mCameraMode = CameraMode.VIDEO_RECORDING;
@@ -566,7 +565,7 @@ public class MainActivity extends AppCompatActivity implements
                     // sound
                     playSoundVideoStart();
                 }
-            }, 150);
+            }, delay);
         }
     }
 
