@@ -1,5 +1,6 @@
 package com.rokid.glass.camera;
 
+import android.app.Instrumentation;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -11,10 +12,12 @@ import android.media.Image;
 import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
@@ -96,6 +99,8 @@ public class MainActivity extends AppCompatActivity implements
     private boolean mIsRecording = false;
     private CameraMode mCameraMode;
 
+    private HandlerThread mHandlerThread;
+
     // Different camera modes for button control
     public enum CameraMode {
         PHOTO_STOPPED,
@@ -156,7 +161,18 @@ public class MainActivity extends AppCompatActivity implements
             mRokidCamera.stopRecording();
         }
         mRokidCamera.onStop();
+    }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        simulatedShutter(intent);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         if (mIsWakeupAlways) {
             // 退出录像，继续语音播放
             sendContinueServer();
@@ -169,6 +185,12 @@ public class MainActivity extends AppCompatActivity implements
         initPreview();
         mRokidCamera.onStart();
         mTouchpadIsDisabled = false;
+
+        mHandlerThread = new HandlerThread("ShutterThread");
+        mHandlerThread.start();
+
+        // 处理是否需要立即拍照
+        simulatedShutter(getIntent());
     }
 
     private void initSound() {
@@ -700,12 +722,32 @@ public class MainActivity extends AppCompatActivity implements
         mChronometer = chronometer;
     }
 
-//    public ImageView getIVRecordingRedDot() {
-//        return mIVRecordingRedDot;
-//    }
-//
-//    public void setIVRecordingRedDot(ImageView IVRecordingRedDot) {
-//        mIVRecordingRedDot = IVRecordingRedDot;
-//    }
+    /**
+     * 模拟按键进行拍照
+     */
+    private void simulatedShutter(Intent intent) {
+        String event = intent.getStringExtra("event");
+        if (!TextUtils.isEmpty(event)) {
+            if (event.equals("capture")) {
+                if (mHandlerThread != null) {
+                    new Handler(mHandlerThread.getLooper()).postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Log.i(TAG, "simulatedShutter send the shutter key event");
+                                Instrumentation instrumentation = new Instrumentation();
+                                instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_ENTER);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, 1500);
+                }
+            }
+            else if (event.equals("exit")) {
+                MainActivity.this.finish();
+            }
+        }
+    }
 
 }
