@@ -23,7 +23,7 @@ public enum RokidCameraSize {
     /** Size for ImageReader for ARSDK Algorithm */
     SIZE_IMAGE_READER_ALGORITHM_ARSDK   (new Size(640, 480)),
     /** Size for ImageReader for Still Photo */
-    SIZE_IMAGE_READER_STILL_PHOTO       (new Size(4000, 3000)),
+    SIZE_IMAGE_READER_STILL_PHOTO       (new Size(3840, 2160)),  //4000*3000 2160
     /** Size for ImageReader for Camera Preview */
     SIZE_PREVIEW                        (new Size(1600, 1200)),
     /** Size for ImageReader for Video Recording */
