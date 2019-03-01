@@ -357,14 +357,18 @@ public class MainActivity extends AppCompatActivity implements
                 performCameraButtonAction();
                 break;
 
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-                // RIGHT
-                performSwipeToPhoto();
-                break;
-
             case KeyEvent.KEYCODE_DPAD_UP:
-                // LEFT
-                performSwipeToVideo();
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+//                PHOTO_STOPPED,
+//                PHOTO_TAKING,
+//                VIDEO_STOPPED,
+//                VIDEO_RECORDING
+                if (mCameraMode == CameraMode.PHOTO_STOPPED) {
+                    performSwipeToVideo();
+                }
+                else if(mCameraMode == CameraMode.VIDEO_STOPPED) {
+                    performSwipeToPhoto();
+                }
                 break;
 
             default:
