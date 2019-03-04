@@ -579,6 +579,8 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             // 延时开始录像
             long delay = mIsWakeupAlways ? 150 : 0;
+            // sound
+            playSoundVideoStart();
             new Handler(getMainLooper()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -588,8 +590,6 @@ public class MainActivity extends AppCompatActivity implements
                     updateButtonText(mCameraMode);
                     enableProgressTextView();
                     mRokidCamera.startVideoRecording();
-                    // sound
-                    playSoundVideoStart();
                 }
             }, delay);
         }
