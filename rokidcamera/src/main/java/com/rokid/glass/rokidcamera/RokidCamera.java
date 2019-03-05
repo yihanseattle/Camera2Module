@@ -674,7 +674,7 @@ public class RokidCamera {
 
                     // preview is a video, so we set a repeating request
                     try {
-                        mPreviewCaptureSession.setRepeatingRequest(mCaptureRequestBuilder.build(), null, mBackgroundHandler);
+                        mPreviewCaptureSession.setRepeatingRequest(mCaptureRequestBuilder.build(), mPreviewCaptureCallback, mBackgroundHandler);
                     } catch (CameraAccessException e) {
                         e.printStackTrace();
                     }
@@ -988,7 +988,7 @@ public class RokidCamera {
                     mBackgroundHandler);
             // After this, the camera will go back to the normal state of preview.
             mCaptureState = STATE_PREVIEW;
-            mPreviewCaptureSession.setRepeatingRequest(mCaptureRequestBuilder.build(), mPreviewCaptureCallback,
+            mPreviewCaptureSession.setRepeatingRequest(mPreviewRequest, mPreviewCaptureCallback,
                     mBackgroundHandler);
         } catch (CameraAccessException e) {
             e.printStackTrace();
